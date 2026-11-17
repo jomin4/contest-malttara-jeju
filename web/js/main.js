@@ -42,6 +42,17 @@ export const actions = {
     if (ctx.stats[m]) { set({}); return; }
     try { ctx.stats[m] = await api.emdStats(m || null); set({}); } catch (e) { toast(e.message); }
   },
+  // 월별 1~12 통계를 한 번에 (GET /api/stats/emd?month=all)
+  async loadMonthly() {
+    if (ctx.monthly || ctx.monthlyLoading) return;
+    ctx.monthlyLoading = true;
+    try {
+      const r = await api.emdStatsAll();
+      ctx.monthly = { period: r.period, source_id: r.source_id, months: r.months };
+    } catch (e) { ctx.monthly = { error: e.message }; }
+    ctx.monthlyLoading = false;
+    set({});
+  },
   go(step) { if (step <= maxStep()) { set({ step, openChip: null }); window.scrollTo({ top: 0 }); } },
   async runBatch(kind) {
     const sid = state.session_id;

@@ -4,6 +4,7 @@ export const ctx = {
   config: null,
   map: null,
   stats: {},     // month(0=연평균) -> EmdStats
+  monthly: null, // month=all 응답 {period, source_id, months: {"1": items, …}}
   trends: {},    // place_id -> Trend
   bootError: null,
 };

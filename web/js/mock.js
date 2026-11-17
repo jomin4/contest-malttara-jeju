@@ -231,6 +231,11 @@ export const api = {
   config: () => load("config"),
   map: () => load("map"),
   emdStats: async (month) => (await load("stats_emd"))[String(month || 0)],
+  emdStatsAll: async () => {
+    const all = await load("stats_emd");
+    const months = {}; for (let m = 1; m <= 12; m++) months[m] = all[m].items;
+    return { period: all["0"].period, source_id: "563", months };
+  },
   parseGoal: async (text) => { await wait(450); return parse(text); },
   startBatchA: async (goal, inject) => { await wait(150); return schedule(await buildA(goal, inject)); },
   startBatchB: async (prevId) => { await wait(150); return schedule(await buildB(prevId)); },

@@ -13,14 +13,16 @@ function Charts(st, ctx, A, B) {
   const P = B.places;
   const ids = B.itinerary.days.flatMap((d) => d.place_ids);
   const emds = [...new Set(ids.map((id) => P[id]?.emd).filter(Boolean))].slice(0, 6);
-  const missingMonths = [];
-  for (let m = 1; m <= 12; m++) if (!ctx.stats[m]) missingMonths.push(m);
-  if (missingMonths.length) queueMicrotask(() => missingMonths.forEach((m) => A.loadStats(m)));
+  if (!ctx.monthly) queueMicrotask(() => A.loadMonthly());
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
-  const c1 = !missingMonths.length ? LineChart({
-    labels: months.map((m) => `${m}월`), fmt: (v) => v.toFixed(1),
-    series: emds.map((e, i) => ({ name: e, color: LINE_COLORS[i % LINE_COLORS.length], values: months.map((m) => ctx.stats[m].items.find((x) => x.emd === e)?.visit_ratio ?? null) })),
-  }) : h("div", { class: "log-status" }, h("span", { class: "spinner" }), "월별 통계 불러오는 중…");
+  const M = ctx.monthly;
+  const c1 = !M ? h("div", { class: "log-status" }, h("span", { class: "spinner" }), "월별 통계 불러오는 중…")
+    : M.error ? h("div", { class: "side-empty" }, M.error)
+    : LineChart({
+        labels: months.map((m) => `${m}월`), fmt: (v) => v.toFixed(1),
+        series: emds.map((e, i) => ({ name: e, color: LINE_COLORS[i % LINE_COLORS.length],
+          values: months.map((m) => (M.months[m] || M.months[String(m)] || []).find((x) => x.emd === e)?.visit_ratio ?? null) })),
+      });
 
   const trendIds = ids.filter((id) => P[id]?.has_trend);
   const need = trendIds.filter((id) => !ctx.trends[id]);
@@ -46,7 +48,7 @@ function Charts(st, ctx, A, B) {
     h("h2", { class: "sec-title" }, "데이터로 본 근거"),
     h("div", { class: "charts" },
       h("div", { class: "card" }, h("div", { class: "card-head" }, h("div", { class: "card-title" }, "일정 지역의 월별 방문/거주 비율 (읍면동 단위)")),
-        h("div", { class: "card-body" }, c1, h("div", { class: "source" }, `출처 제주데이터허브 563 · ${ctx.stats[0]?.period ?? ""} · 읍면동 통계이며 장소 혼잡도가 아닙니다`))),
+        h("div", { class: "card-body" }, c1, h("div", { class: "source" }, `출처 제주데이터허브 563 · ${ctx.monthly?.period ?? ctx.stats[0]?.period ?? ""} · 읍면동 통계이며 장소 혼잡도가 아닙니다`))),
       h("div", { class: "card" }, h("div", { class: "card-head" }, h("div", { class: "card-title" }, "관광지 입장객 추이")),
         h("div", { class: "card-body" }, c2, h("div", { class: "source" }, `출처 제주데이터허브 189·190 · ${period2}`)))));
 }

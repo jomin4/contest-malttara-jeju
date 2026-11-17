@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **2026-11-17 변경 (decisions.md B 항목):** 구현은 React+Vite+TS가 아니라 **바닐라 JS(ES 모듈)+SVG**로 했다. 번들러·Node·Tailwind 없음, `python web/build.py`가 `web/dist`로 복사. 아래 Task의 화면·문구·Review Focus·Global Constraints(수치는 서버 값, 미반영, 지표 분리, 외부 자원 금지 등)는 그대로 유효하고, 파일 구조·명령(`npm`, `tsc`, `VITE_MOCK`)은 `web/README.md`의 구조·명령으로 읽는다. 키오스크 점검으로 바뀐 화면 구성(근거 접기, 한국어 로그, 시연 토글 `?demo=1`, 자동 초기화)도 `web/README.md`에 있다.
+
 **Goal:** 4개 화면(01 여행 설명+조건 확인, 02 경로 만들기, 03 미리보기 게임/목록, 04 다시 짜기+최종 계획)을 React로 만들어 정적 파일로 빌드하고, A 트랙 서버가 서빙하게 한다.
 
 **Architecture:** Vite + React + TypeScript 단일 페이지 앱(`web/`). 화면 상태는 `useReducer` 하나에 모으고, 서버 호출은 `web/src/api/`가 계약 API를 감싼다(`VITE_MOCK=1`이면 픽스처). 지도·말·차트는 모두 SVG 컴포넌트. `npm run build` 결과 `web/dist/`를 Python 서버가 서빙한다(실행 시 Node 불필요).

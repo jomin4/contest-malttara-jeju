@@ -27,6 +27,7 @@ const real = {
   parseGoal: (text) => req("POST", "/api/goal/parse", { text }),
   map: () => req("GET", "/api/map"),
   emdStats: (month) => req("GET", "/api/stats/emd" + (month ? `?month=${month}` : "")),
+  emdStatsAll: () => req("GET", "/api/stats/emd?month=all"),
   startBatchA: (goal, inject_error) => req("POST", "/api/batch/a", { goal, inject_error }).then((r) => r.batch_id),
   startBatchB: (prev_batch_id) => req("POST", "/api/batch/b", { prev_batch_id }).then((r) => r.batch_id),
   events: (id, after) => req("GET", `/api/batch/${encodeURIComponent(id)}/events?after=${after}`),

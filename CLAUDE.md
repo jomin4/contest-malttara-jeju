@@ -49,7 +49,7 @@ UI 프로토타입에는 이 원칙과 어긋나는 요소(하드코딩된 km·�
 
 ## 결정 현황
 
-- 확정: D1 키오스크 · D2 2인/11월 19일 밤 작동 · D5 Solar Pro 4 + 규칙 폴백 · D6 React+SVG(Phaser 미사용) · D7 API 모드 + 규칙 기반 폴백 · D8 11/18 기능 동결
+- 확정: D1 키오스크 · D2 2인/11월 19일 밤 작동 · D5 Solar Pro 4 + 규칙 폴백 · D6 바닐라 JS+SVG(Phaser·React 미사용, 11/17 변경) · D7 API 모드 + 규칙 기반 폴백 · D8 11/18 기능 동결
 - 확정(11/16): D3 필수 데이터 · D4 본섬 전역·5권역 · D9~D16 · **D17 실행 중 서버는 Python 표준 라이브러리만** · D18 가공 DB 동봉 → `docs/01_planning/decisions.md`
 
 ## 팀 협업 (2인, 공개 GitHub 저장소 jomin4/malttara-jeju)
@@ -66,7 +66,7 @@ UI 프로토타입에는 이 원칙과 어긋나는 요소(하드코딩된 km·�
 - 브랜치: `main`은 항상 실행되는 상태. 작업은 계획서 태스크 단위 브랜치(`a/task-07-scoring`, `b/task-03-step1`)에서 하고 PR → squash merge. 계약 변경 PR만 상대 리뷰 필수, 나머지는 본인이 merge 가능. 작업 시작 전 `git pull origin main`.
 - 커밋 메시지 접두: `feat(a):` `feat(b):` `fix(a):` `docs:` `test(a):` (계획서 형식).
 - 저장소에 올리지 않는 것: `.env`(키), `data/raw/`, `data/db/`, `submission/`, `node_modules/`, `dist/`. 키는 비공개 메신저로 주고받는다. 빌드된 DB(`malttara.sqlite`, `map.json`)는 GitHub Release 첨부 파일로 공유한다.
-- B 트랙은 DB 없이 시작한다: 프론트 목업(`VITE_MOCK=1`) → A 트랙 Task 14 이후 `python run.py --mock`(모의 서버) → Release의 실제 DB.
+- B 트랙(프론트)은 바닐라 JS(ES 모듈)+SVG, 번들러·Node 없음. `python web/build.py`가 실행 파일만 `web/dist`로 복사하고 서버가 그것을 서빙한다. 개발 순서: 프론트 목업(`web/`에서 `python -m http.server` + `?mock=1`) → `python run.py --mock`(모의 서버) → Release의 실제 DB. 상세 `web/README.md`.
 - 전체: `docs/01_planning/decisions.md`, 미결·리스크: `docs/01_planning/open-questions.md`
 
 ## 대회 제약 (모든 단계에서 지킬 것)

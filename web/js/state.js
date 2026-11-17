@@ -22,7 +22,6 @@ function initial(session_id = 0) {
     game: { day: 1, idx: 0 },
     open: {},        // 근거를 펼친 place_id
     logOpen: null,   // null = 실행 중에만 펼침
-    showUnset: false,
   };
 }
 

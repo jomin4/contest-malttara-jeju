@@ -13,7 +13,7 @@
 
 ## 시작하기 (팀원 공통)
 
-준비물: Git, Python 3.11 이상(python.org 설치본), Node 24(B 트랙), Claude Code.
+준비물: Git, Python 3.11 이상(python.org 설치본), Claude Code. (Node 불필요 — 프론트는 바닐라 JS)
 
 ```bash
 git clone https://github.com/jomin4/malttara-jeju.git
@@ -35,10 +35,9 @@ Claude Code 안에서 superpowers 설치(둘 중 하나) 후 `/reload-plugins` �
 ### B 트랙(프론트) 첫 실행
 
 ```bash
-cd web && npm install
-VITE_MOCK=1 npm run dev   # 서버·DB 없이 목업으로 화면 개발
+cd web && python -m http.server 8799   # 서버·DB 없이 목업: http://127.0.0.1:8799/?mock=1
 ```
-`web/`은 B 트랙 Task 1에서 만든다. A 트랙 Task 14가 끝나면 루트에서 `PYTHONPATH=src python run.py --mock`(모의 서버)과 함께 `npm run dev`로 실제 API를 쓴다. 실제 DB는 GitHub Release 첨부 파일(`malttara.sqlite`, `map.json`)을 받아 `data/db/`에 둔다.
+실서버와 붙일 때는 루트에서 `python web/build.py`(web/ → web/dist 복사) 후 `python run.py --mock` → http://127.0.0.1:8765/ . 파일을 고치면 build.py를 다시 실행한다. 상세 `web/README.md`. 실제 DB는 GitHub Release 첨부 파일(`malttara.sqlite`, `map.json`)을 받아 `data/db/`에 둔다.
 
 ### A 트랙(데이터·에이전트) 첫 실행
 

@@ -15,14 +15,17 @@ INCLUDE = ["index.html", "css", "js", "fonts"]
 
 def build() -> int:
     if os.path.isdir(DIST):
-        shutil.rmtree(DIST)
-    os.makedirs(DIST)
+        try:
+            shutil.rmtree(DIST)
+        except OSError as e:  # 지울 권한이 없으면 덮어쓰기로 진행
+            print(f"web/dist 를 비우지 못해 덮어씁니다 ({e.__class__.__name__})")
+    os.makedirs(DIST, exist_ok=True)
     n = 0
     for name in INCLUDE:
         src = os.path.join(HERE, name)
         dst = os.path.join(DIST, name)
         if os.path.isdir(src):
-            shutil.copytree(src, dst)
+            shutil.copytree(src, dst, dirs_exist_ok=True)
             n += sum(len(f) for _, _, f in os.walk(dst))
         else:
             shutil.copy2(src, dst)
