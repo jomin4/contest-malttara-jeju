@@ -77,7 +77,7 @@ tests/                    test_*.py, tests/fixtures/
  "max_origin_km": 30, "max_revisions": 2, "alternatives_per_place": 2,
  "llm": {"timeout_s": 20}, "server": {"host": "127.0.0.1", "port": 8765}}
 ```
-- `regions.json`: `{"regions": [{"region_id": "city", "name": "제주시내", "dong_of": "제주시"}, {"region_id": "west", "name": "서부", "emds": ["제주시 애월읍", "제주시 한림읍", "제주시 한경면", "서귀포시 대정읍", "서귀포시 안덕면"]}, {"region_id": "east", "name": "동부", "emds": ["제주시 조천읍", "제주시 구좌읍", "서귀포시 성산읍", "서귀포시 표선면"]}, {"region_id": "south", "name": "남부", "dong_of": "서귀포시", "emds": ["서귀포시 남원읍"]}], "mountain": {"region_id": "mountain", "name": "중산간·한라산", "boxes": []}, "adjacent": {"city": ["west", "east"], "west": ["city", "south"], "east": ["city", "south"], "south": ["west", "east"], "mountain": ["city", "south"]}}` — `boxes`가 비면 4권역(설계 5.3 폴백).
+- `regions.json`: `{"regions": [{"region_id": "city", "name": "제주시내권", "dong_of": "제주시"}, {"region_id": "west", "name": "서부권", "emds": ["제주시 애월읍", "제주시 한림읍", "제주시 한경면", "서귀포시 대정읍", "서귀포시 안덕면"]}, {"region_id": "east", "name": "동부권", "emds": ["제주시 조천읍", "제주시 구좌읍", "서귀포시 성산읍", "서귀포시 표선면"]}, {"region_id": "south", "name": "중문·서귀포권", "dong_of": "서귀포시", "emds": ["서귀포시 남원읍"]}], "adjacent": {"city": ["west", "east"], "west": ["city", "south"], "east": ["city", "south"], "south": ["west", "east"]}}` — **4권역 확정**(912 원본 `TRRSRT_AREA_NM` 값: 제주시내권·서부권·동부권·중문/서귀포). 중산간 권역 없음.
 - `interests.json`: `{"interests": {"바다": {"categories": ["해수욕장", "해변", "포구", "해안"], "triggers": ["바다", "해변", "해수욕", "오션"]}, "오름": {...["오름"]}, "숲": {"categories": ["숲", "휴양림", "공원"], "triggers": ["숲", "산책", "휴양림"]}, "실내·전시": {"categories": ["박물관", "미술관", "전시"], "triggers": ["박물관", "미술관", "전시", "실내"]}, "체험·레저": {"categories": ["레포츠", "체험"], "triggers": ["체험", "레저", "액티비티"]}, "음식": {"categories": ["음식점"], "triggers": ["음식", "맛집", "식당", "먹고", "미식"], "slot": true}, "카페": {"categories": ["카페"], "triggers": ["카페", "커피"], "slot": true}}, "quiet_triggers": ["조용", "한적", "덜 붐비", "사람 적"]}` — `slot: true`는 하루 1곳 슬롯(설계 6.3-4). 실제 분류 값은 Task 6에서 TourAPI 원본을 보고 채운다.
 - `etl.json`: `{"bbox": {"min_lat": 33.10, "max_lat": 33.60, "min_lon": 126.10, "max_lon": 127.00}, "island_address_tokens": ["우도면", "추자면", "마라리", "가파리"], "island_circles": [{"name": "비양도", "lat": 33.4069, "lon": 126.2270, "r_km": 0.8}], "non_place_keywords": ["렌트카", "렌터카", "반납", "공항", "여객터미널", "터미널", "주차장"], "name_prefixes": ["제주"], "match": {"exact_max_m": 300, "fuzzy_max_m": 100, "fuzzy_min_sim": 0.6}, "keyword_categories": {"해수욕장": "해수욕장", "해변": "해수욕장", "포구": "포구", "오름": "오름", "숲길": "숲", "휴양림": "휴양림", "박물관": "박물관", "미술관": "미술관", "폭포": "폭포", "카페": "카페"}}` (비양도 좌표·반경은 원본으로 확인)
 
@@ -157,10 +157,11 @@ class DbTest(unittest.TestCase):
 - Produces:
   - `normalize_name(name: str, prefixes: list[str]) -> str` — 괄호와 그 안, 공백, 특수문자 제거, 접두어(`제주`) 제거, 소문자.
   - `name_similarity(a: str, b: str) -> float` — `difflib.SequenceMatcher` 비율(정규화 후).
-  - `parse_emd(jibun_address: str, alias: dict[str, str]) -> str | None` — "제주특별자치도 제주시 한림읍 협재리 2447" → `"제주시 한림읍"`, "… 제주시 용담2동 …" → `"제주시 용담2동"`, alias 우선.
-  - `assign_region(emd: str | None, lat: float, lon: float, regions_cfg: dict) -> str | None` — 산간 박스 우선, 그다음 `emds` 목록, 그다음 `dong_of`(해당 시의 `…동`).
+  - **읍면동은 좌표로 정한다**(1349 지번주소에 틀린 값이 있음: 예 "김녕해수욕장"·"메이즈랜드"가 모두 "제주시 오라동 34-14"). `emd_of_point(lat, lon, polygons: list[tuple[str, list[list[tuple[float, float]]]]]) -> str | None` — 행정동 경계(`vuski/admdongkor` `ver20261001`, `adm_nm`에서 "제주특별자치도 " 제거 → `"제주시 애월읍"`)에 대한 ray-casting 점-다각형 판정. 경계 밖이면 None.
+  - `parse_emd(jibun_address: str, alias: dict[str, str]) -> str | None` — 경계가 없을 때만 쓰는 폴백: "제주특별자치도 제주시 한림읍 협재리 2447" → `"제주시 한림읍"`, "… 제주시 용담2동 …" → `"제주시 용담2동"`, alias 우선.
+  - `assign_region(emd: str | None, regions_cfg: dict) -> str | None` — `emds` 목록, 그다음 `dong_of`(해당 시의 `…동`).
   - `is_island(address: str, lat: float, lon: float, cfg: dict) -> bool`, `is_non_place(name: str, cfg: dict) -> bool`
-  - `clean_1349(rows: list[dict], cfg: dict, regions_cfg: dict, alias: dict) -> list[dict]` — 입력 행 키: `장소명, 지번주소, 위도, 경도`. bbox 밖·부속섬·비장소 제외, 같은 정규화 이름 + 50m 이내 중복 제거. 출력 dict: `place_id("p1349-{원본행번호:05d}"), name, lat, lon, emd, region_id, source="1349", in_scope=1`.
+  - `clean_1349(rows: list[dict], cfg: dict, regions_cfg: dict, alias: dict, polygons=None) -> list[dict]` — emd는 `polygons`가 있으면 `emd_of_point`, 없으면 `parse_emd`. 입력 행 키: `장소명, 지번주소, 위도, 경도`. bbox 밖·부속섬·비장소 제외, 같은 정규화 이름 + 50m 이내 중복 제거. 출력 dict: `place_id("p1349-{원본행번호:05d}"), name, lat, lon, emd, region_id, source="1349", in_scope=1`.
 
 - [ ] **Step 1: 실패하는 테스트 작성**
 ```python
@@ -171,14 +172,17 @@ def test_clean_1349_drops_outside_island_nonplace(self):
         {"장소명": "렌트카반납", "지번주소": "제주특별자치도 제주시 용담2동 1032-4", "위도": "33.5159", "경도": "126.5032"},
         {"장소명": "우도봉", "지번주소": "제주특별자치도 제주시 우도면 연평리 산1", "위도": "33.4990", "경도": "126.9680"},
     ]
-    out = clean_1349(rows, load_config("etl"), load_config("regions"), {})
+    out = clean_1349(rows, load_config("etl"), load_config("regions"), {}, polygons=None)   # 경계 없으면 주소 폴백
     self.assertEqual([p["name"] for p in out], ["협재해수욕장"])
     self.assertEqual(out[0]["emd"], "제주시 한림읍"); self.assertEqual(out[0]["region_id"], "west")
 def test_normalize_name(self):
     self.assertEqual(normalize_name("제주 민속자연사박물관 (본관)", ["제주"]), "민속자연사박물관")
 def test_parse_emd_dong(self):
     self.assertEqual(parse_emd("제주특별자치도 서귀포시 서홍동 1", {}), "서귀포시 서홍동")
-    self.assertEqual(assign_region("서귀포시 서홍동", 33.25, 126.55, load_config("regions")), "south")
+    self.assertEqual(assign_region("서귀포시 서홍동", load_config("regions")), "south")
+def test_emd_of_point_square(self):
+    sq = [("제주시 테스트동", [[(33.0, 126.0), (33.0, 126.1), (33.1, 126.1), (33.1, 126.0)]])]
+    self.assertEqual(emd_of_point(33.05, 126.05, sq), "제주시 테스트동"); self.assertIsNone(emd_of_point(33.2, 126.05, sq))
 ```
 - [ ] **Step 2: 실패 확인** — `PYTHONPATH=src python -m unittest tests.test_etl_clean -v` → FAIL
 - [ ] **Step 3: 구현** — 표준 라이브러리만(`re`, `difflib`).
@@ -277,7 +281,7 @@ def test_match_sights_strips_suffix(self):
 **Interfaces:**
 - Consumes: Task 3~5 함수 전부, `SCHEMA`
 - Produces:
-  - `build_map(boundary_path: str, regions_cfg: dict, alias: dict, out_path: str, tolerance: float) -> dict` — 읍면동 경계(SHP 또는 GeoJSON, pyshp/pyproj로 WGS84 변환) → Douglas–Peucker 단순화 → 등장방형 투영 `x = (lon - min_lon) * scale * cos(33.4°)`, `y = (max_lat - lat) * scale` → 계약 `GET /api/map` 모양 JSON. 권역 외곽선은 같은 권역 읍면동 path를 이어 붙인 것(겹친 선 허용). 부속섬 읍면동은 제외.
+  - `build_map(boundary_path: str, regions_cfg: dict, alias: dict, out_path: str, tolerance: float) -> dict` — 행정동 경계 `data/raw/boundary/`의 `vuski/admdongkor` `ver20261001` GeoJSON(WGS84, 제주 43개만 사용 — 좌표계는 파일로 재확인, EPSG:5179면 pyproj 변환) → Douglas–Peucker 단순화 → 등장방형 투영 `x = (lon - min_lon) * scale * cos(33.4°)`, `y = (max_lat - lat) * scale` → 계약 `GET /api/map` 모양 JSON. 권역 외곽선은 같은 권역 읍면동 path를 이어 붙인 것(겹친 선 허용). 부속섬 읍면동은 제외.
   - `build_db(raw_dir: str, out_db: str, out_map: str) -> dict` — 순서: 1349 정제 → 분류(ref 세트: `tourapi_jeju.json`, `hub_811.json`, `hub_812.json`, 784 CSV(`해변명`→name, category `해수욕장`, 좌표 없음), 858 CSV(`장소명, 위도, 경도`, category `무장애 여행지`는 분류로 쓰지 않고 이름·좌표 검증용 — 매칭되면 keyword 규칙으로 분류). 파일이 없으면 그 세트는 건너뛰고 로그) → TourAPI 음식점·카페를 `places`에 추가(`place_id="ptour-{content_id}"`, `source="tourapi"`, 같은 정제 규칙) → 563 → 1208 → 189/190 → `data_sources`(행 수, 실제 기간, 매칭률) → `meta.data_version`(빌드 날짜). 반환: 단계별 건수 dict(콘솔 출력용).
   - CLI: `python -m malttara.etl.build_db` → `data/db/malttara.sqlite`, `data/db/map.json`
 
@@ -495,7 +499,8 @@ def test_merge_rejects_unfounded_llm_value(self):
 - Produces:
   - `check_schema(obj, schema: dict) -> bool` — 지원: `type`(object/array/string/integer/number/boolean/null, 리스트 허용), `properties`, `required`, `enum`, `items`, `minimum`, `maximum`, `additionalProperties: false`.
   - `class LLMClient(api_key: str | None, base_url: str | None, model: str | None, timeout_s: float, transport: Callable[[str, dict, bytes, float], bytes] | None = None)` — `available -> bool`(키·주소·모델 모두 있을 때), `chat_json(system: str, user: str, schema: dict) -> dict | None`. OpenAI 호환 `POST {base_url}/chat/completions`, `response_format={"type": "json_schema", "json_schema": {"name": "out", "schema": schema, "strict": true}}`, temperature 0. 예외·HTTP 오류·JSON 파싱 실패·스키마 불일치 → None. 기본 transport는 `urllib.request`. 키를 로그에 남기지 않는다.
-  - `client_from_env(env: dict, settings: dict) -> LLMClient`
+  - 개발용 K-EXAONE 2.5(`https://api.exaone.ai/v1`, 모델 `k-exaone_v2.5`)는 공식 문서에 `response_format`이 없고 항상 추론(`reasoning_content`)을 한다. 그래서 `LLMClient`에 `json_mode: "schema" | "prompt"`를 둔다. `"prompt"`면 `response_format` 없이 시스템 프롬프트 끝에 스키마를 붙여 "JSON만 출력"을 지시하고, `message.content`에서 첫 `{`~마지막 `}`를 잘라 파싱한 뒤 `check_schema`. `"schema"` 요청이 HTTP 400이면 같은 호출을 `"prompt"`로 한 번 재시도. `extra_body: dict`(예: EXAONE `{"reasoning_effort": "low"}`)를 요청 본문에 병합. `reasoning_content`는 무시한다.
+  - `client_from_env(env: dict, settings: dict) -> LLMClient` — `LLM_JSON_MODE`(기본 `schema`), `LLM_EXTRA_BODY`(JSON 문자열, 기본 `{}`)를 읽는다.
   - `decide(conn, batch_id: str, point: str, llm: LLMClient, system: str, user: str, schema: dict, accept: Callable[[dict], bool], fallback: Callable[[], dict], options: object = None) -> tuple[dict, str]` — `llm.available`이면 `chat_json` → `accept(out)`이 참이면 `(out, "llm")`, 아니면 `(fallback(), "rule")`. 어느 쪽이든 `agent_decisions`에 (point, actor, options, choice, reason="llm_unavailable"|"llm_invalid"|"accepted") 기록.
   - `polish_text(llm, template: str) -> tuple[str, str]` — LLM에 문장 다듬기 요청. 출력의 모든 숫자 토큰(`\d+(\.\d+)?`)이 template에 있어야 채택, 아니면 `(template, "rule")`.
 
@@ -515,6 +520,10 @@ def test_rejected_by_accept_falls_back_and_is_recorded(self):
     decide(self.conn, "A-x", "revise", llm, "s", "u", {"type": "object"}, lambda o: o["type"] in ALLOWED_ACTIONS, lambda: {"type": "reorder"})
     row = self.conn.execute("select actor, reason from agent_decisions").fetchone()
     self.assertEqual((row["actor"], row["reason"]), ("rule", "llm_invalid"))
+def test_prompt_json_mode_parses_json_inside_text(self):
+    body = {"choices": [{"message": {"content": "결과입니다:\n{\"type\": \"reorder\"}\n끝", "reasoning_content": "..."}}]}
+    llm = LLMClient("k", "http://x", "m", 5, json_mode="prompt", transport=lambda u, h, b, t: json.dumps(body).encode())
+    self.assertEqual(llm.chat_json("s", "u", {"type": "object", "properties": {"type": {"enum": ["reorder"]}}, "required": ["type"]}), {"type": "reorder"})
 def test_polish_rejects_new_numbers(self):
     llm = LLMClient("k", "http://x", "m", 5, transport=fake({"text": "만족도 99%입니다"}))
     self.assertEqual(polish_text(llm, "직선 12.1 km"), ("직선 12.1 km", "rule"))
@@ -646,6 +655,7 @@ def test_invalid_event_type_rejected(self):
   - 정적 파일: `static_dir`(=`web/dist`) 아래만, 경로 탈출(`..`) 차단, 없는 경로는 `index.html`, `Content-Type`은 `mimetypes`. `static_dir`가 없으면 `/`에 "프론트 빌드 없음" 안내 HTML.
   - `/api/goal/parse`: `parse_goal_rules` → `llm.available`이면 `chat_json(GOAL_SCHEMA)` → `merge_goal` → `validate_goal`. 판단은 `agent_decisions`에 `batch_id="parse"`, `point="parse_goal"`로 기록. 응답 `actor`는 merge에서 LLM 값이 하나라도 채택되면 `"llm"`.
   - `/api/batch/a`: 본문 goal에 `validate_goal` 오류가 있으면 400(배치 시작 안 함).
+  - 계약 보완(PR #2) 반영: `GET /api/config`(`{"interests": [{"key", "slot"}], "regions": [{"region_id", "name"}], "max_days": 7}`), `GET /api/stats/emd?month=all`(월 1~12 묶음), 없는 batch id 404, 오류 `error`는 한국어 문장, `seq`는 배치마다 1부터·`after=N`은 `seq > N`, BatchResult `places`에 일정 + alternatives + diff(`place_id`·`replaced_by`) 장소 전부. 정적 파일 `Content-Type` 고정 표: `.html` `text/html; charset=utf-8`, `.js` `text/javascript`, `.css` `text/css`, `.json` `application/json`, `.svg` `image/svg+xml`, `.woff2` `font/woff2`, `.png` `image/png`(`mimetypes` 사용 금지).
   - `run.py`: `.env` 로드 → `data/db/malttara.sqlite` 없으면 안내 메시지 후 종료 코드 1 → 서버 시작 → `webbrowser.open("http://127.0.0.1:8765/")`. `--mock` 옵션이면 임시 폴더에 `build_mock_db`로 만든 DB 사용(프론트 개발·시연용).
 
 - [ ] **Step 1: 실패하는 테스트 작성** (모의 DB, 임의 포트 스레드 서버, `urllib`로 호출)
@@ -670,6 +680,12 @@ def test_events_and_batch_b(self):
     self.assertTrue(post("/api/events", {"batch_id": a["batch_id"], "place_id": pid, "type": "feedback", "value": "dislike"})["ok"])
     b = poll(post("/api/batch/b", {"prev_batch_id": a["batch_id"]})["batch_id"])["result"]
     self.assertEqual(b["prev_batch_id"], a["batch_id"])
+def test_config_and_month_all(self):
+    c = get("/api/config"); self.assertEqual(c["max_days"], 7); self.assertEqual(len(c["regions"]), 4)
+    self.assertEqual(sorted(get("/api/stats/emd?month=all")["months"].keys(), key=int), [str(m) for m in range(1, 13)])
+def test_unknown_batch_404_and_js_mime(self):
+    self.assertEqual(get_raw("/api/batch/A-0000-000000/events?after=0").status, 404)
+    self.assertEqual(get_raw("/assets/app.js").headers["Content-Type"], "text/javascript")   # 픽스처 static_dir에 assets/app.js
 def test_static_traversal_blocked(self):
     self.assertNotIn(b'"weights"', get_raw("/../config/settings.json").read())   # 설정 파일 내용이 새면 안 됨
 def test_print_is_html_without_external_urls(self):
