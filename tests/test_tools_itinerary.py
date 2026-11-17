@@ -42,13 +42,19 @@ class ItineraryTest(unittest.TestCase):
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual(len(it["days"]), 6)
 
-    def test_food_slot_one_per_day_in_middle(self):
+    def test_food_slot_one_per_day_at_cheapest_position(self):
         it = self.make(goal(days=2, pace="보통", interests=["바다", "음식"]))
         for d in it["days"]:
             cats = [self.P[i]["category"] for i in d["place_ids"]]
             self.assertEqual(cats.count("음식점"), 1)
-            self.assertEqual(cats.index("음식점"), len(cats) // 2)
             self.assertEqual(len(cats), 4)
+
+    def test_insert_best_minimizes_added_distance(self):
+        from malttara.tools.itinerary import _insert_best
+        pts = {"a": {"lat": 33.0, "lon": 126.0}, "b": {"lat": 33.0, "lon": 126.2}, "f": {"lat": 33.0, "lon": 126.1},
+               "far": {"lat": 33.0, "lon": 126.5}}
+        self.assertEqual(_insert_best(["a", "b"], "f", pts), ["a", "f", "b"])
+        self.assertEqual(_insert_best(["a", "b"], "far", pts), ["a", "b", "far"])
 
     def test_food_and_cafe_slots(self):
         it = self.make(goal(days=1, pace="보통", interests=["음식", "카페"]))
