@@ -35,3 +35,7 @@
 | 외부 데이터 | 읍면동 행정경계 (VWorld 또는 SGIS, 선정 전) | SVG 지도 (빌드 시점 변환·동봉) | 재배포 조건 확인 필요 |
 | 오픈소스·외부 코드 | (UI) Tailwind CSS(빌드 설치), 아이콘 SVG(Material Symbols 등, 선정 전), 한글 글꼴(Pretendard 후보, OFL) | 프로토타입 기반 화면 | design/ui-prototype/README.md 3장 |
 | 디자인 시안 | design/ui-prototype (외부 디자인 도구 생성) | 화면 구성 참고 | 생성 도구·이미지 출처 기록 필요 |
+| 외부 데이터 | 행정동 경계 vuski/admdongkor (원자료 통계청 SGIS) — 실서버 ver20261001, B 목업 ver20260701 | 지도 경계 (`data/db/map.json`, B 목업 `web/mock/map.json`) | 원자료 공공누리 제1유형, 가공본 CC BY 4.0. 출처 문구: "본 데이터는 통계청 통계지리정보서비스(SGIS, https://sgis.kostat.go.kr)에서 공공누리 제1유형으로 개방한 행정동 경계를 가공한 것이며(가공: vuski/admdongkor, https://github.com/vuski/admdongkor), CC BY 4.0으로 배포됩니다." |
+| 오픈소스·외부 코드 | Geist, Geist Mono (vercel/geist-font) | 화면 글꼴(라틴·숫자·로그) `web/fonts/` | SIL OFL 1.1 |
+| 오픈소스·외부 코드 | Pretendard (orioncactus/pretendard) | 화면 글꼴(한글) `web/fonts/` | SIL OFL 1.1 |
+| 오픈소스·외부 코드 | (개발용) shapely | `web/tools/make_mock.py` 목업 지도 생성, 실행 중 미사용 | BSD-3-Clause |

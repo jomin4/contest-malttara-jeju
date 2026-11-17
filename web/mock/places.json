@@ -1,0 +1,1186 @@
+{
+ "p-mock-city-01": {
+  "place_id": "p-mock-city-01",
+  "name": "모의 해변 제주1",
+  "lat": 33.514157,
+  "lon": 126.527385,
+  "emd": "제주시 일도1동",
+  "region_id": "city",
+  "region_name": "제주시내권",
+  "category": "해수욕장",
+  "category_source": "hub_811",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.68,
+  "interest": 1.0,
+  "spread": 0.9,
+  "quiet": 0.91,
+  "indicators": {
+   "region": {
+    "emd": "제주시 일도1동",
+    "visit_ratio": 1.4,
+    "pct": 0.1,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 326,
+    "pct": 0.18,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": true
+ },
+ "p-mock-city-02": {
+  "place_id": "p-mock-city-02",
+  "name": "모의 오름 제주2",
+  "lat": 33.510425,
+  "lon": 126.531885,
+  "emd": "제주시 일도2동",
+  "region_id": "city",
+  "region_name": "제주시내권",
+  "category": "오름",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.71,
+  "interest": 1.0,
+  "spread": 0.75,
+  "quiet": 0.93,
+  "indicators": {
+   "region": {
+    "emd": "제주시 일도2동",
+    "visit_ratio": 2.31,
+    "pct": 0.25,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 588,
+    "pct": 0.17,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-city-03": {
+  "place_id": "p-mock-city-03",
+  "name": "모의 숲길 제주3",
+  "lat": 33.502173,
+  "lon": 126.530806,
+  "emd": "제주시 이도1동",
+  "region_id": "city",
+  "region_name": "제주시내권",
+  "category": "숲길",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.95,
+  "interest": 1.0,
+  "spread": 0.65,
+  "quiet": 0.46,
+  "indicators": {
+   "region": {
+    "emd": "제주시 이도1동",
+    "visit_ratio": 2.88,
+    "pct": 0.35,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 175,
+    "pct": 0.51,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-city-04": {
+  "place_id": "p-mock-city-04",
+  "name": "모의 전시관 제주4",
+  "lat": 33.491649,
+  "lon": 126.5217,
+  "emd": "제주시 이도2동",
+  "region_id": "city",
+  "region_name": "제주시내권",
+  "category": "박물관",
+  "category_source": "hub_811",
+  "overview": null,
+  "source": "1349",
+  "score": 0.83,
+  "interest": 1.0,
+  "spread": 0.88,
+  "quiet": 0.19,
+  "indicators": {
+   "region": {
+    "emd": "제주시 이도2동",
+    "visit_ratio": 1.77,
+    "pct": 0.12,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 77,
+    "pct": 0.51,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": true
+ },
+ "p-mock-city-05": {
+  "place_id": "p-mock-city-05",
+  "name": "모의 식당 제주5",
+  "lat": 33.50003,
+  "lon": 126.518628,
+  "emd": "제주시 삼도1동",
+  "region_id": "city",
+  "region_name": "제주시내권",
+  "category": "음식점",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "tourapi",
+  "score": 0.73,
+  "interest": 1.0,
+  "spread": 0.62,
+  "quiet": 0.5,
+  "indicators": {
+   "region": {
+    "emd": "제주시 삼도1동",
+    "visit_ratio": 3.01,
+    "pct": 0.38,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 481,
+    "pct": 0.71,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-city-06": {
+  "place_id": "p-mock-city-06",
+  "name": "모의 카페 제주6",
+  "lat": 33.504394,
+  "lon": 126.524894,
+  "emd": "제주시 삼도2동",
+  "region_id": "city",
+  "region_name": "제주시내권",
+  "category": "카페",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "tourapi",
+  "score": 0.67,
+  "interest": 1.0,
+  "spread": 0.7,
+  "quiet": 0.68,
+  "indicators": {
+   "region": {
+    "emd": "제주시 삼도2동",
+    "visit_ratio": 2.62,
+    "pct": 0.3,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 830,
+    "pct": 0.9,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-city-07": {
+  "place_id": "p-mock-city-07",
+  "name": "모의 체험장 제주7",
+  "lat": 33.510797,
+  "lon": 126.515611,
+  "emd": "제주시 용담1동",
+  "region_id": "city",
+  "region_name": "제주시내권",
+  "category": "체험",
+  "category_source": "hub_811",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.44,
+  "interest": 1.0,
+  "spread": 0.45,
+  "quiet": 0.19,
+  "indicators": {
+   "region": {
+    "emd": "제주시 용담1동",
+    "visit_ratio": 3.81,
+    "pct": 0.55,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": null,
+    "pct": null,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": true
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-city-08": {
+  "place_id": "p-mock-city-08",
+  "name": "모의 해안 제주8",
+  "lat": 33.495874,
+  "lon": 126.491833,
+  "emd": "제주시 용담2동",
+  "region_id": "city",
+  "region_name": "제주시내권",
+  "category": "해변",
+  "category_source": "tourapi",
+  "overview": null,
+  "source": "1349",
+  "score": 0.85,
+  "interest": 1.0,
+  "spread": 0.25,
+  "quiet": 0.49,
+  "indicators": {
+   "region": {
+    "emd": "제주시 용담2동",
+    "visit_ratio": 4.43,
+    "pct": 0.75,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 577,
+    "pct": 0.57,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-west-01": {
+  "place_id": "p-mock-west-01",
+  "name": "모의 해변 서부1",
+  "lat": 33.367401,
+  "lon": 126.243157,
+  "emd": "제주시 한림읍",
+  "region_id": "west",
+  "region_name": "서부권",
+  "category": "해수욕장",
+  "category_source": "hub_811",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.74,
+  "interest": 1.0,
+  "spread": 0.93,
+  "quiet": 0.31,
+  "indicators": {
+   "region": {
+    "emd": "제주시 한림읍",
+    "visit_ratio": 1.17,
+    "pct": 0.07,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 672,
+    "pct": 0.04,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": true
+ },
+ "p-mock-west-02": {
+  "place_id": "p-mock-west-02",
+  "name": "모의 오름 서부2",
+  "lat": 33.394991,
+  "lon": 126.384134,
+  "emd": "제주시 애월읍",
+  "region_id": "west",
+  "region_name": "서부권",
+  "category": "오름",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.84,
+  "interest": 1.0,
+  "spread": 0.72,
+  "quiet": 0.2,
+  "indicators": {
+   "region": {
+    "emd": "제주시 애월읍",
+    "visit_ratio": 2.52,
+    "pct": 0.28,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 302,
+    "pct": 0.31,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-west-03": {
+  "place_id": "p-mock-west-03",
+  "name": "모의 숲길 서부3",
+  "lat": 33.334524,
+  "lon": 126.165028,
+  "emd": "제주시 한경면",
+  "region_id": "west",
+  "region_name": "서부권",
+  "category": "숲길",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.85,
+  "interest": 1.0,
+  "spread": 0.03,
+  "quiet": 0.69,
+  "indicators": {
+   "region": {
+    "emd": "제주시 한경면",
+    "visit_ratio": 5.89,
+    "pct": 0.97,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 816,
+    "pct": 0.11,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-west-04": {
+  "place_id": "p-mock-west-04",
+  "name": "모의 전시관 서부4",
+  "lat": 33.246721,
+  "lon": 126.22969,
+  "emd": "서귀포시 대정읍",
+  "region_id": "west",
+  "region_name": "서부권",
+  "category": "박물관",
+  "category_source": "hub_811",
+  "overview": null,
+  "source": "1349",
+  "score": 0.75,
+  "interest": 1.0,
+  "spread": 0.4,
+  "quiet": 0.45,
+  "indicators": {
+   "region": {
+    "emd": "서귀포시 대정읍",
+    "visit_ratio": 4.04,
+    "pct": 0.6,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 837,
+    "pct": 0.3,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": true
+ },
+ "p-mock-west-05": {
+  "place_id": "p-mock-west-05",
+  "name": "모의 식당 서부5",
+  "lat": 33.263274,
+  "lon": 126.317244,
+  "emd": "서귀포시 안덕면",
+  "region_id": "west",
+  "region_name": "서부권",
+  "category": "음식점",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "tourapi",
+  "score": 0.84,
+  "interest": 1.0,
+  "spread": 0.07,
+  "quiet": 0.47,
+  "indicators": {
+   "region": {
+    "emd": "서귀포시 안덕면",
+    "visit_ratio": 5.47,
+    "pct": 0.93,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 388,
+    "pct": 0.3,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-west-06": {
+  "place_id": "p-mock-west-06",
+  "name": "모의 카페 서부6",
+  "lat": 33.374973,
+  "lon": 126.24221,
+  "emd": "제주시 한림읍",
+  "region_id": "west",
+  "region_name": "서부권",
+  "category": "카페",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "tourapi",
+  "score": 0.38,
+  "interest": 1.0,
+  "spread": 0.93,
+  "quiet": 0.84,
+  "indicators": {
+   "region": {
+    "emd": "제주시 한림읍",
+    "visit_ratio": 1.17,
+    "pct": 0.07,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 57,
+    "pct": 0.33,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-west-07": {
+  "place_id": "p-mock-west-07",
+  "name": "모의 체험장 서부7",
+  "lat": 33.399734,
+  "lon": 126.436757,
+  "emd": "제주시 애월읍",
+  "region_id": "west",
+  "region_name": "서부권",
+  "category": "체험",
+  "category_source": "hub_811",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.63,
+  "interest": 1.0,
+  "spread": 0.72,
+  "quiet": 0.71,
+  "indicators": {
+   "region": {
+    "emd": "제주시 애월읍",
+    "visit_ratio": 2.52,
+    "pct": 0.28,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": null,
+    "pct": null,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": true
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-west-08": {
+  "place_id": "p-mock-west-08",
+  "name": "모의 해안 서부8",
+  "lat": 33.333657,
+  "lon": 126.225162,
+  "emd": "제주시 한경면",
+  "region_id": "west",
+  "region_name": "서부권",
+  "category": "해변",
+  "category_source": "tourapi",
+  "overview": null,
+  "source": "1349",
+  "score": 0.72,
+  "interest": 1.0,
+  "spread": 0.03,
+  "quiet": 0.11,
+  "indicators": {
+   "region": {
+    "emd": "제주시 한경면",
+    "visit_ratio": 5.89,
+    "pct": 0.97,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 53,
+    "pct": 0.52,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-east-01": {
+  "place_id": "p-mock-east-01",
+  "name": "모의 해변 동부1",
+  "lat": 33.541853,
+  "lon": 126.832092,
+  "emd": "제주시 구좌읍",
+  "region_id": "east",
+  "region_name": "동부권",
+  "category": "해수욕장",
+  "category_source": "hub_811",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.71,
+  "interest": 1.0,
+  "spread": 0.1,
+  "quiet": 0.47,
+  "indicators": {
+   "region": {
+    "emd": "제주시 구좌읍",
+    "visit_ratio": 5.36,
+    "pct": 0.9,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 471,
+    "pct": 0.16,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": true
+ },
+ "p-mock-east-02": {
+  "place_id": "p-mock-east-02",
+  "name": "모의 오름 동부2",
+  "lat": 33.503469,
+  "lon": 126.671517,
+  "emd": "제주시 조천읍",
+  "region_id": "east",
+  "region_name": "동부권",
+  "category": "오름",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.94,
+  "interest": 1.0,
+  "spread": 0.15,
+  "quiet": 0.53,
+  "indicators": {
+   "region": {
+    "emd": "제주시 조천읍",
+    "visit_ratio": 5.11,
+    "pct": 0.85,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 109,
+    "pct": 0.26,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-east-03": {
+  "place_id": "p-mock-east-03",
+  "name": "모의 숲길 동부3",
+  "lat": 33.474184,
+  "lon": 126.881058,
+  "emd": "서귀포시 성산읍",
+  "region_id": "east",
+  "region_name": "동부권",
+  "category": "숲길",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.31,
+  "interest": 1.0,
+  "spread": 0.67,
+  "quiet": 0.23,
+  "indicators": {
+   "region": {
+    "emd": "서귀포시 성산읍",
+    "visit_ratio": 2.75,
+    "pct": 0.33,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 210,
+    "pct": 0.23,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-east-04": {
+  "place_id": "p-mock-east-04",
+  "name": "모의 전시관 동부4",
+  "lat": 33.381058,
+  "lon": 126.733944,
+  "emd": "서귀포시 표선면",
+  "region_id": "east",
+  "region_name": "동부권",
+  "category": "박물관",
+  "category_source": "hub_811",
+  "overview": null,
+  "source": "1349",
+  "score": 0.43,
+  "interest": 1.0,
+  "spread": 0.58,
+  "quiet": 0.52,
+  "indicators": {
+   "region": {
+    "emd": "서귀포시 표선면",
+    "visit_ratio": 3.22,
+    "pct": 0.42,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 852,
+    "pct": 0.55,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": true
+ },
+ "p-mock-east-05": {
+  "place_id": "p-mock-east-05",
+  "name": "모의 식당 동부5",
+  "lat": 33.499448,
+  "lon": 126.876347,
+  "emd": "제주시 구좌읍",
+  "region_id": "east",
+  "region_name": "동부권",
+  "category": "음식점",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "tourapi",
+  "score": 0.58,
+  "interest": 1.0,
+  "spread": 0.1,
+  "quiet": 0.16,
+  "indicators": {
+   "region": {
+    "emd": "제주시 구좌읍",
+    "visit_ratio": 5.36,
+    "pct": 0.9,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 660,
+    "pct": 0.82,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-east-06": {
+  "place_id": "p-mock-east-06",
+  "name": "모의 카페 동부6",
+  "lat": 33.439553,
+  "lon": 126.658162,
+  "emd": "제주시 조천읍",
+  "region_id": "east",
+  "region_name": "동부권",
+  "category": "카페",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "tourapi",
+  "score": 0.45,
+  "interest": 1.0,
+  "spread": 0.15,
+  "quiet": 0.66,
+  "indicators": {
+   "region": {
+    "emd": "제주시 조천읍",
+    "visit_ratio": 5.11,
+    "pct": 0.85,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 74,
+    "pct": 0.86,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-east-07": {
+  "place_id": "p-mock-east-07",
+  "name": "모의 체험장 동부7",
+  "lat": 33.47476,
+  "lon": 126.878049,
+  "emd": "서귀포시 성산읍",
+  "region_id": "east",
+  "region_name": "동부권",
+  "category": "체험",
+  "category_source": "hub_811",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.66,
+  "interest": 1.0,
+  "spread": 0.67,
+  "quiet": 0.15,
+  "indicators": {
+   "region": {
+    "emd": "서귀포시 성산읍",
+    "visit_ratio": 2.75,
+    "pct": 0.33,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": null,
+    "pct": null,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": true
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-east-08": {
+  "place_id": "p-mock-east-08",
+  "name": "모의 해안 동부8",
+  "lat": 33.364869,
+  "lon": 126.811397,
+  "emd": "서귀포시 표선면",
+  "region_id": "east",
+  "region_name": "동부권",
+  "category": null,
+  "category_source": "none",
+  "overview": null,
+  "source": "1349",
+  "score": 0.43,
+  "interest": 1.0,
+  "spread": 0.58,
+  "quiet": 0.6,
+  "indicators": {
+   "region": {
+    "emd": "서귀포시 표선면",
+    "visit_ratio": 3.22,
+    "pct": 0.42,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 296,
+    "pct": 0.14,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-south-01": {
+  "place_id": "p-mock-south-01",
+  "name": "모의 해변 중문1",
+  "lat": 33.328022,
+  "lon": 126.616492,
+  "emd": "서귀포시 남원읍",
+  "region_id": "south",
+  "region_name": "중문·서귀포권",
+  "category": "해수욕장",
+  "category_source": "hub_811",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.59,
+  "interest": 1.0,
+  "spread": 0.35,
+  "quiet": 0.58,
+  "indicators": {
+   "region": {
+    "emd": "서귀포시 남원읍",
+    "visit_ratio": 4.14,
+    "pct": 0.65,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 519,
+    "pct": 0.52,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": true
+ },
+ "p-mock-south-02": {
+  "place_id": "p-mock-south-02",
+  "name": "모의 오름 중문2",
+  "lat": 33.240878,
+  "lon": 126.600399,
+  "emd": "서귀포시 송산동",
+  "region_id": "south",
+  "region_name": "중문·서귀포권",
+  "category": "오름",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.61,
+  "interest": 1.0,
+  "spread": 0.3,
+  "quiet": 0.36,
+  "indicators": {
+   "region": {
+    "emd": "서귀포시 송산동",
+    "visit_ratio": 4.24,
+    "pct": 0.7,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 673,
+    "pct": 0.08,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-south-03": {
+  "place_id": "p-mock-south-03",
+  "name": "모의 숲길 중문3",
+  "lat": 33.247338,
+  "lon": 126.570166,
+  "emd": "서귀포시 정방동",
+  "region_id": "south",
+  "region_name": "중문·서귀포권",
+  "category": "숲길",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.87,
+  "interest": 1.0,
+  "spread": 0.47,
+  "quiet": 0.39,
+  "indicators": {
+   "region": {
+    "emd": "서귀포시 정방동",
+    "visit_ratio": 3.75,
+    "pct": 0.53,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 701,
+    "pct": 0.4,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-south-04": {
+  "place_id": "p-mock-south-04",
+  "name": "모의 전시관 중문4",
+  "lat": 33.252252,
+  "lon": 126.563237,
+  "emd": "서귀포시 중앙동",
+  "region_id": "south",
+  "region_name": "중문·서귀포권",
+  "category": "박물관",
+  "category_source": "hub_811",
+  "overview": null,
+  "source": "1349",
+  "score": 0.83,
+  "interest": 1.0,
+  "spread": 0.28,
+  "quiet": 0.39,
+  "indicators": {
+   "region": {
+    "emd": "서귀포시 중앙동",
+    "visit_ratio": 4.4,
+    "pct": 0.72,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 513,
+    "pct": 0.15,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": true
+ },
+ "p-mock-south-05": {
+  "place_id": "p-mock-south-05",
+  "name": "모의 식당 중문5",
+  "lat": 33.244273,
+  "lon": 126.551684,
+  "emd": "서귀포시 천지동",
+  "region_id": "south",
+  "region_name": "중문·서귀포권",
+  "category": "음식점",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "tourapi",
+  "score": 0.59,
+  "interest": 1.0,
+  "spread": 0.2,
+  "quiet": 0.56,
+  "indicators": {
+   "region": {
+    "emd": "서귀포시 천지동",
+    "visit_ratio": 4.74,
+    "pct": 0.8,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 175,
+    "pct": 0.9,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-south-06": {
+  "place_id": "p-mock-south-06",
+  "name": "모의 카페 중문6",
+  "lat": 33.268129,
+  "lon": 126.622081,
+  "emd": "서귀포시 효돈동",
+  "region_id": "south",
+  "region_name": "중문·서귀포권",
+  "category": "카페",
+  "category_source": "tourapi",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "tourapi",
+  "score": 0.33,
+  "interest": 1.0,
+  "spread": 0.95,
+  "quiet": 0.21,
+  "indicators": {
+   "region": {
+    "emd": "서귀포시 효돈동",
+    "visit_ratio": 1.03,
+    "pct": 0.05,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 48,
+    "pct": 0.37,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-south-07": {
+  "place_id": "p-mock-south-07",
+  "name": "모의 체험장 중문7",
+  "lat": 33.29546,
+  "lon": 126.594235,
+  "emd": "서귀포시 영천동",
+  "region_id": "south",
+  "region_name": "중문·서귀포권",
+  "category": "체험",
+  "category_source": "hub_811",
+  "overview": "목업 개요 문장입니다. 실제 서버 연결 후 TourAPI 개요가 들어갑니다. 화면 줄바꿈과 세 줄 말줄임을 확인하기 위한 긴 문장입니다.",
+  "source": "1349",
+  "score": 0.63,
+  "interest": 1.0,
+  "spread": 0.43,
+  "quiet": 0.38,
+  "indicators": {
+   "region": {
+    "emd": "서귀포시 영천동",
+    "visit_ratio": 3.9,
+    "pct": 0.57,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": null,
+    "pct": null,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": true
+   }
+  },
+  "has_trend": false
+ },
+ "p-mock-south-08": {
+  "place_id": "p-mock-south-08",
+  "name": "모의 해안 중문8",
+  "lat": 33.247939,
+  "lon": 126.574562,
+  "emd": "서귀포시 동홍동",
+  "region_id": "south",
+  "region_name": "중문·서귀포권",
+  "category": "해변",
+  "category_source": "tourapi",
+  "overview": null,
+  "source": "1349",
+  "score": 0.54,
+  "interest": 1.0,
+  "spread": 0.0,
+  "quiet": 0.66,
+  "indicators": {
+   "region": {
+    "emd": "서귀포시 동홍동",
+    "visit_ratio": 6.0,
+    "pct": 1.0,
+    "period": "2018-01~2022-09",
+    "month": null,
+    "source_id": "563",
+    "missing": false
+   },
+   "nearby": {
+    "quiet_count": 486,
+    "pct": 0.61,
+    "radius_km": 1.0,
+    "period": "2021-07~12 토요일",
+    "source_id": "1208",
+    "missing": false
+   }
+  },
+  "has_trend": false
+ }
+}

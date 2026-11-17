@@ -1,0 +1,51 @@
+{
+ "interests": [
+  {
+   "key": "바다",
+   "slot": false
+  },
+  {
+   "key": "오름",
+   "slot": false
+  },
+  {
+   "key": "숲",
+   "slot": false
+  },
+  {
+   "key": "실내·전시",
+   "slot": false
+  },
+  {
+   "key": "체험·레저",
+   "slot": false
+  },
+  {
+   "key": "음식",
+   "slot": true
+  },
+  {
+   "key": "카페",
+   "slot": true
+  }
+ ],
+ "regions": [
+  {
+   "region_id": "city",
+   "name": "제주시내권"
+  },
+  {
+   "region_id": "west",
+   "name": "서부권"
+  },
+  {
+   "region_id": "east",
+   "name": "동부권"
+  },
+  {
+   "region_id": "south",
+   "name": "중문·서귀포권"
+  }
+ ],
+ "max_days": 7
+}

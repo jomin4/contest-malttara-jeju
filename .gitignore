@@ -32,3 +32,8 @@ build/
 Thumbs.db
 .idea/
 .vscode/
+
+# 개인 로컬 파일 (테스트·메모·캡처) — 저장소에 올리지 않음
+.local/
+CLAUDE.local.md
+Claude outputs/
