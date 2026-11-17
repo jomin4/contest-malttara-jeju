@@ -116,10 +116,12 @@ A 트랙(데이터·에이전트)과 B 트랙(프론트)이 함께 지키는 계
 
 - 오류: `4xx/5xx` + `{"error": "사람이 읽을 메시지"}`. 잘못된 JSON·필수 키 누락은 400, 없는 batch id는 404. `error`는 화면에 그대로 보여줄 한국어 문장이다(예: "여행 기간이 없습니다").
 - 정적 파일 `Content-Type`은 `mimetypes`에 맡기지 않고 고정 표로 준다: `.html` `text/html; charset=utf-8`, `.js` `text/javascript`, `.css` `text/css`, `.json` `application/json`, `.svg` `image/svg+xml`, `.woff2` `font/woff2`, `.png` `image/png`. (Windows Python은 레지스트리 값을 읽어 `.js`를 `text/plain`으로 줄 수 있고, 그러면 브라우저가 스크립트를 거부해 빈 화면이 된다.)
-- `GET /api/map`의 `regions[]`: 중산간 박스(`regions.json`의 `mountain.boxes`)가 있으면 `mountain`을 넣고 `d`는 박스 다각형. 4권역 폴백이면 넣지 않는다. `emds[].region_id`는 해안 권역 그대로.
+- 권역은 **4개로 확정**(912 원본의 권역 구분): `city` 제주시내권, `west` 서부권, `east` 동부권, `south` 중문·서귀포권. 중산간 권역은 두지 않는다. `GET /api/map`의 `regions[]`와 `GET /api/config`의 `regions[]`는 이 4개다.
+- 지도 경계 원자료: 통계청 SGIS 행정동 경계를 가공한 `vuski/admdongkor` `ver20261001`(CC BY 4.0, 원자료 공공누리 1유형). 화면 범례 또는 데이터 출처 표에 "SGIS 행정동 경계(가공: vuski/admdongkor)"를 표기한다.
 - 폴링 주기: 프론트 500ms. `done: true`가 되면 멈춘다.
 - 한 번에 하나의 키오스크 사용자를 가정한다(동시 배치는 허용하되 사용자 구분 없음).
 
 ## 변경 이력
 
-- 2026-11-17 (B 제안, A 확인 필요): emd 키 형식 통일, `GET /api/config` 추가, `places` 포함 범위, `seq`·`after` 의미, Violation value/limit, 정적 파일 범위·MIME 고정, 중산간 권역 경로, 404·오류 문구, (선택) 월별 통계 일괄 조회. 근거: `2026-11-17-frontend-requirements.md` 4장
+- 2026-11-17 (B 제안, A 확인 완료 — PR #2):  emd 키 형식 통일, `GET /api/config` 추가, `places` 포함 범위, `seq`·`after` 의미, Violation value/limit, 정적 파일 범위·MIME 고정, 중산간 권역 경로, 404·오류 문구, (선택) 월별 통계 일괄 조회. 근거: `2026-11-17-frontend-requirements.md` 4장
+- 2026-11-17 (A): 중산간 권역 경로(C7) 삭제 — 912 원본 권역 4개로 확정. 지도 경계 출처 명시.
