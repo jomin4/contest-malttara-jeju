@@ -61,7 +61,9 @@ def create_itinerary(candidates: list, slot_candidates: dict, goal: dict, settin
     by_region = {}
     for p in candidates:
         by_region.setdefault(p["region_id"], []).append(p)
-    ranked = sorted(by_region, key=lambda r: (-sum(p["score"] for p in by_region[r][:k]),
+    # 후보가 k개 미만인 권역은 뒤로(인접 권역 확장 대신 배정 순서로 처리), 그다음 상위 k개 점수 합
+    ranked = sorted(by_region, key=lambda r: (len(by_region[r]) < k,
+                                               -sum(p["score"] for p in by_region[r][:k]),
                                                order_idx.get(r, 99), r))
 
     used = set()
