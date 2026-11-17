@@ -142,3 +142,22 @@ class TestBuildDb(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DedupSameNameRegionTest(unittest.TestCase):
+    def test_keeps_reference_matched_record(self):
+        from malttara.etl.build_db import dedup_same_name_region
+        ps = [{"place_id": "p1349-00958", "name": "우진해장국", "region_id": "east", "category_source": "keyword"},
+              {"place_id": "p1349-01437", "name": "우진해장국", "region_id": "city", "category_source": "keyword"},
+              {"place_id": "p1349-00017", "name": "함덕해수욕장", "region_id": "east", "category_source": "keyword"},
+              {"place_id": "p1349-04189", "name": "함덕 해수욕장", "region_id": "east", "category_source": "hub_784"}]
+        kept = [p["place_id"] for p in dedup_same_name_region(ps, ["제주"])]
+        self.assertEqual(kept, ["p1349-00958", "p1349-01437", "p1349-04189"])   # 권역이 다르면 둘 다 유지
+
+    def test_drop_coord_mismatch(self):
+        from malttara.etl.build_db import drop_coord_mismatch
+        refs = [{"name": "우진해장국", "lat": 33.5030, "lon": 126.4966}]
+        ps = [{"place_id": "a", "name": "우진해장국", "lat": 33.3871, "lon": 126.5841, "source": "1349"},
+              {"place_id": "b", "name": "우진해장국", "lat": 33.5031, "lon": 126.4967, "source": "1349"},
+              {"place_id": "c", "name": "다른식당", "lat": 33.3871, "lon": 126.5841, "source": "1349"}]
+        self.assertEqual([p["place_id"] for p in drop_coord_mismatch(ps, refs, ["제주"])], ["b", "c"])

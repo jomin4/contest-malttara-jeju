@@ -1,4 +1,4 @@
-"""M5 일정 생성 (설계 6.3). 권역 하나에 하루, 최근접 이웃 순서, 음식·카페는 하루 1곳씩 가운데."""
+"""M5 일정 생성 (설계 6.3). 권역 하나에 하루, 최근접 이웃 순서, 음식·카페는 하루 1곳씩 이동거리가 가장 적게 느는 자리에."""
 import re
 
 from malttara.geo import haversine_km
@@ -41,11 +41,25 @@ def resolve_origin(conn, origin):
     return None
 
 
-def _merge_middle(general: list, slot_ids: list) -> list:
-    total = len(general) + len(slot_ids)
-    mid = max(0, total // 2 - len(slot_ids) // 2)
-    mid = min(mid, len(general))
-    return general[:mid] + slot_ids + general[mid:]
+def _insert_best(order: list, pid: str, places: dict) -> list:
+    """slot 장소를 직선 이동거리가 가장 적게 늘어나는 자리에 끼운다(맨 앞·맨 뒤 포함, 동률이면 앞자리)."""
+    if not order:
+        return [pid]
+    best_i, best_add = 0, None
+    p = places[pid]
+    for i in range(len(order) + 1):
+        prev = places[order[i - 1]] if i > 0 else None
+        nxt = places[order[i]] if i < len(order) else None
+        add = 0.0
+        if prev:
+            add += haversine_km(prev["lat"], prev["lon"], p["lat"], p["lon"])
+        if nxt:
+            add += haversine_km(p["lat"], p["lon"], nxt["lat"], nxt["lon"])
+        if prev and nxt:
+            add -= haversine_km(prev["lat"], prev["lon"], nxt["lat"], nxt["lon"])
+        if best_add is None or add < best_add - 1e-9:
+            best_i, best_add = i, add
+    return order[:best_i] + [pid] + order[best_i:]
 
 
 def create_itinerary(candidates: list, slot_candidates: dict, goal: dict, settings: dict,
@@ -96,5 +110,7 @@ def create_itinerary(candidates: list, slot_candidates: dict, goal: dict, settin
                 general.append(p["place_id"])
         start = origin_xy if day == 1 else None
         ordered = order_nearest(general, places, start)
-        out.append({"day": day, "region_id": region, "place_ids": _merge_middle(ordered, slot_ids)})
+        for sid in slot_ids:
+            ordered = _insert_best(ordered, sid, places)
+        out.append({"day": day, "region_id": region, "place_ids": ordered})
     return {"days": out}
