@@ -45,7 +45,7 @@ SOURCE_NAMES = {
 # 784 해변명은 "협재"처럼 접미어가 없다. 1349 이름과 맞추려고 접미어를 붙인 이름을 참조로 쓴다.
 BEACH_SUFFIXES = ["해수욕장", "해변"]
 # TourAPI 스냅샷에서 places에 추가하는 유형: 음식점(카페 포함)
-TOURAPI_ADD_CONTENT_TYPES = {"39"}
+TOURAPI_ADD_CONTENT_TYPES = {"39", "음식점"}   # 스냅샷은 유형 이름("음식점")으로 저장된다
 
 
 def _csvs(raw_dir: str, sub: str) -> list:

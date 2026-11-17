@@ -92,3 +92,16 @@ class PlacesTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class UncategorizedTest(unittest.TestCase):
+    def test_only_slot_interest_prefers_categorized_places(self):
+        conn, _ = mock_conn()
+        conn.execute("UPDATE places SET category = NULL WHERE place_id = 'p-mock-west-00'")
+        conn.commit()
+        ps = {p["place_id"]: p for p in score_places(conn, goal(interests=["카페"]), S, I)}
+        self.assertEqual(ps["p-mock-west-00"]["interest"], 0.5)
+        self.assertEqual(ps["p-mock-west-01"]["interest"], 1.0)
+        nothing = {p["place_id"]: p for p in score_places(conn, goal(), S, I)}
+        self.assertEqual(nothing["p-mock-west-00"]["interest"], 0.5)
+        conn.close()

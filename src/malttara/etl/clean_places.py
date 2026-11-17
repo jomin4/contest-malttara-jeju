@@ -92,6 +92,8 @@ def is_non_place(name: str, cfg: dict) -> bool:
         return True
     if n.strip().lower() in [j.lower() for j in cfg.get("junk_names", [])]:
         return True
+    if cfg.get("area_name_pattern") and re.match(cfg["area_name_pattern"], n.replace(" ", "")):
+        return True                              # "대정읍"처럼 행정구역 이름만 적은 기록
     return len(re.findall(r"[가-힣]", n)) < cfg.get("min_hangul", 0)   # "dd", "123", "TERER" 같은 이름
 
 

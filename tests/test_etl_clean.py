@@ -117,3 +117,10 @@ class RealDataQualityTest(unittest.TestCase):
                                     ("점심식사", 33.5, 126.65), ("팜파스", 33.5, 126.66)]),
                          load_config("etl"), load_config("regions"), {}, polygons=None)
         self.assertEqual([p["name"] for p in out], ["팜파스"])
+
+    def test_facility_words_area_names_and_near_prefix_duplicates(self):
+        out = clean_1349(self.rows([("성판악 입구", 33.3850, 126.6200), ("성판악매표소", 33.3852, 126.6202),
+                                    ("성판악코스안내", 33.3853, 126.6203), ("대정읍", 33.22, 126.25),
+                                    ("관음사코스~성판악코스", 33.42, 126.55), ("윗세오름", 33.36, 126.53)]),
+                         load_config("etl"), load_config("regions"), {}, polygons=None)
+        self.assertEqual([p["name"] for p in out], ["윗세오름"])
