@@ -1,0 +1,13 @@
+{
+  "_note": "categories는 places.category 값. TourAPI 원본을 받은 뒤 실제 소분류 값으로 갱신한다(A Task 6).",
+  "interests": {
+    "바다": {"categories": ["해수욕장", "해변", "포구", "해안"], "triggers": ["바다", "해변", "해수욕", "오션"], "slot": false},
+    "오름": {"categories": ["오름"], "triggers": ["오름"], "slot": false},
+    "숲": {"categories": ["숲", "휴양림", "공원"], "triggers": ["숲", "산책", "휴양림"], "slot": false},
+    "실내·전시": {"categories": ["박물관", "미술관", "전시"], "triggers": ["박물관", "미술관", "전시", "실내"], "slot": false},
+    "체험·레저": {"categories": ["레포츠", "체험"], "triggers": ["체험", "레저", "액티비티"], "slot": false},
+    "음식": {"categories": ["음식점"], "triggers": ["음식", "맛집", "식당", "먹고", "미식"], "slot": true},
+    "카페": {"categories": ["카페"], "triggers": ["카페", "커피"], "slot": true}
+  },
+  "quiet_triggers": ["조용", "한적", "덜 붐비", "사람 적"]
+}
