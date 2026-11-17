@@ -49,6 +49,40 @@ def _places():
     return out
 
 
+def build_mock_map(path: str) -> dict:
+    """모의 읍면동을 사각형으로 그린 지도(계약 GET /api/map 모양). 실제 경계가 아니다."""
+    import json
+    import math
+    min_lon, max_lat, scale = 126.10, 33.60, 1000.0
+    kx = scale * math.cos(math.radians(33.4))
+
+    def xy(lat, lon):
+        return round((lon - min_lon) * kx, 1), round((max_lat - lat) * scale, 1)
+
+    def rect(lat1, lon1, lat2, lon2):
+        pts = [xy(lat1, lon1), xy(lat1, lon2), xy(lat2, lon2), xy(lat2, lon1)]
+        return "M" + " L".join(f"{x} {y}" for x, y in pts) + " Z"
+
+    emds, regions = [], []
+    for rid, (lat0, lon0, names, _) in REGION_SPECS.items():
+        boxes = []
+        for j, emd in enumerate(names + ([MISSING_EMD] if rid == "west" else [])):
+            box = (lat0 - 0.01, lon0 - 0.01 + 0.04 * j, lat0 + 0.04, lon0 + 0.03 + 0.04 * j)
+            boxes.append(box)
+            emds.append({"emd": emd, "region_id": rid, "d": rect(*box)})
+        regions.append({"region_id": rid, "name": next(r["name"] for r in load_config("regions")["regions"]
+                                                       if r["region_id"] == rid),
+                        "d": rect(min(b[0] for b in boxes), min(b[1] for b in boxes),
+                                  max(b[2] for b in boxes), max(b[3] for b in boxes))})
+    w, h = xy(33.10, 127.00)
+    out = {"view_box": f"0 0 {w} {h}", "emds": emds, "regions": regions,
+           "project": {"min_lon": min_lon, "max_lat": max_lat, "scale": scale},
+           "attribution": "모의 지도(실제 경계 아님)"}
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False)
+    return out
+
+
 def build_mock_db(path: str) -> None:
     if os.path.exists(path):
         os.remove(path)
