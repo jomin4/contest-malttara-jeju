@@ -28,18 +28,19 @@ A 트랙(데이터·에이전트)과 B 트랙(프론트)이 함께 지키는 계
 ```json
 {
   "place_id": "p1349-00123", "name": "…", "lat": 33.4, "lon": 126.5,
-  "emd": "애월읍", "region_id": "west", "region_name": "서부",
+  "emd": "제주시 애월읍", "region_id": "west", "region_name": "서부",
   "category": "해수욕장", "category_source": "tourapi",   // tourapi|hub_811|hub_812|hub_784|hub_858|keyword|none
   "overview": "…" ,                                         // TourAPI 개요, 없으면 null
   "source": "1349",                                          // "1349" | "tourapi"
   "score": 0.82, "interest": 1.0, "spread": 0.7, "quiet": 0.5,
   "indicators": {
-    "region": {"emd": "애월읍", "visit_ratio": 3.21, "pct": 0.3, "period": "2018-01~2022-09", "month": null, "source_id": "563", "missing": false},
+    "region": {"emd": "제주시 애월읍", "visit_ratio": 3.21, "pct": 0.3, "period": "2018-01~2022-09", "month": null, "source_id": "563", "missing": false},
     "nearby": {"quiet_count": 412, "pct": 0.5, "radius_km": 1.0, "period": "2021-07~12 토요일", "source_id": "1208", "missing": false}
   },
   "has_trend": true
 }
 ```
+- **읍면동 키 `emd`는 모든 응답에서 `"{시} {읍면동}"` 한 형식**이다(예: `"제주시 애월읍"`, `"서귀포시 서홍동"`). Place.emd, indicators.region.emd, `GET /api/map`의 `emds[].emd`, `GET /api/stats/emd`의 `items[].emd`가 같은 키여야 한다.
 - `indicators.region`은 **읍면동 지표**, `indicators.nearby`는 **장소 반경 지표**다. 화면은 둘을 다른 제목 아래 따로 그린다(원칙 3). 지표가 없으면 `missing: true`이고 값은 `null`.
 
 ### Itinerary
@@ -58,12 +59,14 @@ A 트랙(데이터·에이전트)과 B 트랙(프론트)이 함께 지키는 계
 {"day": 1, "type": "distance", "value": 71.3, "limit": 60, "place_id": null}
 ```
 - `type`: `distance` | `regions` | `duplicate` | `out_of_scope` | `count` | `origin`.
+- `distance`·`origin`은 km, `regions`·`count`는 개수. `duplicate`·`out_of_scope`는 `value: null, limit: null`이고 `place_id`가 반드시 있다.
 
 ### LogEvent (실행 로그 한 줄)
 ```json
 {"seq": 3, "batch_id": "A-1116-193916", "tool": "validate_itinerary",
  "actor": "code", "status": "fail", "message": "2일차 직선 71.3km > 60km", "ts": "2026-11-16T19:39:18"}
 ```
+- `seq`는 배치마다 1부터 1씩 증가한다.
 - `actor`: `llm` | `rule` | `code`. `status`: `ok` | `fail` | `fix` | `skip` | `add`.
 - `plan_tasks`가 Tool을 추가·생략하면 `status: "add"`/`"skip"`와 이유를 `message`에 남긴다.
 
@@ -85,6 +88,8 @@ A 트랙(데이터·에이전트)과 B 트랙(프론트)이 함께 지키는 계
 }
 ```
 
+- `places`에는 **일정 장소 + `alternatives`에 나온 장소 + (Batch B) `diff`의 `place_id`·`replaced_by` 전부**를 넣는다. 프론트는 이름·카드를 `places`에서만 찾는다.
+
 ### DiffItem (Batch B)
 ```json
 {"place_id": "p…", "change": "replace", "replaced_by": "p…", "day": 2, "reason": "별로예요 → 같은 권역 대안으로 교체"}
@@ -97,16 +102,24 @@ A 트랙(데이터·에이전트)과 B 트랙(프론트)이 함께 지키는 계
 |---|---|---|
 | `GET /api/health` | — | `{"ok": true, "llm_available": bool, "data_version": "2026-11-17"}` |
 | `POST /api/goal/parse` | `{"text": str}` | `{"goal": Goal, "missing": ["days"], "actor": "llm"\|"rule"}` |
+| `GET /api/config` | — | `{"interests": [{"key": "바다", "slot": false}], "regions": [{"region_id": str, "name": str}], "max_days": int}` (`config/interests.json`·`regions.json`·settings 값 그대로) |
 | `GET /api/map` | — | `{"view_box": "0 0 W H", "emds": [{"emd": str, "region_id": str, "d": str}], "regions": [{"region_id": str, "name": str, "d": str}], "project": {"min_lon": f, "max_lat": f, "scale": f}}` |
 | `GET /api/stats/emd?month=N` | month 생략 = 연평균 | `{"period": str, "source_id": "563", "items": [{"emd": str, "region_id": str, "visit_ratio": f\|null, "pct": f\|null}]}` |
 | `POST /api/batch/a` | `{"goal": Goal, "inject_error": bool}` | `{"batch_id": str}` (실행은 백그라운드) |
 | `POST /api/batch/b` | `{"prev_batch_id": str}` | `{"batch_id": str}` |
-| `GET /api/batch/{id}/events?after=N` | — | `{"events": [LogEvent], "done": bool, "result": BatchResult\|null, "error": str\|null}` |
+| `GET /api/batch/{id}/events?after=N` | `seq > N`인 이벤트만, 처음은 `after=0` | `{"events": [LogEvent], "done": bool, "result": BatchResult\|null, "error": str\|null}` |
 | `POST /api/events` | `{"batch_id": str, "place_id": str, "type": "virtual_arrival"\|"feedback", "value": "interest"\|"must"\|"dislike"\|null}` | `{"ok": true}` |
 | `GET /api/places/{id}/trend` | — | `{"place_id": str, "period": str\|null, "source_ids": ["189","190"], "series": [{"year_month": "2024-01", "domestic": int\|null, "foreign": int\|null}]}` |
 | `GET /api/print/{batch_id}` | — | `text/html` 인쇄용 문서 |
-| `GET /`, `/assets/*` | — | `web/dist` 정적 파일 (없는 경로는 `index.html`) |
+| (선택) `GET /api/stats/emd?month=all` | — | `{"period": str, "source_id": "563", "months": {"1": [items], …, "12": [items]}}` — 없으면 프론트가 `month=1..12`로 12회 호출 |
+| `GET /` 및 그 밖의 경로 | — | `web/dist` 아래 **모든 파일**(`/assets/*`, `/fonts/*` 등). 없는 경로는 `index.html` |
 
-- 오류: `4xx/5xx` + `{"error": "사람이 읽을 메시지"}`. 잘못된 JSON·필수 키 누락은 400.
+- 오류: `4xx/5xx` + `{"error": "사람이 읽을 메시지"}`. 잘못된 JSON·필수 키 누락은 400, 없는 batch id는 404. `error`는 화면에 그대로 보여줄 한국어 문장이다(예: "여행 기간이 없습니다").
+- 정적 파일 `Content-Type`은 `mimetypes`에 맡기지 않고 고정 표로 준다: `.html` `text/html; charset=utf-8`, `.js` `text/javascript`, `.css` `text/css`, `.json` `application/json`, `.svg` `image/svg+xml`, `.woff2` `font/woff2`, `.png` `image/png`. (Windows Python은 레지스트리 값을 읽어 `.js`를 `text/plain`으로 줄 수 있고, 그러면 브라우저가 스크립트를 거부해 빈 화면이 된다.)
+- `GET /api/map`의 `regions[]`: 중산간 박스(`regions.json`의 `mountain.boxes`)가 있으면 `mountain`을 넣고 `d`는 박스 다각형. 4권역 폴백이면 넣지 않는다. `emds[].region_id`는 해안 권역 그대로.
 - 폴링 주기: 프론트 500ms. `done: true`가 되면 멈춘다.
 - 한 번에 하나의 키오스크 사용자를 가정한다(동시 배치는 허용하되 사용자 구분 없음).
+
+## 변경 이력
+
+- 2026-11-17 (B 제안, A 확인 필요): emd 키 형식 통일, `GET /api/config` 추가, `places` 포함 범위, `seq`·`after` 의미, Violation value/limit, 정적 파일 범위·MIME 고정, 중산간 권역 경로, 404·오류 문구, (선택) 월별 통계 일괄 조회. 근거: `2026-11-17-frontend-requirements.md` 4장
