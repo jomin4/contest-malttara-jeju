@@ -68,3 +68,14 @@ class EtlCategorizeTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class KeywordRuleTest(unittest.TestCase):
+    def test_food_words_win_and_scenery_needs_suffix(self):
+        places = [{"place_id": "a", "name": "삼화포구횟집", "lat": 33.5, "lon": 126.6},
+                  {"place_id": "b", "name": "준반점(아점/ 함덕해수욕장에 위치)", "lat": 33.5, "lon": 126.6},
+                  {"place_id": "c", "name": "협재해수욕장", "lat": 33.5, "lon": 126.6},
+                  {"place_id": "d", "name": "오름카페 바람", "lat": 33.5, "lon": 126.6},
+                  {"place_id": "e", "name": "새별오름 (나홀로나무)", "lat": 33.5, "lon": 126.6}]
+        categorize_places(places, [], load_config("etl"))
+        self.assertEqual([p["category"] for p in places], ["음식점", "음식점", "해수욕장", "카페", "오름"])

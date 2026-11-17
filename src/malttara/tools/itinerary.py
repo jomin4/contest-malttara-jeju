@@ -67,6 +67,16 @@ def create_itinerary(candidates: list, slot_candidates: dict, goal: dict, settin
                                                order_idx.get(r, 99), r))
 
     used = set()
+    used_names = set()
+
+    def take(p) -> bool:                         # 같은 이름의 다른 좌표 기록이 두 번 들어가지 않게
+        n = _norm(p.get("name", ""))
+        if p["place_id"] in used or n in used_names:
+            return False
+        used.add(p["place_id"])
+        used_names.add(n)
+        return True
+
     out = []
     for day in range(1, days + 1):
         if not ranked:
@@ -75,13 +85,15 @@ def create_itinerary(candidates: list, slot_candidates: dict, goal: dict, settin
         region = ranked[(day - 1) % len(ranked)]
         slot_ids = []
         for key in slot_candidates:
-            pick = next((p["place_id"] for p in slot_candidates[key]
-                         if p["region_id"] == region and p["place_id"] not in used), None)
+            pick = next((p for p in slot_candidates[key] if p["region_id"] == region and take(p)), None)
             if pick:
-                slot_ids.append(pick)
-                used.add(pick)
-        general = [p["place_id"] for p in by_region[region] if p["place_id"] not in used][:max(0, k - len(slot_ids))]
-        used.update(general)
+                slot_ids.append(pick["place_id"])
+        general = []
+        for p in by_region[region]:
+            if len(general) >= max(0, k - len(slot_ids)):
+                break
+            if take(p):
+                general.append(p["place_id"])
         start = origin_xy if day == 1 else None
         ordered = order_nearest(general, places, start)
         out.append({"day": day, "region_id": region, "place_ids": _merge_middle(ordered, slot_ids)})

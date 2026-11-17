@@ -97,3 +97,23 @@ class EtlCleanTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RealDataQualityTest(unittest.TestCase):
+    """실데이터 점검에서 나온 문제(11/17): 같은 장소 반복, 무의미한 이름, 섬 이름, 숙소·식사 기록."""
+
+    def rows(self, items):
+        return [{"장소명": n, "지번주소": "제주특별자치도 제주시 조천읍 함덕리 1", "위도": str(a), "경도": str(b)} for n, a, b in items]
+
+    def test_same_name_within_2km_is_one_place(self):
+        out = clean_1349(self.rows([("함덕해수욕장", 33.5430, 126.6690), ("함덕 해수욕장", 33.5480, 126.6750),
+                                    ("함덕해수욕장", 33.4000, 126.3000)]),
+                         load_config("etl"), load_config("regions"), {}, polygons=None)
+        self.assertEqual(len(out), 2)          # 1km 안 둘은 하나, 20km 밖 하나는 별개
+
+    def test_junk_and_island_names_and_non_places_dropped(self):
+        out = clean_1349(self.rows([("dd", 33.5, 126.6), ("123", 33.5, 126.61), ("몰라", 33.5, 126.62),
+                                    ("TERER", 33.5, 126.63), ("가파도", 33.3, 126.27), ("숙소(아일랜드힐)", 33.5, 126.64),
+                                    ("점심식사", 33.5, 126.65), ("팜파스", 33.5, 126.66)]),
+                         load_config("etl"), load_config("regions"), {}, polygons=None)
+        self.assertEqual([p["name"] for p in out], ["팜파스"])
