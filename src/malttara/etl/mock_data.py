@@ -19,6 +19,8 @@ CATEGORIES = ["해수욕장", "오름", "숲", "박물관", "음식점", "카페
 CATEGORY_LABEL = {"해수욕장": "해변", "오름": "오름", "숲": "숲길", "박물관": "박물관",
                   "음식점": "식당", "카페": "카페", "포구": "포구"}
 MISSING_EMD = "제주시 한경면"   # emd_stats에 없는 읍면동(지표 없음 시험용)
+# 한적함 요청이 순위를 바꾸는 장면: 붐비는 시내 해변 vs 한적한 남부 숲
+QUIET_OVERRIDES = {"p-mock-city-00": 490, "p-mock-city-06": 495, "p-mock-south-02": 1}
 
 
 def _places():
@@ -28,9 +30,10 @@ def _places():
             emd = emds[i % 2]
             if rid == "west" and i == 7:
                 emd = MISSING_EMD
-            quiet = None if i == 5 else (i * 97 + r_idx * 31) % 500
+            pid = f"p-mock-{rid}-{i:02d}"
+            quiet = None if i == 5 else QUIET_OVERRIDES.get(pid, (i * 97 + r_idx * 31) % 500)
             out.append({
-                "place_id": f"p-mock-{rid}-{i:02d}",
+                "place_id": pid,
                 "name": f"모의 {CATEGORY_LABEL[cat]} {rid}-{i:02d}",
                 "lat": round(lat0 + 0.01 * (i % 3), 6),
                 "lon": round(lon0 + 0.012 * (i // 3), 6),
