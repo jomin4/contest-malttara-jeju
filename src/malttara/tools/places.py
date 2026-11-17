@@ -28,6 +28,8 @@ def score_places(conn, goal: dict, settings: dict, interests_cfg: dict, boosts=N
         spec = interests_cfg["interests"].get(key)
         if spec:
             wanted |= set(spec["categories"])
+    general_wanted = any(not interests_cfg["interests"].get(k, {}).get("slot") for k in interests
+                         if k in interests_cfg["interests"])
     w = settings["weights"]["quiet" if goal.get("quiet_pref") else "default"]
     neutral = settings["missing_indicator_value"]
     radius = settings["quiet_radius_km"]
@@ -43,7 +45,10 @@ def score_places(conn, goal: dict, settings: dict, interests_cfg: dict, boosts=N
 
     out = []
     for p in places:
-        interest = 1.0 if not interests or p["category"] in wanted else 0.0
+        if general_wanted:
+            interest = 1.0 if p["category"] in wanted else 0.0
+        else:                                    # 관심사 미반영·음식/카페만 → 분류 있는 장소를 우선(분류 없음 0.5)
+            interest = 1.0 if p["category"] else 0.5
         if interest and boosts.get(p["category"]):
             interest = min(1.2, interest + boosts[p["category"]])
 

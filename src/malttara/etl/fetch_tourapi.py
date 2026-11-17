@@ -95,7 +95,8 @@ def _paged(api_key: str, op: str, params: dict) -> list:
 def fetch_category_names(api_key: str) -> dict:
     """분류체계 코드 → 이름표 {코드: 이름}(1·2·3단계 모두)."""
     names = {}
-    for it in _paged(api_key, "categoryCode2", {"lclsSystmListYn": "Y"}):
+    # 신분류체계 코드표는 lclsSystmCode2(lclsSystmListYn=Y)로 받는다(categoryCode2는 구분류 cat1~3).
+    for it in _paged(api_key, "lclsSystmCode2", {"lclsSystmListYn": "Y"}):
         for lv in ("1", "2", "3"):
             code, name = it.get(f"lclsSystm{lv}Cd"), it.get(f"lclsSystm{lv}Nm")
             if code and name:
@@ -180,6 +181,18 @@ def main(argv=None) -> int:
     if not key:
         print("DATA_GO_KR_KEY가 비어 있습니다. .env에 공공데이터포털 인증키를 넣은 뒤 다시 실행하세요.")
         return 1
+    if "--refresh-categories" in argv:              # 목록은 그대로 두고 분류 이름만 다시 붙인다
+        with open(DEFAULT_OUT, encoding="utf-8") as f:
+            items = json.load(f)
+        names = fetch_category_names(key)
+        for it in items:
+            it["category"] = names.get(it.get("lclsSystm3")) or names.get(it.get("lclsSystm2"))
+            it["category_l1"] = names.get(it.get("lclsSystm1"))
+            it["category_l2"] = names.get(it.get("lclsSystm2"))
+        with open(DEFAULT_OUT, "w", encoding="utf-8") as f:
+            json.dump(items, f, ensure_ascii=False)
+        print(f"분류 이름 갱신: {sum(1 for it in items if it['category'])}/{len(items)}건 (코드표 {len(names)}개)")
+        return 0
     max_calls = None
     if "--max-overview" in argv:
         max_calls = int(argv[argv.index("--max-overview") + 1])
