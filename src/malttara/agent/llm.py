@@ -1,0 +1,90 @@
+"""OpenAI 호환 LLM 클라이언트(urllib). 실패하면 None을 돌려주고 호출부가 규칙으로 넘어간다.
+
+- 배포: Upstage Solar Pro 4 (json_mode="schema", response_format=json_schema)
+- 개발: K-EXAONE 2.5 (json_mode="prompt": response_format 없이 프롬프트로 JSON 지시, 본문에서 JSON 추출)
+키는 로그에 남기지 않는다.
+"""
+import json
+import urllib.error
+import urllib.request
+
+from malttara.agent.schema_lite import check_schema
+
+
+def _default_transport(url: str, headers: dict, body: bytes, timeout: float) -> bytes:
+    req = urllib.request.Request(url, data=body, headers=headers, method="POST")
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.read()
+
+
+def _extract_json(text: str):
+    if not isinstance(text, str):
+        return None
+    s, e = text.find("{"), text.rfind("}")
+    if s < 0 or e <= s:
+        return None
+    try:
+        return json.loads(text[s:e + 1])
+    except ValueError:
+        return None
+
+
+class LLMClient:
+    def __init__(self, api_key, base_url, model, timeout_s: float, transport=None,
+                 json_mode: str = "schema", extra_body=None):
+        self.api_key = api_key
+        self.base_url = (base_url or "").rstrip("/")
+        self.model = model
+        self.timeout_s = timeout_s
+        self.transport = transport or _default_transport
+        self.json_mode = json_mode if json_mode in ("schema", "prompt") else "schema"
+        self.extra_body = dict(extra_body or {})
+
+    @property
+    def available(self) -> bool:
+        return bool(self.api_key and self.base_url and self.model)
+
+    def _post(self, messages: list, schema: dict, mode: str):
+        body = {"model": self.model, "messages": messages, "temperature": 0}
+        if mode == "schema":
+            body["response_format"] = {"type": "json_schema",
+                                       "json_schema": {"name": "out", "schema": schema, "strict": True}}
+        body.update(self.extra_body)
+        headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
+        raw = self.transport(f"{self.base_url}/chat/completions", headers,
+                             json.dumps(body, ensure_ascii=False).encode("utf-8"), self.timeout_s)
+        data = json.loads(raw)
+        return data["choices"][0]["message"].get("content")
+
+    def chat_json(self, system: str, user: str, schema: dict):
+        if not self.available:
+            return None
+        modes = [self.json_mode] if self.json_mode == "prompt" else ["schema", "prompt"]
+        for mode in modes:
+            sys_msg = system
+            if mode == "prompt":
+                sys_msg = (system + "\n\n반드시 아래 JSON 스키마에 맞는 JSON 객체 하나만 출력하라. 설명·코드블록 금지.\n"
+                           + json.dumps(schema, ensure_ascii=False))
+            try:
+                content = self._post([{"role": "system", "content": sys_msg},
+                                      {"role": "user", "content": user}], schema, mode)
+            except urllib.error.HTTPError as e:
+                if mode == "schema" and e.code == 400:
+                    continue                    # response_format 미지원 → 프롬프트 방식으로 한 번 더
+                return None
+            except Exception:
+                return None
+            out = _extract_json(content)
+            return out if out is not None and check_schema(out, schema) else None
+        return None
+
+
+def client_from_env(env: dict, settings: dict) -> LLMClient:
+    try:
+        extra = json.loads(env.get("LLM_EXTRA_BODY") or "{}")
+    except ValueError:
+        extra = {}
+    return LLMClient(env.get("LLM_API_KEY") or None, env.get("LLM_BASE_URL") or None,
+                     env.get("LLM_MODEL") or None, settings["llm"]["timeout_s"],
+                     json_mode=env.get("LLM_JSON_MODE") or "schema",
+                     extra_body=extra if isinstance(extra, dict) else {})
