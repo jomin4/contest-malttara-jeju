@@ -324,7 +324,7 @@ function frame(t) {
   // 추격 카메라: 말 뒤 위쪽에서 목적지 방향을 본다. 남은 거리가 멀면 조금 멀리
   const target = view.seg ? view.seg.pts[view.seg.pts.length - 1] : view.horse.position;
   const remain = view.seg ? (1 - view.f) * view.seg.total : 0;
-  const dist = Math.min(190, Math.max(85, remain * 0.55 + 70));
+  const dist = Math.min(210, Math.max(115, remain * 0.55 + 90));
   const hp = view.horse.position;
   view.camPosT.set(hp.x - view.heading.x * dist, hp.y + dist * 0.78 + 10, hp.z - view.heading.z * dist);
   view.camLookT.copy(hp).lerp(target, remain > 1 ? 0.45 : 0).setY(hp.y + 4);

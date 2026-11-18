@@ -66,7 +66,7 @@ export const actions = {
     const sid = state.session_id;
     const key = kind === "A" ? "batchA" : "batchB";
     const ac = new AbortController(); aborts.push(ac);
-    set({ [key]: { id: null, events: [], result: null, error: null, slow: false }, activeDay: null, selPlace: null, open: {}, logOpen: null, ...(kind === "A" ? { batchB: null, game: { day: 1, idx: 0 }, arrived: {}, feedback: {} } : {}) });
+    set({ [key]: { id: null, events: [], result: null, error: null, slow: false }, activeDay: null, selPlace: null, open: {}, logOpen: null, ...(kind === "A" ? { batchB: null, game: { day: 1, idx: 0, awaiting: null }, arrived: {}, feedback: {} } : {}) });
     try {
       const id = kind === "A" ? await api.startBatchA(state.goal, state.injectError) : await api.startBatchB(state.batchA.id);
       if (sid !== state.session_id) return;
@@ -110,7 +110,7 @@ function Header() {
       "말따라 제주"),
     h("nav", { class: "steps" }, STEPS.map(([n, label]) => h("button", {
       class: "step" + (state.step === n ? " active" : ""), disabled: n > ms, onclick: () => actions.go(n),
-    }, h("span", { class: "n" }, `0${n}`), label))),
+    }, h("span", { class: "n" }, `0${n}`), h("span", { class: "lbl" }, label)))),
     h("div", { class: "top-right" },
       MOCK ? h("span", { class: "badge badge-mock", title: "목업 데이터로 동작 중입니다. 화면의 장소명·수치는 실제가 아닙니다." }, "MOCK DATA") : null,
       ctx.demo ? h("span", { class: "badge badge-warn" }, "시연 모드") : null,

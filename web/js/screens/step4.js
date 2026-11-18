@@ -4,7 +4,7 @@ import { api } from "../api.js";
 import { CHANGE } from "../format.js";
 import { LogPanel, Stepper } from "../components/log.js";
 import { LineChart } from "../components/chart.js";
-import { DayList, MapCard } from "./step2.js";
+import { DayList, MapCard, TransportNote } from "./step2.js";
 
 const LINE_COLORS = ["#0f766e", "#ea580c", "#2563eb", "#9333ea", "#ca8a04", "#db2777"];
 let loadingTrends = false;
@@ -80,7 +80,8 @@ export function Step4(st, ctx, A) {
     h("div", { class: "pagehead" },
       h("div", {}, h("div", { class: "eyebrow" }, "04 최종 계획"),
         h("h1", {}, r ? "나만의 제주 여행 계획" : "반응을 반영해 다시 짜는 중"),
-        h("div", { class: "muted lead" }, r ? (changed ? `반응을 반영해 ${changed}곳을 바꿨어요. 최종 선택은 여러분이 합니다.` : "반응이 없어 처음 경로를 그대로 두었어요. 최종 선택은 여러분이 합니다.") : "꼭 갈래요는 고정하고, 별로예요는 같은 권역 대안으로 바꿉니다.")),
+        h("div", { class: "muted lead" }, r ? (changed ? `반응을 반영해 ${changed}곳을 바꿨어요. 최종 선택은 여러분이 합니다.` : "반응이 없어 처음 경로를 그대로 두었어요. 최종 선택은 여러분이 합니다.") : "꼭 갈래요는 고정하고, 별로예요는 같은 권역 대안으로 바꿉니다."),
+        TransportNote(st.goal)),
       h("div", { class: "actions no-print" },
         h("button", { class: "btn", onclick: () => A.go(3) }, "다시 둘러보기"),
         h("button", { class: "btn btn-primary btn-lg", disabled: !r, onclick: print }, icon("print", 16), "인쇄해서 가져가기"))),

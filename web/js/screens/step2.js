@@ -5,6 +5,17 @@ import { SvgMap, dayColor } from "../components/map.js";
 import { LogPanel, Stepper } from "../components/log.js";
 import { PlaceRow } from "../components/placecard.js";
 
+// 이동수단·동행은 표시만 한다는 것을 분명히 알린다 (원칙 2·6)
+export function TransportNote(goal) {
+  if (!goal) return null;
+  const parts = [];
+  if (goal.transport) parts.push(`이동수단 '${goal.transport}'`);
+  if (goal.companion) parts.push(`동행 '${goal.companion}'`);
+  if (!parts.length) return null;
+  return h("div", { class: "transport-note" }, icon("alert", 15),
+    `${parts.join(", ")}은(는) 화면에 표시만 하고 경로 계산에는 쓰지 않았어요. 거리는 직선 기준이며 버스 노선·이동시간은 반영하지 않습니다.`);
+}
+
 export function DayTabs(st, itin, places) {
   return h("div", { class: "daytabs" },
     h("button", { class: "daytab" + (!st.activeDay ? " on" : ""), onclick: () => set({ activeDay: null }) }, "전체"),
@@ -52,7 +63,8 @@ export function Step2(st, ctx, A) {
       h("div", {},
         h("div", { class: "eyebrow" }, "02 경로 만들기"),
         h("h1", {}, r ? "경로가 준비됐어요" : b?.error ? "경로를 만들지 못했어요" : "AI가 경로를 짜고 있어요"),
-        h("div", { class: "muted lead" }, [periodLabel(st.goal), st.goal?.pace, ...(st.goal?.interests || [])].filter(Boolean).join(" · "))),
+        h("div", { class: "muted lead" }, [periodLabel(st.goal), st.goal?.pace, ...(st.goal?.interests || [])].filter(Boolean).join(" · ")),
+        TransportNote(st.goal)),
       h("div", { class: "actions" },
         ctx.demo ? h("label", { class: "switch", title: "초안에 일부러 잘못된 장소를 넣어 검증·수정 과정을 보여줍니다" },
           h("input", { type: "checkbox", checked: st.injectError, onchange: (e) => set({ injectError: e.target.checked }) }), h("span", { class: "track" }), "오류 주입") : null,

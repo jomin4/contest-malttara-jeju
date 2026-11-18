@@ -20,7 +20,7 @@ function initial(session_id = 0) {
     map3d: true,      // 03 게임 지도: 3D 지형(가능할 때) / 2D
     activeDay: 1,
     selPlace: null,
-    game: { day: 1, idx: 0 },
+    game: { day: 1, idx: 0, awaiting: null },
     open: {},        // 근거를 펼친 place_id
     logOpen: null,   // null = 실행 중에만 펼침
   };

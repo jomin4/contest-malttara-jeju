@@ -461,3 +461,49 @@ button { cursor: pointer; }
   .stage.game3d .typein { height: 50px; font-size: 20px; margin-top: 6px; }
   .stage.game3d .hint { display: none; }
 }
+
+/* ── 4차: 버튼 위계, 헤더 줄바꿈, 게임 전체 화면, 반응 패널 ── */
+.btn-dark-outline { border-color: var(--fg); color: var(--fg); }
+.brand { white-space: nowrap; flex-shrink: 0; }
+.topbar-inner { grid-template-columns: auto 1fr auto; }
+.steps { justify-self: center; }
+.step { white-space: nowrap; }
+@media (max-width: 1180px) {
+  .step:not(.active) .lbl { display: none; }
+  .topbar-inner { gap: 12px; padding: 0 16px; }
+}
+.transport-note { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 12px; border-radius: 9px;
+  background: #fffbeb; border: 1px solid #fde68a; color: #92400e; font-size: 14px; }
+
+.page.page-game { max-width: none; padding: 10px 16px 12px; }
+.page-game .stage { border-radius: 14px; }
+.stage-head { gap: 16px; flex-wrap: wrap; }
+.stage-left, .stage-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.stage-right .tally { font-size: 14px; gap: 10px; }
+.stage.game3d .terrain-wrap { height: calc(100vh - 64px - 22px); min-height: 520px; }
+.page-game .stage:not(.game3d) .map-svg { height: calc(100vh - 64px - 260px); }
+.stage.game3d .terrain-credit { top: auto; bottom: 6px; left: auto; right: 12px; background: transparent; }
+
+.typebar.arrived { display: flex; flex-direction: column; gap: 14px; }
+.arr-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.arr-kicker { font-size: 15px; font-weight: 600; color: var(--accent); }
+.arr-name { font-size: 30px; font-weight: 700; letter-spacing: -0.03em; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.arr-meta { font-size: 15px; font-weight: 400; color: var(--fg-3); letter-spacing: 0; }
+.react.big { gap: 12px; }
+.react.big button { height: 72px; border-radius: 14px; font-size: 18px; position: relative; justify-content: center; gap: 14px; border-width: 1.5px; }
+.react.big .rb-t { font-size: 18px; font-weight: 600; }
+.react.big .rb-h { font-size: 13.5px; }
+.keycap { font-family: var(--mono); font-size: 14px; min-width: 28px; height: 28px; display: inline-grid; place-items: center; border: 1.5px solid currentColor;
+  border-bottom-width: 3px; border-radius: 7px; opacity: .7; }
+.react.big button.on .keycap { opacity: 1; }
+.kbd-dark { border-color: rgba(255,255,255,.4); color: rgba(255,255,255,.85); background: transparent; margin-left: 4px; }
+.btn .kbd { margin-left: 6px; }
+@media (max-height: 820px) {
+  .react.big button { height: 58px; }
+  .arr-name { font-size: 24px; }
+  .typebar.arrived { gap: 10px; }
+}
+.typebar.arrived { display: flex !important; flex-direction: column; align-items: stretch; text-align: left; }
+.typebar.arrived > * { width: 100%; }
+.typebar.arrived .react.big { display: grid; grid-template-columns: repeat(3, 1fr); }
+.typebar.arrived .react.big button { width: 100%; }
