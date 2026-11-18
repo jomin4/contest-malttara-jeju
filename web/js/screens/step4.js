@@ -5,6 +5,8 @@ import { CHANGE } from "../format.js";
 import { LogPanel, Stepper } from "../components/log.js";
 import { LineChart } from "../components/chart.js";
 import { DayList, MapCard, TransportNote } from "./step2.js";
+import { WhyButton, WhySection } from "../components/why.js";
+import { QrModal, planText } from "../components/qr.js";
 
 const LINE_COLORS = ["#0f766e", "#ea580c", "#2563eb", "#9333ea", "#ca8a04", "#db2777"];
 let loadingTrends = false;
@@ -45,7 +47,8 @@ function Charts(st, ctx, A, B) {
   }
   const period2 = trendIds.map((id) => ctx.trends[id]?.period).find(Boolean) || "—";
   return h("section", { class: "evidence" },
-    h("h2", { class: "sec-title" }, "데이터로 본 근거"),
+    h("h2", { class: "sec-title" }, "자세한 데이터 (참고)"),
+    h("p", { class: "muted", style: { margin: "-6px 0 14px" } }, "왼쪽: 일정이 있는 동네가 달마다 얼마나 붐비는지 — 높을수록 사는 사람 대비 찾아오는 사람이 많아요. 오른쪽: 일정 속 관광지의 실제 입장객 수 변화."),
     h("div", { class: "charts" },
       h("div", { class: "card" }, h("div", { class: "card-head" }, h("div", { class: "card-title" }, "일정 지역의 월별 방문/거주 비율 (읍면동 단위)")),
         h("div", { class: "card-body" }, c1, h("div", { class: "source" }, `출처 제주데이터허브 563 · ${ctx.monthly?.period ?? ctx.stats[0]?.period ?? ""} · 읍면동 통계이며 장소 혼잡도가 아닙니다`))),
@@ -84,7 +87,9 @@ export function Step4(st, ctx, A) {
         TransportNote(st.goal)),
       h("div", { class: "actions no-print" },
         h("button", { class: "btn", onclick: () => A.go(3) }, "다시 둘러보기"),
-        h("button", { class: "btn btn-primary btn-lg", disabled: !r, onclick: print }, icon("print", 16), "인쇄해서 가져가기"))),
+        r ? WhyButton() : null,
+        h("button", { class: "btn", disabled: !r, onclick: print }, icon("print", 15), "인쇄"),
+        h("button", { class: "btn btn-primary btn-lg", disabled: !r, onclick: () => set({ qrOpen: true }) }, icon("spark", 16), "휴대폰으로 가져가기"))),
     r ? null : Stepper({ kind: "B", batch: b }),
     h("div", { class: "s2" },
       h("div", { class: "s2-left" },
@@ -92,5 +97,8 @@ export function Step4(st, ctx, A) {
         LogPanel({ title: "AI가 한 일", batch: b, onRetry: () => A.runBatch("B"), open: logOpen, onToggle: r ? () => set({ logOpen: !logOpen }) : null,
           sub: b?.id ? `${b.id} ← 이전 ${a.batch_id}` : null })),
       h("div", { class: "s2-right" }, MapCard(st, ctx, r, "최종 경로"))),
-    r ? Charts(st, ctx, A, r) : null);
+    r ? WhySection({ st, ctx, r, events: b.events, kind: "B", feedback: st.feedback }) : null,
+    r ? Charts(st, ctx, A, r) : null,
+    r && st.qrOpen ? QrModal({ text: planText(st.goal, r, (rid) => ctx.map.regions.find((x) => x.region_id === rid)?.name || rid),
+      onClose: () => set({ qrOpen: false }), onPrint: () => { set({ qrOpen: false }); print(); } }) : null);
 }

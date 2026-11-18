@@ -22,7 +22,8 @@ export const actions = {
     try {
       const r = await api.parseGoal(text);
       if (sid !== state.session_id) return;
-      set({ goal: r.goal, missing: r.missing, parseActor: r.actor, parsing: false, batchA: null, batchB: null, feedback: {}, arrived: {} });
+      const keep = { stay: state.goal?.stay ?? null, area: state.goal?.area ?? null };   // 지도에서 고른 숙소·범위는 다시 읽어도 유지
+      set({ goal: { ...r.goal, ...keep }, missing: r.missing, parseActor: r.actor, parsing: false, batchA: null, batchB: null, feedback: {}, arrived: {} });
       if (r.goal.month) actions.loadStats(r.goal.month);
     } catch (e) {
       if (sid !== state.session_id) return;

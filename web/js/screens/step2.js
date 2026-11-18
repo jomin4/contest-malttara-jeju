@@ -4,6 +4,7 @@ import { distanceLabel, DIST_NOTE, violationText, periodLabel } from "../format.
 import { SvgMap, dayColor } from "../components/map.js";
 import { LogPanel, Stepper } from "../components/log.js";
 import { PlaceRow } from "../components/placecard.js";
+import { WhyButton, WhySection } from "../components/why.js";
 
 // 이동수단·동행은 표시만 한다는 것을 분명히 알린다 (원칙 2·6)
 export function TransportNote(goal) {
@@ -69,6 +70,7 @@ export function Step2(st, ctx, A) {
         ctx.demo ? h("label", { class: "switch", title: "초안에 일부러 잘못된 장소를 넣어 검증·수정 과정을 보여줍니다" },
           h("input", { type: "checkbox", checked: st.injectError, onchange: (e) => set({ injectError: e.target.checked }) }), h("span", { class: "track" }), "오류 주입") : null,
         ctx.demo ? h("button", { class: "btn", disabled: b && !r && !b.error, onclick: () => A.runBatch("A") }, icon("reset", 15), "다시 만들기") : null,
+        r ? WhyButton() : null,
         h("button", { class: "btn btn-primary btn-lg", disabled: !r, onclick: () => A.go(3) }, "미리 둘러보기", icon("arrow", 16)))),
     r ? null : Stepper({ kind: "A", batch: b }),
     h("div", { class: "s2" },
@@ -79,5 +81,6 @@ export function Step2(st, ctx, A) {
         r ? DayList(st, ctx, A, r) : null,
         LogPanel({ title: "AI가 한 일", batch: b, onRetry: () => A.runBatch("A"), open: logOpen, onToggle: r ? () => set({ logOpen: !logOpen }) : null,
           sub: r ? `분류 없음 ${r.quality.no_category}곳 · 읍면동 지표 없음 ${r.quality.no_region_indicator}곳 · 반경 지표 없음 ${r.quality.no_nearby_indicator}곳` : null })),
-      h("div", { class: "s2-right" }, MapCard(st, ctx, r, "경로 지도"))));
+      h("div", { class: "s2-right" }, MapCard(st, ctx, r, "경로 지도"))),
+    r ? WhySection({ st, ctx, r, events: b.events, kind: "A" }) : null);
 }

@@ -29,7 +29,7 @@ const fillFor = (v) => (v == null ? "url(#hatch)" : RAMP[Math.min(4, Math.floor(
 
 export function SvgMap(opts) {
   const z = opts.zoom || 1;
-  const { map, emdValues, itinerary, places, activeDay, horseAt, highlightRegion, onPlaceClick, markerState, showLabels = true, onlyDay } = opts;
+  const { map, emdValues, itinerary, places, activeDay, horseAt, highlightRegion, onPlaceClick, markerState, showLabels = true, onlyDay, onEmdClick, selectedEmd, pin } = opts;
   const [, , W, H] = map.view_box.split(" ").map(Number);
   const svg = s("svg", { class: "map-svg", viewBox: opts.viewBox || map.view_box, role: "img", "aria-label": "제주 지도" });
   svg.appendChild(s("defs", {},
@@ -39,8 +39,10 @@ export function SvgMap(opts) {
   const gE = s("g");
   for (const e of map.emds) {
     const v = emdValues ? emdValues[e.emd] : undefined;
-    gE.appendChild(s("path", { class: "emd" + (emdValues ? "" : " plain"), d: e.d, fill: emdValues ? fillFor(v) : null },
-      s("title", {}, e.emd + (emdValues ? (v == null ? " · 지표 없음" : ` · 백분위 ${Math.round(v * 100)}`) : ""))));
+    const el = s("path", { class: "emd" + (emdValues ? "" : " plain") + (onEmdClick ? " clickable" : "") + (selectedEmd === e.emd ? " selected" : ""), d: e.d, fill: emdValues ? fillFor(v) : null },
+      s("title", {}, e.emd + (emdValues ? (v == null ? " · 지표 없음" : ` · 백분위 ${Math.round(v * 100)}`) : "")));
+    if (onEmdClick) el.addEventListener("click", () => onEmdClick(e));
+    gE.appendChild(el);
   }
   svg.appendChild(gE);
 
@@ -81,12 +83,19 @@ export function SvgMap(opts) {
     svg.appendChild(gM);
   }
 
+  if (pin) {   // 숙소 표시
+    svg.appendChild(s("g", { class: "stay-pin", transform: `translate(${pin[0]},${pin[1]})` },
+      s("path", { d: "M0 0 C-9 -12 -12 -18 -12 -24 A12 12 0 1 1 12 -24 C12 -18 9 -12 0 0 Z", fill: "#ea580c", stroke: "#fff", "stroke-width": 2.5 }),
+      s("path", { d: "M-6 -22 L0 -28 L6 -22 V-16 H-6 Z", fill: "#fff" })));
+  }
   if (horseAt) {
     const g = s("g", { class: "horse", style: `transform: translate(${horseAt[0]}px, ${horseAt[1] - 26 * z}px) scale(${z})` }, horseGlyph());
     svg.appendChild(g);
   }
   return svg;
 }
+
+export function emdCenter(d) { return pathCenter(d); }
 
 export function MapLegend({ title, source, period, missing = true }) {
   return h("div", { class: "legend" },

@@ -40,4 +40,5 @@
 | 오픈소스·외부 코드 | Pretendard (orioncactus/pretendard) | 화면 글꼴(한글) `web/fonts/` | SIL OFL 1.1 |
 | 오픈소스·외부 코드 | (개발용) shapely | `web/tools/make_mock.py` 목업 지도 생성, 실행 중 미사용 | BSD-3-Clause |
 | 오픈소스·외부 코드 | three.js r187 (mrdoob/three.js) | 03 미리보기 3D 지형 지도 `web/vendor/three/` (로컬 동봉) | MIT |
+| 오픈소스·외부 코드 | qrcode-generator 2.0.4 (Kazuhiko Arase) | 04 일정 QR(휴대폰으로 가져가기) `web/vendor/qrcode/` (로컬 동봉) | MIT |
 | 외부 데이터 | Copernicus DEM GLO-30 (타일 N33 E126) | 03 미리보기 3D 지형 높이 `web/assets/terrain.bin` (약 250m 격자로 가공·동봉) | © DLR e.V. 2010-2014, © Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the European Union and ESA. 화면에 출처 표기 |

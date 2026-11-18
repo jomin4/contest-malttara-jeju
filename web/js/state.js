@@ -17,7 +17,9 @@ function initial(session_id = 0) {
     feedback: {},     // place_id -> interest|must|dislike
     arrived: {},      // place_id -> true (가상 도착)
     previewMode: "game",
-    map3d: true,      // 03 게임 지도: 3D 지형(가능할 때) / 2D
+    map3d: true,
+    showCrowd: false, // 01 지도에 붐비는 정도 겹쳐 보기
+    qrOpen: false,      // 03 게임 지도: 3D 지형(가능할 때) / 2D
     activeDay: 1,
     selPlace: null,
     game: { day: 1, idx: 0, awaiting: null },

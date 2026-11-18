@@ -1,7 +1,7 @@
 import { h, icon } from "../dom.js";
 import { set } from "../state.js";
 import { periodLabel } from "../format.js";
-import { SvgMap, MapLegend } from "../components/map.js";
+import { SvgMap, MapLegend, emdCenter } from "../components/map.js";
 
 const EXAMPLES = [
   ["바다 · 맛집 · 2박 3일", "2박 3일 동안 바다를 보며 여유롭게 쉬고, 현지 음식도 먹고 싶어요"],
@@ -79,6 +79,48 @@ function Conditions(st, ctx, A) {
     daysMissing ? h("div", { class: "notice notice-warn" }, icon("alert", 16), "여행 기간(예: 2박 3일)을 입력하거나 기간 칩을 눌러 골라 주세요") : null);
 }
 
+const AREAS = [
+  ["all", "섬 전체", "권역을 골고루"],
+  ["near", "숙소 근처 위주", "숙소 권역과 가까운 곳"],
+  ["coast", "해안 따라", "바닷가 마을·해변 위주"],
+  ["inland", "중산간(안쪽)", "오름·숲·마을 안쪽 위주"],
+];
+
+// 오른쪽: 숙소(한 곳)와 다닐 범위를 지도에서 고른다. '붐비는 정도'는 켜야 보이는 보조 층.
+function PlanPanel(st, ctx, A, values, stats) {
+  const g = st.goal || {};
+  const stay = g.stay || null;
+  const area = g.area || null;
+  const supported = (ctx.config?.supports || []);
+  const applied = supported.includes("stay") && supported.includes("area");
+  const P = ctx.map.project, COS = Math.cos((33.4 * Math.PI) / 180);
+  const pick = (e) => {
+    const [x, y] = emdCenter(e.d);
+    const lon = x / (P.scale * COS) + P.min_lon, lat = P.max_lat - y / P.scale;
+    const rn = ctx.map.regions.find((r) => r.region_id === e.region_id)?.name;
+    A.editGoal({ stay: { emd: e.emd, region_id: e.region_id, region_name: rn, label: e.emd.replace(/^\S+\s/, ""), lat: +lat.toFixed(5), lon: +lon.toFixed(5) } });
+  };
+  const pin = stay ? (() => { const e = ctx.map.emds.find((x) => x.emd === stay.emd); return e ? emdCenter(e.d) : null; })() : null;
+  return h("div", { class: "card plan-panel", style: { position: "sticky", top: "88px" } },
+    h("div", { class: "card-head" },
+      h("div", { class: "card-title" }, icon("map", 15), "어디에 머물고, 어디를 다닐까요?"),
+      h("label", { class: "switch", title: "동네별 '사는 사람 대비 찾아오는 사람' 비율을 색으로 겹쳐 봅니다" },
+        h("input", { type: "checkbox", checked: !!st.showCrowd, onchange: (e) => set({ showCrowd: e.target.checked }) }), h("span", { class: "track" }), "붐비는 정도")),
+    h("div", { class: "card-body" },
+      h("div", { class: "pp-guide" }, stay ? h("span", {}, "숙소 ", h("b", {}, `${stay.label} · ${stay.region_name}`), " — 다른 동네를 누르면 바뀌어요")
+        : h("span", {}, h("b", {}, "숙소가 있는 동네를 지도에서 눌러 주세요."), " 숙소는 보통 한 곳이니, 그 주변부터 동선을 잡아요.")),
+      SvgMap({ map: ctx.map, emdValues: st.showCrowd ? values : null, onEmdClick: st.goal ? pick : null, selectedEmd: stay?.emd, pin,
+        highlightRegion: stay?.region_id }),
+      st.showCrowd ? h("div", { style: { marginTop: "10px" } }, MapLegend({ title: "진할수록 주민 대비 여행객이 많은 동네", source: stats?.source_id ?? "563", period: stats?.period ?? "" })) : null,
+      h("div", { class: "pp-label" }, "어디를 다니고 싶나요?"),
+      h("div", { class: "area-opts" }, AREAS.map(([k, t, d]) => h("button", {
+        class: "area-opt" + ((area || "all") === k ? " on" : ""), disabled: !st.goal || (k === "near" && !stay),
+        onclick: () => A.editGoal({ area: k === "all" ? null : k }) }, h("b", {}, t), h("span", {}, d)))),
+      !st.goal ? h("div", { class: "notice notice-info", style: { fontSize: "13.5px" } }, "먼저 왼쪽에 여행을 한 줄로 적고 ‘조건 읽기’를 눌러 주세요.") : null,
+      st.goal && (stay || area) && !applied ? h("div", { class: "transport-note", style: { marginTop: "12px" } }, icon("alert", 15),
+        "숙소·다닐 범위는 지금 서버 버전에서는 표시만 해요. 경로 계산 반영은 업데이트 예정이에요.") : null));
+}
+
 export function Step1(st, ctx, A) {
   const stats = ctx.stats[st.goal?.month || 0] || ctx.stats[0];
   const values = Object.fromEntries((stats?.items || []).map((x) => [x.emd, x.pct]));
@@ -103,13 +145,5 @@ export function Step1(st, ctx, A) {
         st.goal ? h("div", { class: "cta-row" },
           h("button", { class: "btn btn-primary btn-lg", disabled: !canGo, onclick: () => A.go(2) }, "경로 만들기", icon("arrow", 16)),
           h("span", { class: "muted", style: { fontSize: "14px" } }, "조건이 맞으면 눌러 주세요. AI가 일하는 과정을 그대로 보여드려요")) : null),
-      h("div", { class: "card", style: { position: "sticky", top: "88px" } },
-        h("div", { class: "card-head" },
-          h("div", { class: "card-title" }, icon("map", 15), "데이터로 보는 제주"),
-          h("span", { class: "badge badge-accent" }, stats?.month ? `${stats.month}월` : "연평균")),
-        h("div", { class: "card-body" },
-          h("div", { style: { fontSize: "15px", color: "var(--fg-2)", marginBottom: "12px" } }, "진할수록 사는 사람에 비해 찾아오는 사람이 많은 지역이에요"),
-          SvgMap({ map: ctx.map, emdValues: values }),
-          h("div", { style: { marginTop: "14px" } }, MapLegend({ title: "읍면동별 방문/거주 비율", source: stats?.source_id ?? "563", period: stats?.period ?? "" })),
-          h("div", { class: "notice notice-info", style: { marginTop: "14px", fontSize: "13px" } }, "읍면동 단위 통계입니다. 개별 장소의 혼잡도가 아닙니다.")))));
+      PlanPanel(st, ctx, A, values, stats)));
 }
