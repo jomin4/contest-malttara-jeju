@@ -108,6 +108,43 @@ def _tourapi_places(items: list, existing: list, etl_cfg: dict, regions_cfg: dic
     return out
 
 
+_SOURCE_RANK = {"tourapi": 0, "hub_811": 0, "hub_812": 0, "hub_784": 0, "hub_858": 1, "keyword": 2, "none": 3}
+
+
+def drop_coord_mismatch(places: list, ref_items: list, prefixes: list, max_km: float = 2.0) -> list:
+    """1349 기록이 참조 데이터(TourAPI·허브)와 이름은 같은데 모든 참조 좌표에서 max_km 넘게 떨어져 있으면 좌표 오류로 본다."""
+    ref_xy = {}
+    for r in ref_items:
+        try:
+            lat, lon = float(r["lat"]), float(r["lon"])
+        except (TypeError, ValueError, KeyError):
+            continue
+        ref_xy.setdefault(normalize_name(r.get("name") or "", prefixes), []).append((lat, lon))
+    out = []
+    for p in places:
+        refs = ref_xy.get(normalize_name(p["name"], prefixes))
+        if p.get("source") == "1349" and refs and all(haversine_km(p["lat"], p["lon"], a, b) > max_km for a, b in refs):
+            continue
+        out.append(p)
+    return out
+
+
+def dedup_same_name_region(places: list, prefixes: list) -> list:
+    """같은 정규화 이름이 같은 권역에 여러 번 있으면 하나만 남긴다.
+
+    1349는 이용자 입력이라 같은 장소가 엉뚱한 좌표로 다시 기록된 경우가 있다(예: 우진해장국이 한라산 중턱에).
+    참조 데이터(TourAPI·허브)와 매칭된 기록 → 키워드 분류 → 분류 없음 순으로, 같으면 place_id 순으로 남긴다.
+    """
+    best = {}
+    for p in places:
+        key = (normalize_name(p["name"], prefixes), p.get("region_id"))
+        rank = (_SOURCE_RANK.get(p.get("category_source") or "none", 3), p["place_id"])
+        if key not in best or rank < best[key][0]:
+            best[key] = (rank, p["place_id"])
+    keep = {v[1] for v in best.values()}
+    return [p for p in places if p["place_id"] in keep]
+
+
 def _fix_outside_emd(places: list, polygons: list, regions_cfg: dict) -> "tuple[int, int]":
     """경계 밖 좌표(해변·포구처럼 단순화된 해안선 바깥)는 지번주소 대신 1km 이내 가장 가까운 읍면동을 쓴다.
 
@@ -218,6 +255,10 @@ def build_db(raw_dir: str, out_db: str, out_map: str, log=print, mapping_dir: st
         all_858 = []
         skip("hub_858", "858 CSV 없음")
 
+    before = len(places)
+    places = drop_coord_mismatch(places, [r for _, refs in ref_sets for r in refs], etl_cfg.get("name_prefixes", []))
+    stats["places_coord_mismatch_dropped"] = before - len(places)
+    log(f"[정제] 참조 데이터와 이름은 같고 좌표가 2km 넘게 다른 기록 {before - len(places)}곳 제외")
     cat_counts = categorize_places(places, ref_sets, etl_cfg)
     stats["category_counts"] = cat_counts
     log(f"[분류] {cat_counts}")
@@ -248,6 +289,10 @@ def build_db(raw_dir: str, out_db: str, out_map: str, log=print, mapping_dir: st
             fetched_at=_mtime_date(os.path.join(raw_dir, "tourapi_jeju.json")),
             notes=f"분류 매칭 {cat_counts.get('tourapi', 0)}곳, 음식점·카페 {len(added)}곳 추가")
     stats["places_tourapi_added"] = len(added)
+    before = len(places)
+    places[:] = dedup_same_name_region(places, etl_cfg.get("name_prefixes", []))
+    stats["places_same_name_region_dropped"] = before - len(places)
+    log(f"[정제] 같은 권역 같은 이름 중복 {before - len(places)}곳 제외")
     log(f"[TourAPI] 음식점·카페 추가 {len(added)}곳")
 
     if stats.get("places_emd_nearest") is not None:
