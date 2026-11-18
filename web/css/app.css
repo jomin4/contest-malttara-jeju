@@ -738,3 +738,7 @@ html.touring .toast { z-index: 210; }
 }
 @media (prefers-reduced-motion: reduce) { .tour-shade, .tour-hole, .tour-tip { transition: none; animation: none; } }
 .tour.noanim .tour-shade, .tour.noanim .tour-hole { transition: none; }
+.tour-enter { font-family: var(--mono); font-size: 11px; padding: 1px 6px; border: 1px solid rgba(255,255,255,.45); border-bottom-width: 2px; border-radius: 5px; margin-left: 2px; }
+.tour-keys { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--fg-3); }
+.tour-keys .kbd { font-size: 11px; }
+@media (hover: none), (max-width: 640px) { .tour-keys, .tour-enter { display: none; } }

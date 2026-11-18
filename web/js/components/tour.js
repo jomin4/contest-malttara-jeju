@@ -180,7 +180,10 @@ function renderTip(tip, s, list, waitText, waiting) {
       h("span", { class: "grow" }),
       T.i > 0 ? h("button", { class: "btn btn-sm", onclick: () => go(-1) }, "이전") : null,
       h("button", { class: "btn btn-primary btn-sm", disabled: waiting, onclick: () => go(1) },
-        s.last ? (s.nextLabel || "다음 화면") : "다음", icon("arrow", 14))));
+        s.last ? (s.nextLabel || "다음 화면") : "다음", h("span", { class: "tour-enter" }, "Enter"))),
+    h("div", { class: "tour-keys" },
+      h("span", { class: "kbd" }, "Enter"), " 또는 ", h("span", { class: "kbd" }, "→"), " 다음 · ",
+      h("span", { class: "kbd" }, "←"), " 이전 · ", h("span", { class: "kbd" }, "Esc"), " 닫기"));
 }
 
 function centerTip(tip, vw, vh) {
@@ -212,6 +215,12 @@ function positionTip(tip, b, vw, vh) {
 
 // 키보드: → / Enter 다음, ← 이전, Esc 닫기. 앱 단축키(게임 Enter 등)보다 먼저 받는다.
 window.addEventListener("keydown", (e) => {
+  const offer = document.querySelector(".guide-offer");
+  if (offer && !T && !e.isComposing && (e.key === "Enter" || e.key === "Escape")) {   // 첫 화면 제안 카드
+    e.preventDefault(); e.stopImmediatePropagation();
+    offer.querySelector(e.key === "Enter" ? ".btn-primary" : ".btn:not(.btn-primary)")?.click();
+    return;
+  }
   if (!T || !root) return;
   if (e.isComposing) return;
   const k = e.key;
@@ -242,5 +251,6 @@ export function GuideOffer({ onStart, onSkip }) {
       h("div", { class: "guide-d" }, "어떻게 쓰는지 화면을 따라가며 짚어 드릴게요. 언제든 위쪽 ‘가이드’ 버튼으로 다시 볼 수 있어요."),
       h("div", { class: "guide-a" },
         h("button", { class: "btn", onclick: onSkip }, "괜찮아요"),
-        h("button", { class: "btn btn-primary", onclick: onStart }, "가이드 시작", icon("arrow", 15)))));
+        h("button", { class: "btn btn-primary", onclick: onStart }, "가이드 시작", h("span", { class: "tour-enter" }, "Enter"))),
+      h("div", { class: "tour-keys" }, "가이드 중에는 ", h("span", { class: "kbd" }, "Enter"), "로 다음 설명으로 넘어가요")));
 }
