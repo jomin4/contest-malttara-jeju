@@ -47,6 +47,7 @@ function Game(st, ctx, A, r) {
     const v = normalizeTyping(e.target.value), target = normalizeTyping(cur.label);
     let n = 0; while (n < v.length && v[n] === target[n]) n++;
     paint(n);
+    if (use3d) ctx.T3.setProgress(n / Math.max(1, target.length));   // 메트로타이핑: 친 만큼 선·말 이동
     if (v === target) check(e.target);
   };
   const onKey = (e) => {
