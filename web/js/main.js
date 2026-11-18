@@ -34,7 +34,7 @@ export const actions = {
     const g = { ...state.goal, ...patch, evidence: { ...(state.goal?.evidence || {}) } };
     for (const k of Object.keys(patch)) delete g.evidence[k === "nights" ? "days" : k];
     if ("days" in patch) g.nights = patch.days == null ? null : patch.days - 1;
-    const missing = g.days == null ? ["days"] : [];
+    const missing = g.days == null ? ["days"] : g.days > (ctx.config?.max_days ?? 7) ? ["days_range"] : [];
     set({ goal: g, missing, batchA: null, batchB: null, feedback: {}, arrived: {} });
     if ("month" in patch) actions.loadStats(patch.month);
   },

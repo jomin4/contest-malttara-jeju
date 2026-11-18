@@ -5,7 +5,7 @@
 import copy
 
 from malttara.geo import centroid, haversine_km
-from malttara.tools.itinerary import order_nearest
+from malttara.tools.itinerary import is_duplicate, order_nearest
 
 ALLOWED_ACTIONS = ("replace", "reorder", "remove")
 
@@ -36,6 +36,8 @@ def apply_action(itinerary: dict, action: dict, candidates_by_region: dict, plac
         allowed = {p["place_id"] for p in candidates_by_region.get(d["region_id"], [])}
         if rep not in allowed or rep in _used(itinerary) or rep not in places:
             return None
+        if is_duplicate(places[rep], [places[i] for i in d["place_ids"] if i != pid and i in places]):
+            return None                          # 같은 곳의 다른 기록으로 바꾸지 않는다
         idx = nd["place_ids"].index(pid)
         nd["place_ids"][idx] = rep
     elif t == "remove":
@@ -44,9 +46,17 @@ def apply_action(itinerary: dict, action: dict, candidates_by_region: dict, plac
     return new
 
 
-def _best_unused(itinerary, region, candidates_by_region):
+def _best_unused(itinerary, region, candidates_by_region, day=None, places=None, target=None, near=None):
+    """같은 권역 미사용 후보. day·places를 주면 그날 장소와 중복(이름 변형·0.5km)인 후보는 건너뛰고,
+    target과 같은 slot(음식·카페·일반)을 고르며, near=(lat, lon)이면 점수 상위 30곳 중 가장 가까운 곳."""
     used = _used(itinerary)
-    return next((p["place_id"] for p in candidates_by_region.get(region, []) if p["place_id"] not in used), None)
+    others = [places[i] for i in (day or {}).get("place_ids", []) if i != target and places and i in places]
+    slot = (places or {}).get(target, {}).get("slot") if target else None
+    pool = [p for p in candidates_by_region.get(region, []) if p["place_id"] not in used
+            and (places is None or (p.get("slot") == slot and not is_duplicate(p, others)))]
+    if near and pool:
+        pool = sorted(pool[:30], key=lambda p: (haversine_km(near[0], near[1], p["lat"], p["lon"]), p["place_id"]))
+    return pool[0]["place_id"] if pool else None
 
 
 def rule_revision(itinerary: dict, violations: list, candidates_by_region: dict, places: dict, pinned: set):
@@ -65,7 +75,10 @@ def rule_revision(itinerary: dict, violations: list, candidates_by_region: dict,
             else:
                 c = centroid([(places[i]["lat"], places[i]["lon"]) for i in d["place_ids"] if i in places])
                 target = max(movable, key=lambda i: (haversine_km(c[0], c[1], places[i]["lat"], places[i]["lon"]), i))
-            rep = _best_unused(itinerary, d["region_id"], candidates_by_region)
+            rest = [i for i in d["place_ids"] if i != target and i in places]
+            near = centroid([(places[i]["lat"], places[i]["lon"]) for i in rest]) if rest else None
+            rep = _best_unused(itinerary, d["region_id"], candidates_by_region, d, places, target,
+                               near if v["type"] == "distance" else None)
             if rep:
                 return {"type": "replace", "day": d["day"], "place_id": target, "replacement_id": rep}
             if foreign:
@@ -74,7 +87,7 @@ def rule_revision(itinerary: dict, violations: list, candidates_by_region: dict,
             target = v["place_id"]
             if target in pinned:
                 continue
-            rep = _best_unused(itinerary, d["region_id"], candidates_by_region)
+            rep = _best_unused(itinerary, d["region_id"], candidates_by_region, d, places, target)
             if rep and target in places:
                 return {"type": "replace", "day": d["day"], "place_id": target, "replacement_id": rep}
             return {"type": "remove", "day": d["day"], "place_id": target}

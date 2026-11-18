@@ -30,6 +30,45 @@ def _norm(name: str) -> str:
     return re.sub(r"\(.*?\)|[\s·.,\-]", "", name or "").lower()
 
 
+DUP_KM = 0.5   # 일반 장소끼리 이 거리 안이면 같은 곳의 다른 기록으로 본다(예: 삼양해수욕장 / 삼양 검은모래해변)
+
+
+def _core(name: str) -> str:
+    return re.sub(r"제주|자연", "", _norm(name))
+
+
+def _one_edit(a: str, b: str) -> bool:
+    """글자 하나 다름(바꿈·빠짐) 이내 — 오타 기록(예: 절물/정물휴양림) 판별용."""
+    if abs(len(a) - len(b)) > 1:
+        return False
+    if len(a) == len(b):
+        return sum(x != y for x, y in zip(a, b)) <= 1
+    if len(a) > len(b):
+        a, b = b, a
+    return any(a == b[:i] + b[i + 1:] for i in range(len(b)))
+
+
+def is_duplicate(p: dict, chosen: list) -> bool:
+    """이미 고른 장소와 같은 곳의 다른 기록인지. 이름이 같거나 한쪽이 다른 쪽을 포함(4자 이상),
+    3km 안에서 이름이 한 글자만 다름(오타), 또는 둘 다 일반 장소(slot 없음)이고 DUP_KM 안."""
+    n = _core(p.get("name", ""))
+    for q in chosen:
+        if q["place_id"] == p["place_id"]:
+            return True
+        m = _core(q.get("name", ""))
+        if n and m and (n == m or (min(len(n), len(m)) >= 4 and (n in m or m in n))):
+            return True
+        a, b = _norm(p.get("name", "")), _norm(q.get("name", ""))
+        if min(len(a), len(b)) >= 4 and (a in b or b in a):
+            return True
+        km = haversine_km(p["lat"], p["lon"], q["lat"], q["lon"])
+        if min(len(n), len(m)) >= 4 and km < 3 and _one_edit(n, m):
+            return True
+        if not p.get("slot") and not q.get("slot") and km < DUP_KM:
+            return True
+    return False
+
+
 def resolve_origin(conn, origin):
     """출발지 문자열과 정규화 이름이 같은 장소의 좌표. 없으면 None(→ 미반영)."""
     if not origin:
@@ -74,21 +113,20 @@ def create_itinerary(candidates: list, slot_candidates: dict, goal: dict, settin
 
     by_region = {}
     for p in candidates:
+        if p.get("region_id") is None:           # 권역 없는 기록(예: '제주도')으로 하루를 만들지 않는다
+            continue
         by_region.setdefault(p["region_id"], []).append(p)
     # 후보가 k개 미만인 권역은 뒤로(인접 권역 확장 대신 배정 순서로 처리), 그다음 상위 k개 점수 합
     ranked = sorted(by_region, key=lambda r: (len(by_region[r]) < k,
                                                -sum(p["score"] for p in by_region[r][:k]),
                                                order_idx.get(r, 99), r))
 
-    used = set()
-    used_names = set()
+    chosen = []
 
-    def take(p) -> bool:                         # 같은 이름의 다른 좌표 기록이 두 번 들어가지 않게
-        n = _norm(p.get("name", ""))
-        if p["place_id"] in used or n in used_names:
+    def take(p) -> bool:                         # 같은 곳의 다른 기록(이름 변형·0.5km 이내)이 두 번 들어가지 않게
+        if is_duplicate(p, chosen):
             return False
-        used.add(p["place_id"])
-        used_names.add(n)
+        chosen.append(p)
         return True
 
     out = []

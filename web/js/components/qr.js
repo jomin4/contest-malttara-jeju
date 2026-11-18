@@ -36,7 +36,11 @@ export function QrSvg(text, px = 300) {
     s("rect", { width: size, height: size, fill: "#fff" }), s("path", { d, fill: "#0a0a0a" }));
 }
 
+let escClose = null;   // Esc로 닫기 (모달이 다시 그려져도 하나만)
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && escClose && document.querySelector(".qr-modal")) escClose(); });
+
 export function QrModal({ text, onClose, onPrint }) {
+  escClose = onClose;
   const bg = h("div", { class: "modal-bg", onclick: (e) => { if (e.target === bg) onClose(); } },
     h("div", { class: "modal qr-modal" },
       h("div", { class: "qr-top" }, h("div", { class: "modal-t" }, "휴대폰으로 가져가기"),

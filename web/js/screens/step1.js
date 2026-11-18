@@ -41,9 +41,10 @@ function Conditions(st, ctx, A) {
   const maxDays = ctx.config?.max_days ?? 7;
   const interestKeys = (ctx.config?.interests || []).map((x) => x.key);
   const daysMissing = st.missing.includes("days");
+  const daysRange = st.missing.includes("days_range") || (g.days != null && g.days > maxDays);
   const t = (k) => (ev[k] ? `원문: “${ev[k]}”` : undefined);
   const chips = [
-    { id: "days", k: "기간", v: periodLabel(g) ?? "(미반영)", unset: g.days == null, warn: daysMissing, title: t("days"),
+    { id: "days", k: "기간", v: periodLabel(g) ?? "(미반영)", unset: g.days == null, warn: daysMissing || daysRange, title: t("days"),
       pop: [h("div", { class: "pop-title" }, "여행 기간 (필수)"), Opts(Array.from({ length: maxDays }, (_, i) => i + 1), g.days, (d) => close({ days: d }), { none: false, fmt: (d) => (d === 1 ? "당일" : `${d - 1}박 ${d}일`) })] },
     { id: "pace", k: "여유", v: g.pace ?? "(미반영·보통 기준 적용)", unset: g.pace == null, title: t("pace"),
       pop: [h("div", { class: "pop-title" }, "하루 일정의 여유"), Opts(["여유롭게", "보통", "빡빡하게"], g.pace, (v) => close({ pace: v }))] },
@@ -76,7 +77,8 @@ function Conditions(st, ctx, A) {
     h("div", { class: "chips" }, shown.map((c) => Chip({ ...c, open: st.openChip === c.id }, st))),
     hidden.length ? h("div", { class: "unset-row" }, h("span", { class: "muted" }, "입력하지 않아 반영하지 않는 조건"),
       h("div", { class: "chips" }, hidden.map((c) => Chip({ ...c, v: "미반영", open: st.openChip === c.id }, st)))) : null,
-    daysMissing ? h("div", { class: "notice notice-warn" }, icon("alert", 16), "여행 기간(예: 2박 3일)을 입력하거나 기간 칩을 눌러 골라 주세요") : null);
+    daysMissing ? h("div", { class: "notice notice-warn" }, icon("alert", 16), "여행 기간(예: 2박 3일)을 입력하거나 기간 칩을 눌러 골라 주세요") : null,
+    daysRange ? h("div", { class: "notice notice-warn" }, icon("alert", 16), `한 번에 최대 ${maxDays - 1}박 ${maxDays}일까지 짤 수 있어요. 기간 칩을 눌러 줄여 주세요`) : null);
 }
 
 const AREAS = [
@@ -124,7 +126,7 @@ function PlanPanel(st, ctx, A, values, stats) {
 export function Step1(st, ctx, A) {
   const stats = ctx.stats[st.goal?.month || 0] || ctx.stats[0];
   const values = Object.fromEntries((stats?.items || []).map((x) => [x.emd, x.pct]));
-  const canGo = st.goal && !st.missing.includes("days");
+  const canGo = st.goal && !st.missing.includes("days") && !st.missing.includes("days_range") && !(st.goal.days > (ctx.config?.max_days ?? 7));
   return h("div", { class: "page", onclick: () => st.openChip && set({ openChip: null }) },
     h("div", { class: "s1" },
       h("div", {},

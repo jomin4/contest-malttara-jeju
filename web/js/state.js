@@ -52,6 +52,6 @@ export const subscribe = (fn) => listeners.add(fn);
 export function maxStep() {
   if (state.batchB) return 4;
   if (state.batchA?.result) return 4;
-  if (state.goal && !state.missing.includes("days")) return 2;
+  if (state.goal && !state.missing.includes("days") && !state.missing.includes("days_range")) return 2;
   return 1;
 }

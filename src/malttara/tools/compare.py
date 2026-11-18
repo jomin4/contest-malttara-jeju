@@ -10,7 +10,8 @@ def compare_itineraries(prev: dict, new: dict, fb: dict, replaced: dict, added: 
             if pid in new_day:
                 pin = pid in fb["pinned"]
                 out.append({"place_id": pid, "change": "pin" if pin else "keep", "replaced_by": None,
-                            "day": new_day[pid], "reason": "꼭 갈래요 → 고정" if pin else "유지"})
+                            "day": new_day[pid],
+                            "reason": ("직접 고름 → 고정" if pid in picked else "꼭 갈래요 → 고정") if pin else "유지"})
             elif pid in replaced:
                 why = ("별로예요 → 같은 권역 대안으로 교체" if pid in fb["disliked"] else
                        "직접 고른 장소로 교체" if replaced[pid] in picked else "검증 위반 → 같은 권역 대안으로 교체")

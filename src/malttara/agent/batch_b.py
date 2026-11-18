@@ -10,7 +10,7 @@ from malttara.agent.pipeline import assemble_result, revise_loop
 from malttara.agent.schema_lite import check_schema
 from malttara.tools.compare import compare_itineraries
 from malttara.tools.feedback import analyze_feedback, load_events
-from malttara.tools.itinerary import order_nearest, pace_k
+from malttara.tools.itinerary import is_duplicate, order_nearest, pace_k
 from malttara.tools.places import score_places
 
 REDESIGN_SCHEMA = {
@@ -53,8 +53,9 @@ def place_picks(new_it, picks, pmap, pinned, used, scored_rank):
         d = days.get(pk.get("day")) or next((x for x in new_it["days"] if x["region_id"] == pmap[pid]["region_id"]), None) \
             or min(new_it["days"], key=lambda x: sum(i in pinned for i in x["place_ids"]))
         free = [i for i in d["place_ids"] if i not in pinned]
+        dup = [i for i in free if i in pmap and is_duplicate(pmap[pid], [pmap[i]])]
         same = [i for i in free if (pmap.get(i) or {}).get("slot") == pmap[pid].get("slot")]
-        free = same or free
+        free = dup or same or free                     # 같은 곳의 다른 기록이 있으면 그것과 바꾼다
         if free:
             out = max(free, key=lambda i: scored_rank.get(i, 10 ** 9))
             d["place_ids"] = [pid if i == out else i for i in d["place_ids"]]
@@ -122,8 +123,10 @@ def run_batch_b(conn, prev_batch_id, llm, settings, interests_cfg, regions_cfg, 
                 ids.append(pid)
                 continue
             slot = (pmap.get(pid) or {}).get("slot")
+            others = [pmap[i] for i in d["place_ids"] if i != pid and i in pmap] + [pmap[i] for i in ids if i in pmap]
             rep = next((p["place_id"] for p in scored if p["region_id"] == d["region_id"] and p.get("slot") == slot
-                        and p["place_id"] not in used and p["place_id"] not in fb["disliked"]), None)
+                        and p["place_id"] not in used and p["place_id"] not in fb["disliked"]
+                        and not is_duplicate(p, others)), None)
             if rep:
                 ids.append(rep)
                 used.add(rep)
@@ -132,7 +135,8 @@ def run_batch_b(conn, prev_batch_id, llm, settings, interests_cfg, regions_cfg, 
                            f"{d['day']}일차 '{prev['places'][pid]['name']}' → '{pmap[rep]['name']}'")
         while len(ids) < k:
             extra = next((p for p in scored if p["region_id"] == d["region_id"] and not p.get("slot")
-                          and p["place_id"] not in used and p["place_id"] not in fb["disliked"]), None)
+                          and p["place_id"] not in used and p["place_id"] not in fb["disliked"]
+                          and not is_duplicate(p, [pmap[i] for i in ids if i in pmap])), None)
             if extra is None:
                 break
             ids.append(extra["place_id"])
