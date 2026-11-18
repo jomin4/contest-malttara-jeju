@@ -553,3 +553,77 @@ section.why { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--b
 .map-svg .emd.selected { fill: #fde7d6 !important; stroke: #ea580c; stroke-width: 1.6; }
 @media (max-width: 1400px) { .area-opts { grid-template-columns: repeat(2, 1fr); } .why-timeline li { grid-template-columns: 1fr; gap: 2px; } }
 .map-svg .rlabel, .map-svg .region, .map-svg .stay-pin, .map-svg .route { pointer-events: none; }
+
+/* ── 6차: 적응형(어떤 화면이든) ─────────────────────────────
+   원칙: ① 제목은 절대 눌리지 않는다(버튼이 먼저 줄바꿈) ② 가로 스크롤 금지
+   ③ 1100px 미만 1단 ④ 760px 미만 모바일(헤더 축약, 버튼 꽉 채움) */
+html, body { overflow-x: hidden; }
+img, svg, canvas { max-width: 100%; }
+.pagehead { flex-wrap: wrap; align-items: flex-end; }
+.pagehead > :first-child { flex: 1 1 380px; min-width: min(380px, 100%); }
+.pagehead .actions { flex-wrap: wrap; justify-content: flex-end; }
+.card-head { flex-wrap: wrap; row-gap: 8px; }
+.daytabs { min-width: 0; }
+.s1 > *, .s2 > *, .s3 > *, .s4 > * { min-width: 0; }
+.transport-note { max-width: 100%; }
+
+@media (max-width: 1100px) {
+  .s1, .s2, .s4 { grid-template-columns: 1fr !important; gap: 24px; }
+  .s3 { grid-template-columns: 1fr !important; }
+  .s2-right { position: static; }
+  .map-fit .map-svg { max-height: 70vh; }
+  .charts { grid-template-columns: 1fr; }
+  .stepper { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .stg { padding: 10px; font-size: 13.5px; }
+  .pagehead .actions { justify-content: flex-start; }
+  .hero-title { font-size: 40px; }
+}
+
+@media (max-width: 760px) {
+  .page { padding: 18px 16px 40px; }
+  .topbar-inner { padding: 0 12px; gap: 8px; height: 56px; }
+  .brand-name, .brand-sub, .badge-rule { display: none; }
+  .steps { padding: 3px; }
+  .step { padding: 6px 9px; font-size: 13px; }
+  .step .lbl { display: none; }
+  .step.active .lbl { display: inline; }
+  .topbar .btn-sm { padding: 0 10px; }
+  .topbar .btn-sm .lbl-txt { display: none; }
+  .hero-title { font-size: 30px; }
+  .pagehead h1 { font-size: 26px; }
+  .pagehead .actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .pagehead .actions .btn { width: 100%; justify-content: center; padding: 0 10px; }
+  .pagehead .actions .btn-primary { grid-column: 1 / -1; order: -1; }
+  .stepper { display: flex; overflow-x: auto; }
+  .stg { flex: none; }
+  .daytabs { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; }
+  .daytab { flex: none; height: 36px; padding: 0 10px; font-size: 14px; }
+  .area-opts { grid-template-columns: 1fr 1fr; }
+  .why-step { grid-template-columns: 28px 1fr; gap: 10px; }
+  .why-n { width: 26px; height: 26px; font-size: 12px; }
+  .why-c h3 { font-size: 17px; }
+  .why-timeline li { grid-template-columns: 1fr; gap: 2px; }
+  .qr-body { grid-template-columns: 1fr; justify-items: center; }
+  .qr-side { width: 100%; }
+  .modal { width: calc(100vw - 24px); padding: 20px; }
+  .ind-grid { grid-template-columns: 1fr; }
+  .places { grid-template-columns: 1fr; }
+  .diff-row { grid-template-columns: 1fr 20px 1fr; }
+  .diff-row > :last-child { grid-column: 1 / -1; }
+  .react.big { grid-template-columns: 1fr !important; }
+  .react.big button { height: 54px; }
+  .arr-name { font-size: 22px; }
+  .stage-head { padding: 10px 12px; }
+  .stage.game3d .terrain-wrap { height: calc(100svh - 56px - 20px); min-height: 460px; }
+  .typein { font-size: 18px; }
+}
+.day-head { flex-wrap: wrap; row-gap: 6px; }
+.day-head h3 { white-space: nowrap; }
+@media (max-width: 760px) {
+  .typebar, .stage.game3d .typebar { grid-template-columns: 1fr; gap: 10px; padding: 12px 14px; }
+  .target { flex-wrap: wrap; gap: 4px 10px; }
+  .target .name { font-size: 24px; }
+  .typein, .stage.game3d .typein { height: 48px; font-size: 18px; padding: 0 14px; }
+  .stage-head .tally { display: none; }
+  .stage-head { gap: 8px; }
+}

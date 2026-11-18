@@ -108,7 +108,7 @@ function Header() {
   return h("header", { class: "topbar no-print" }, h("div", { class: "topbar-inner" },
     h("div", { class: "brand" },
       h("span", { class: "brand-mark" }, svgEl("svg", { width: 16, height: 16, viewBox: "0 0 24 24" }, svgEl("path", { d: "M7 19V10a5 5 0 0 1 10 0v9", fill: "none", stroke: "#fff", "stroke-width": 2.6, "stroke-linecap": "round" }))),
-      "말따라 제주"),
+      h("span", { class: "brand-name" }, "말따라 제주")),
     h("nav", { class: "steps" }, STEPS.map(([n, label]) => h("button", {
       class: "step" + (state.step === n ? " active" : ""), disabled: n > ms, onclick: () => actions.go(n),
     }, h("span", { class: "n" }, `0${n}`), h("span", { class: "lbl" }, label)))),
@@ -116,7 +116,7 @@ function Header() {
       MOCK ? h("span", { class: "badge badge-mock", title: "목업 데이터로 동작 중입니다. 화면의 장소명·수치는 실제가 아닙니다." }, "MOCK DATA") : null,
       ctx.demo ? h("span", { class: "badge badge-warn" }, "시연 모드") : null,
       ctx.health && !ctx.health.llm_available ? h("span", { class: "badge badge-rule", title: "AI 연결이 없어 규칙 기반으로 판단합니다" }, h("span", { class: "dot" }), "규칙 모드") : null,
-      h("button", { class: "btn btn-sm", onclick: actions.restart }, icon("reset", 14), "처음부터"))));
+      h("button", { class: "btn btn-sm", onclick: actions.restart, "aria-label": "처음부터", title: "처음부터" }, icon("reset", 14), h("span", { class: "lbl-txt" }, "처음부터")))));
 }
 
 function Screen() {
