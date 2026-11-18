@@ -59,6 +59,7 @@ export function icon(name, size = 16) {
     list: [s("path", { d: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" })],
     skip: [s("path", { d: "M5 5l8 7-8 7zM19 5v14" })],
     alert: [s("path", { d: "M12 9v4M12 17h.01" }), s("path", { d: "M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" })],
+    help: [s("circle", { cx: 12, cy: 12, r: 9 }), s("path", { d: "M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01" })],
     plus: [s("path", { d: "M12 5v14M5 12h14" })],
     search: [s("circle", { cx: 11, cy: 11, r: 7 }), s("path", { d: "M20 20l-3.5-3.5" })],
     spark: [s("path", { d: "M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8" })],

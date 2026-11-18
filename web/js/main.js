@@ -2,6 +2,7 @@ import { h, s as svgEl, clear, icon, toast } from "./dom.js";
 import { state, set, reset, subscribe, maxStep } from "./state.js";
 import { api, pollBatch, MOCK } from "./api.js";
 import { ctx } from "./ctx.js";
+import { startTour, tourActive, GuideOffer } from "./components/tour.js";
 import { Step1 } from "./screens/step1.js";
 import { Step2 } from "./screens/step2.js";
 import { Step3 } from "./screens/step3.js";
@@ -152,6 +153,8 @@ function Header() {
       MOCK ? h("span", { class: "badge badge-mock", title: "목업 데이터로 동작 중입니다. 화면의 장소명·수치는 실제가 아닙니다." }, "MOCK DATA") : null,
       ctx.demo ? h("span", { class: "badge badge-warn" }, "시연 모드") : null,
       ctx.health && !ctx.health.llm_available ? h("span", { class: "badge badge-rule", title: "AI 연결이 없어 규칙 기반으로 판단합니다" }, h("span", { class: "dot" }), "규칙 모드") : null,
+      ctx.map ? h("button", { class: "btn btn-sm btn-guide", onclick: () => { set({ guideSeen: true }); startTour(); }, "aria-label": "사용 가이드", title: "사용 가이드" },
+        icon("help", 14), h("span", { class: "lbl-txt" }, "가이드")) : null,
       h("button", { class: "btn btn-sm", onclick: actions.restart, "aria-label": "처음부터", title: "처음부터" }, icon("reset", 14), h("span", { class: "lbl-txt" }, "처음부터")))));
 }
 
@@ -172,6 +175,9 @@ function render() {
   clear(root);
   root.appendChild(Header());
   root.appendChild(h("main", {}, Screen()));
+  if (state.step === 1 && !state.guideSeen && ctx.map && !ctx.bootError && !tourActive()) {
+    root.appendChild(GuideOffer({ onStart: () => { set({ guideSeen: true }); startTour(); }, onSkip: () => set({ guideSeen: true }) }));
+  }
   if (keep) {
     const el = document.getElementById(keep.id);
     if (el) { el.focus({ preventScroll: true }); try { el.setSelectionRange(keep.start, keep.end); } catch { /* 선택 불가 요소 */ } }

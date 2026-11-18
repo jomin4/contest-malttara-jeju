@@ -10,7 +10,7 @@ const newPage=async(opts={})=>{const c=await b.newContext({viewport:{width:W,hei
 const shot=(p,n)=>p.screenshot({path:`./${W}-${n}.png`});
 try{
 // ── S1 정상 흐름 (키보드) ──
-let p=await newPage(); await p.goto(BASE); await p.waitForTimeout(800);
+let p=await newPage(); await p.goto(BASE); await p.waitForTimeout(800); await p.click('.guide-offer button:has-text("괜찮아요")');
 ok('01 첫 화면: 경로 만들기 비활성', await p.locator('button:has-text("경로 만들기")').last().isDisabled());
 await p.click('textarea'); await p.keyboard.type('3박 4일 동안 오름이랑 숲을 천천히 걷고 카페도 가고 싶어요'); await p.keyboard.press('Enter'); await p.waitForTimeout(1200);
 const chipsTxt=(await p.locator('.chips').first().innerText()).replace(/\s+/g,' ');
@@ -104,12 +104,12 @@ await p.click('.step:has-text("04")'); await p.waitForTimeout(400);
 ok('헤더: 04로 다시(재실행 없이)', p.reqs.filter(r=>r.startsWith('POST /api/batch/b')).length===2);
 // 처음부터
 await p.click('button[title="처음부터"]'); await p.waitForTimeout(400);
-ok('처음부터 → 01 초기화', (await p.inputValue('textarea'))==='' && /한 줄로/.test(await p.innerText('h1')));
+ok('처음부터 → 01 초기화 + 다음 사람에게 가이드 제안', (await p.inputValue('textarea'))==='' && /한 줄로/.test(await p.innerText('h1')) && await p.locator('.guide-offer').count()===1);
 ok('S1 콘솔 오류 없음', p.errs.length===0, p.errs.join(' / '));
 await p.context().close();
 
 // ── S2 기간 없음 / 범위 초과 / 빈 입력 ──
-p=await newPage(); await p.goto(BASE); await p.waitForTimeout(600);
+p=await newPage(); await p.goto(BASE); await p.waitForTimeout(600); await p.click('.guide-offer button:has-text("괜찮아요")');
 await p.click('textarea'); await p.keyboard.press('Enter'); await p.waitForTimeout(500);
 ok('빈 입력 Enter → 오류 없이 유지', p.errs.length===0 && await p.locator('button:has-text("경로 만들기")').last().isDisabled());
 await p.fill('textarea','바다 보고 맛있는 거 먹고 싶어요'); await p.keyboard.press('Enter'); await p.waitForTimeout(1000);
@@ -124,7 +124,7 @@ ok('HTML 입력이 실행되지 않음(XSS)', await p.locator('img[src="x"]').co
 await p.context().close();
 
 // ── S3 시연 모드 오류 주입 ──
-p=await newPage(); await p.goto(BASE); await p.waitForTimeout(600);
+p=await newPage(); await p.goto(BASE); await p.waitForTimeout(600); await p.click('.guide-offer button:has-text("괜찮아요")');
 await p.keyboard.press('Control+Shift+D'); await p.waitForTimeout(300);
 await p.click('.example >> nth=0'); await p.waitForTimeout(900);
 await p.locator('button:has-text("경로 만들기")').last().click(); await p.waitForTimeout(300);
@@ -140,7 +140,7 @@ ok('S3 콘솔 오류 없음', p.errs.length===0, p.errs.join(' / '));
 await p.context().close();
 
 // ── S4 자동 초기화(120초 무입력) ──
-p=await newPage(); await p.clock.install(); await p.goto(BASE); await p.waitForTimeout(600);
+p=await newPage(); await p.clock.install(); await p.goto(BASE); await p.waitForTimeout(600); await p.click('.guide-offer button:has-text("괜찮아요")');
 await p.click('.example >> nth=0'); await p.waitForTimeout(900);
 await p.clock.fastForward(122000); await p.waitForTimeout(300);
 const modal=await p.locator('.modal').count(); ok('120초 무입력 → 초기화 예고 모달(15초)', modal===1);
@@ -149,7 +149,7 @@ ok('135초 → 01 초기화', (await p.inputValue('textarea'))==='');
 await p.context().close();
 
 // ── S5 서버 끊김 ──
-p=await newPage(); await p.goto(BASE); await p.waitForTimeout(600);
+p=await newPage(); await p.goto(BASE); await p.waitForTimeout(600); await p.click('.guide-offer button:has-text("괜찮아요")');
 await p.click('.example >> nth=0'); await p.waitForTimeout(900);
 await p.route('**/api/batch/a', r=>r.abort()); 
 await p.locator('button:has-text("경로 만들기")').last().click(); await p.waitForTimeout(1500);

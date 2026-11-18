@@ -25,6 +25,7 @@ function initial(session_id = 0) {
     game: { day: 1, idx: 0, awaiting: null },
     open: {},        // 근거를 펼친 place_id
     logOpen: null,   // null = 실행 중에만 펼침
+    guideSeen: false, // 처음 화면의 '가이드 볼까요?' 카드를 이미 봤는지 (처음부터 누르면 다음 사람에게 다시 보임)
     listView: "rec", // 02·04 왼쪽: rec = AI 추천 일정, pick = 직접 고르기
     picks: [],       // [{place_id, day|null, place}] 직접 고른 장소 → Batch B picks
     pickQ: { q: "", region: null, interest: null, sort: "score" },
