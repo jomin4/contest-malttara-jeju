@@ -1,0 +1,12 @@
+{
+ "west": 126.1,
+ "north": 33.62,
+ "dlon": 0.0025,
+ "dlat": 0.0025,
+ "cols": 360,
+ "rows": 208,
+ "max_m": 1905,
+ "unit": "m",
+ "source": "Copernicus DEM GLO-30 (N33 E126)",
+ "attribution": "지형: Copernicus DEM GLO-30 © DLR e.V. 2010-2014, © Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the European Union and ESA"
+}

@@ -38,6 +38,9 @@ js/components/          map.js(SVG 지도) log.js(실행 로그) placecard.js(�
 js/screens/step1~4.js   01 여행 설명·조건 확인 / 02 경로 만들기 / 03 미리보기(게임·목록) / 04 다시 짜기·최종
 mock/                   목업 픽스처 (map·config·places·stats_emd·trend)
 fonts/                  Geist, Geist Mono, Pretendard (모두 SIL OFL 1.1) + 라이선스 파일
+vendor/three/           three.js r187 (MIT) — 03 게임 3D 지형 지도에만 사용, 처음 03에 들어갈 때 불러옴
+assets/terrain.*        제주 높이 격자 360×208 (Copernicus DEM GLO-30, 약 250m 평균) — tools/make_terrain.py로 생성
+js/components/terrain3d.js  3D 지형 지도 (WebGL 없거나 지형 파일 실패 시 2D 지도로 자동 전환, 화면에서 3D/2D 전환 가능)
 ```
 
 ## 지켜야 할 것 (계획서 Global Constraints)
@@ -49,10 +52,18 @@ fonts/                  Geist, Geist Mono, Pretendard (모두 SIL OFL 1.1) + 라
 - 03 게임: IME 조합 중에는 판정하지 않음(`isComposing`, keyCode 229). 띄어쓰기 무시 비교.
 - 1920×1080 기준, 1366×768에서 가로 스크롤 없음.
 
+## 03 게임 3D 지형
+
+- 높이는 실제 지형(Copernicus DEM)을 4배 과장해 보여준다(표시용). 좌표 투영은 2D 지도와 같다(`map.project`).
+- 말은 지형을 따라 달리고, 카메라는 다음 목적지를 남쪽에서 비스듬히 비춘다. 마우스 조작은 없다(키오스크).
+- WebGL이 없거나 `assets/terrain.*`을 못 읽으면 2D 지도로 그린다. 헤더의 `3D 지형 | 2D`로도 바꿀 수 있다.
+
 ## 출처
 
 - 지도 목업 경계(`mock/map.json`): 통계청 SGIS 행정동 경계(공공누리 제1유형)를 vuski/admdongkor가 가공(CC BY 4.0), ver20260701. 제주 41개 행정동(추자면·우도면 제외), 작은 섬 조각 제외 후 단순화.
 - 글꼴: Geist·Geist Mono (Vercel, SIL OFL 1.1), Pretendard (길형진, SIL OFL 1.1).
+- three.js r187 (MIT, `vendor/three/LICENSE`).
+- 지형: Copernicus DEM GLO-30 © DLR e.V. 2010-2014, © Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the European Union and ESA. 화면 왼쪽 아래에 같은 문구 표시.
 
 ## 키오스크 사용성 원칙 (2026-11-17 점검 반영)
 

@@ -59,15 +59,25 @@ function Game(st, ctx, A, r) {
   };
   if (!done) queueMicrotask(() => document.getElementById("typein")?.focus({ preventScroll: true }));
 
+  const can3d = ctx.webgl ?? (ctx.webgl = (() => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch { return false; } })());
+  if (can3d && !ctx.terrainState) queueMicrotask(() => A.loadTerrain());
+  const use3d = can3d && st.map3d && ctx.terrainState === "ready";
   const arrivedPlace = st.selPlace && P[st.selPlace] ? P[st.selPlace] : null;
   return h("div", { class: "card stage" },
       h("div", { class: "card-head" },
         h("div", { class: "card-title" }, h("span", { class: "pnum", style: { background: dayColor(q.day), width: "24px", height: "24px", fontSize: "12px" } }, q.day), `${q.day}일차 경로 따라가기`),
+        h("div", { style: { display: "flex", gap: "10px", alignItems: "center" } },
+          can3d ? h("div", { class: "seg" },
+            h("button", { class: st.map3d ? "on" : "", onclick: () => set({ map3d: true }), title: ctx.terrainState === "error" ? "지형 파일을 읽지 못했습니다" : "" }, ctx.terrainState === "loading" ? "3D 불러오는 중" : "3D 지형"),
+            h("button", { class: st.map3d ? "" : "on", onclick: () => set({ map3d: false }) }, "2D")) : null,
         h("div", { class: "daytabs" }, quests.map((x) => h("button", { class: "daytab" + (x.day === q.day ? " on" : ""), onclick: () => set({ game: { day: x.day, idx: 0 }, selPlace: null }) },
-          h("span", { class: "sw", style: { background: dayColor(x.day) } }), `${x.day}일차`)))),
+          h("span", { class: "sw", style: { background: dayColor(x.day) } }), `${x.day}일차`))))),
       h("div", { class: "stage-map" },
-        SvgMap({ map: ctx.map, itinerary: dayItin, places: P, horseAt, showLabels: true, viewBox: zoomBox, zoom: Math.min(1, vw / 900),
-          markerState: (id, day, i) => (i < idx ? "done" : i === idx ? "next" : "") }),
+        use3d
+          ? ctx.T3.Terrain3D({ map: ctx.map, places: P, items: q.items, idx, color: dayColor(q.day) })
+          : SvgMap({ map: ctx.map, itinerary: dayItin, places: P, horseAt, showLabels: true, viewBox: zoomBox, zoom: Math.min(1, vw / 900),
+              markerState: (id, day, i) => (i < idx ? "done" : i === idx ? "next" : "") }),
+        use3d ? h("div", { class: "terrain-credit" }, ctx.T3.terrainAttribution()) : null,
         arrivedPlace ? h("div", { class: "overlay arrive" },
           h("div", { class: "overlay-top" }, h("span", { class: "eyebrow" }, "도착! · 가상 탐험"), h("button", { class: "btn btn-sm btn-ghost", onclick: () => set({ selPlace: null }) }, icon("x", 14))),
           h("div", { class: "ov-name" }, arrivedPlace.name),

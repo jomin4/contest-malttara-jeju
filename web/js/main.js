@@ -53,6 +53,14 @@ export const actions = {
     ctx.monthlyLoading = false;
     set({});
   },
+  // 03 게임 3D 지형 파일 (한 번만)
+  async loadTerrain() {
+    if (ctx.terrainState) return;
+    ctx.terrainState = "loading"; set({});
+    try { const T3 = await import("./components/terrain3d.js"); await T3.loadTerrain(); ctx.T3 = T3; ctx.terrainState = "ready"; }
+    catch (e) { ctx.terrainState = "error"; }
+    set({});
+  },
   go(step) { if (step <= maxStep()) { set({ step, openChip: null }); window.scrollTo({ top: 0 }); } },
   async runBatch(kind) {
     const sid = state.session_id;

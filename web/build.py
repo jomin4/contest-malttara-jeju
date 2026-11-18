@@ -10,7 +10,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(HERE, "dist")
-INCLUDE = ["index.html", "css", "js", "fonts"]
+INCLUDE = ["index.html", "css", "js", "fonts", "vendor", "assets"]
 
 
 def build() -> int:
@@ -33,6 +33,8 @@ def build() -> int:
     # 외부 주소가 섞이지 않았는지 점검 (SVG 네임스페이스 제외)
     bad = []
     for root, _, files in os.walk(DIST):
+        if os.sep + "vendor" in root:   # 제3자 라이브러리 주석의 문서 주소는 제외 (네트워크 요청 아님)
+            continue
         for f in files:
             if f.endswith((".html", ".css", ".js")):
                 text = open(os.path.join(root, f), encoding="utf-8").read()
