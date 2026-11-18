@@ -63,7 +63,7 @@ UI 프로토타입에는 이 원칙과 어긋나는 요소(하드코딩된 km·�
 
 - 두 트랙의 접점은 **`docs/superpowers/plans/2026-11-16-api-contract.md` 하나**다. 계약을 바꿔야 하면 이슈로 먼저 제안하고 상대 트랙의 확인을 받은 뒤 계약 문서를 고친다. 계약과 다른 응답·요청을 코드에서 먼저 만들지 않는다.
 - 공용 문서 중 `docs/05_submission/README.md`(명시 사항 표)와 `docs/01_planning/decisions.md`(변경 이력)는 **줄 추가만** 한다. `CLAUDE.md`는 이슈로 상대에게 알린 뒤 바꾼다.
-- 진행 방식(11/18 변경): **PR 없이 이슈로 진행**한다. 할 일·요청·확인은 GitHub 이슈로 올리고, 작업은 `main`에 직접 커밋·push한다(`main`은 항상 실행되는 상태). 작업 시작 전과 push 전에 `git pull origin main`. 커밋 메시지에 관련 이슈 번호(`#12`)를 적는다.
+- 진행 방식(11/18 변경): **PR 없이** `main`에 직접 커밋·push한다(`main`은 항상 실행되는 상태). **상대 트랙에 요청·확인이 필요한 것만 이슈로** 올리고, 자기 트랙 폴더 안의 작업은 이슈 없이 진행한다. 작업 시작 전과 push 전에 `git pull origin main`(충돌 방지). 이슈와 관련된 커밋은 메시지에 번호(`#9`)를 적는다.
 - 커밋 메시지 접두: `feat(a):` `feat(b):` `fix(a):` `docs:` `test(a):` (계획서 형식).
 - 저장소에 올리지 않는 것: `.env`(키), `data/raw/`, `data/db/`, `submission/`, `node_modules/`, `dist/`. 키는 비공개 메신저로 주고받는다. 빌드된 DB(`malttara.sqlite`, `map.json`)는 GitHub Release 첨부 파일로 공유한다.
 - B 트랙(프론트)은 바닐라 JS(ES 모듈)+SVG, 번들러·Node 없음. `python web/build.py`가 실행 파일만 `web/dist`로 복사하고 서버가 그것을 서빙한다. 개발 순서: 프론트 목업(`web/`에서 `python -m http.server` + `?mock=1`) → `python run.py --mock`(모의 서버) → Release의 실제 DB. 상세 `web/README.md`.

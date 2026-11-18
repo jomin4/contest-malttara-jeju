@@ -50,8 +50,8 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 
 ```bash
 git pull origin main
-# 할 일은 이슈로: gh issue list / gh issue create
-git commit -m "feat(b): … (#12)"   # 커밋 메시지에 이슈 번호
+# 상대 트랙에 요청할 것만 이슈로 (gh issue create). 내 폴더 작업은 이슈 없이
+git commit -m "feat(b): …"          # 이슈 관련이면 번호(#9)
 git pull origin main
 git push origin main               # PR 없이 main에 직접 push (11/18 팀 결정)
 ```
