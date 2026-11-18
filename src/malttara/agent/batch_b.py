@@ -41,7 +41,33 @@ def rule_redesign(prev_ids: list, fb: dict) -> dict:
                            "replace" if p in fb["disliked"] else "keep"} for p in prev_ids]}
 
 
-def run_batch_b(conn, prev_batch_id, llm, settings, interests_cfg, regions_cfg, state):
+def place_picks(new_it, picks, pmap, pinned, used, scored_rank):
+    """직접 고른 장소를 일정에 넣는다. 같은 날의 고정 안 된 장소 중 점수가 가장 낮은 곳과 바꿔 하루 장소 수(k)를 지킨다.
+    날짜 지정이 없으면 같은 권역의 날 → 없으면 고정이 가장 적은 날. 반환 ({빠진 id: 들어간 id}, [추가만 된 id])."""
+    swapped, appended = {}, []
+    days = {d["day"]: d for d in new_it["days"]}
+    for pk in picks:
+        pid = pk["place_id"]
+        if pid in used or pid not in pmap:
+            continue
+        d = days.get(pk.get("day")) or next((x for x in new_it["days"] if x["region_id"] == pmap[pid]["region_id"]), None) \
+            or min(new_it["days"], key=lambda x: sum(i in pinned for i in x["place_ids"]))
+        free = [i for i in d["place_ids"] if i not in pinned]
+        same = [i for i in free if (pmap.get(i) or {}).get("slot") == pmap[pid].get("slot")]
+        free = same or free
+        if free:
+            out = max(free, key=lambda i: scored_rank.get(i, 10 ** 9))
+            d["place_ids"] = [pid if i == out else i for i in d["place_ids"]]
+            swapped[out] = pid
+            used.discard(out)
+        else:
+            d["place_ids"].append(pid)
+            appended.append(pid)
+        used.add(pid)
+    return swapped, appended
+
+
+def run_batch_b(conn, prev_batch_id, llm, settings, interests_cfg, regions_cfg, state, picks=None):
     row = conn.execute("SELECT goal_json, result_json FROM batches WHERE batch_id = ?", (prev_batch_id,)).fetchone()
     if row is None or not row["result_json"] or row["result_json"] == "null":
         msg = "이전 경로를 찾을 수 없습니다. 처음부터 다시 시작해 주세요"
@@ -57,6 +83,13 @@ def run_batch_b(conn, prev_batch_id, llm, settings, interests_cfg, regions_cfg, 
     state.emit("analyze_feedback", "code", "ok",
                f"꼭 갈래요 {len(fb['pinned'])} · 별로예요 {len(fb['disliked'])} · 관심 분류 "
                + (", ".join(fb["liked_categories"]) or "없음") + f" · 가상 도착 {len(fb['arrived'])}곳")
+
+    picks = [x for x in (picks or []) if x.get("place_id")]
+    picked = {x["place_id"] for x in picks}
+    if picks:                                           # 직접 고른 장소 = 꼭 갈래요와 같은 대우(원칙 7)
+        fb["pinned"] |= picked
+        fb["disliked"] -= picked
+        state.emit("analyze_feedback", "code", "ok", f"직접 고른 장소 {len(picks)}곳 → 고정")
 
     boosts = {c: settings["feedback_interest_boost"] for c in fb["liked_categories"]}
     scored = score_places(conn, goal, settings, interests_cfg, boosts)
@@ -109,12 +142,32 @@ def run_batch_b(conn, prev_batch_id, llm, settings, interests_cfg, regions_cfg, 
         if ids != d["place_ids"]:
             d["place_ids"] = order_nearest(ids, pmap, None)
 
+    if picks:
+        rank = {p["place_id"]: i for i, p in enumerate(scored)}
+        swapped, appended = place_picks(new_it, picks, pmap, fb["pinned"], used, rank)
+        for out_id, in_id in swapped.items():
+            day = next(d["day"] for d in new_it["days"] if in_id in d["place_ids"])
+            name = (prev["places"].get(out_id) or pmap.get(out_id) or {}).get("name", out_id)
+            state.emit("search_places", "code", "fix", f"{day}일차 '{name}' → '{pmap[in_id]['name']}' (직접 고름)")
+            if out_id in replaced.values():             # 방금 대안으로 들어온 곳을 다시 뺀 경우
+                replaced = {k: (in_id if v == out_id else v) for k, v in replaced.items()}
+            elif out_id in added:
+                added.pop(out_id)
+                added[in_id] = pmap[in_id].get("category")
+            else:
+                replaced[out_id] = in_id
+        for in_id in appended:
+            added[in_id] = pmap[in_id].get("category")
+            state.emit("search_places", "code", "add", f"'{pmap[in_id]['name']}' 추가 (직접 고름, 그날 장소가 모두 고정이라 늘어남)")
+        for d in new_it["days"]:
+            d["place_ids"] = order_nearest(d["place_ids"], pmap, None)
+
     cands = {}
     for p in scored:
         if p["place_id"] not in fb["disliked"]:
             cands.setdefault(p["region_id"], []).append(p)
     new_it, remaining = revise_loop(conn, state, new_it, pmap, cands, goal, settings, llm, pinned=frozenset(fb["pinned"]))
-    diff = compare_itineraries(prev_it, new_it, fb, replaced, added)
+    diff = compare_itineraries(prev_it, new_it, fb, replaced, added, picked=picked)
     state.emit("compare_itineraries", "code", "ok",
                " · ".join(f"{c} {sum(x['change'] == c for x in diff)}" for c in ("keep", "pin", "replace", "add", "remove")))
     extra_ids = {x["place_id"] for x in diff} | {x["replaced_by"] for x in diff if x["replaced_by"]}

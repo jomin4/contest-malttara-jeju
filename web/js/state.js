@@ -25,6 +25,11 @@ function initial(session_id = 0) {
     game: { day: 1, idx: 0, awaiting: null },
     open: {},        // 근거를 펼친 place_id
     logOpen: null,   // null = 실행 중에만 펼침
+    listView: "rec", // 02·04 왼쪽: rec = AI 추천 일정, pick = 직접 고르기
+    picks: [],       // [{place_id, day|null, place}] 직접 고른 장소 → Batch B picks
+    pickQ: { q: "", region: null, interest: null, sort: "score" },
+    pickRes: null,   // {key, items, total, loading, error}
+    pickHot: null,   // 목록에서 가리킨 place_id (지도 강조)
   };
 }
 

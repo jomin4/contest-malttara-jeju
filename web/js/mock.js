@@ -138,15 +138,22 @@ async function buildA(goal, inject) {
   return { id, ev, result };
 }
 
-async function buildB(prevId) {
+async function buildB(prevId, picks = []) {
   const P = await load("places");
   const A = batches[prevId].result;
-  const fb = feedback[prevId] || {};
+  const fb = { ...(feedback[prevId] || {}) };
+  picks.forEach((x) => { fb[x.place_id] = "must"; });
   const k = K[A.goal.pace] || 4;
   const used = new Set(A.itinerary.days.flatMap((d) => d.place_ids));
   const diff = [];
+  const pickDays = {};
+  picks.filter((x) => P[x.place_id] && !used.has(x.place_id)).forEach((x) => {
+    const day = x.day || A.itinerary.days.find((d) => d.region_id === P[x.place_id].region_id)?.day || 1;
+    (pickDays[day] ||= []).push(x.place_id); used.add(x.place_id);
+  });
   const days = A.itinerary.days.map((d) => {
     const ids = [];
+    const queue = [...(pickDays[d.day] || [])];
     for (const id of d.place_ids) {
       const v = fb[id];
       if (v === "must") { ids.push(id); diff.push({ place_id: id, change: "pin", replaced_by: null, day: d.day, reason: "꼭 갈래요 → 고정" }); }
@@ -154,11 +161,15 @@ async function buildB(prevId) {
         const alt = (A.alternatives[id] || []).find((x) => !used.has(x));
         if (alt) { used.add(alt); ids.push(alt); diff.push({ place_id: id, change: "replace", replaced_by: alt, day: d.day, reason: "별로예요 → 같은 권역 대안으로 교체" }); }
         else diff.push({ place_id: id, change: "remove", replaced_by: null, day: d.day, reason: "별로예요 → 같은 권역 대안 없음, 제외" });
+      } else if (queue.length) {
+        const pid = queue.shift(); ids.push(pid);
+        diff.push({ place_id: id, change: "replace", replaced_by: pid, day: d.day, reason: "직접 고른 장소로 교체" });
       } else {
         ids.push(id);
         diff.push({ place_id: id, change: "keep", replaced_by: null, day: d.day, reason: v === "interest" ? "관심 → 유지, 같은 분류 가중 +0.2" : "반응 없음 → 유지" });
       }
     }
+    queue.forEach((pid) => { ids.push(pid); diff.push({ place_id: pid, change: "add", replaced_by: null, day: d.day, reason: "직접 고름 → 추가" }); });
     // 관심 분류 가중으로 빈 자리 채우기
     if (ids.length < k) {
       const likedCats = new Set(Object.entries(fb).filter(([, v]) => v === "interest").map(([pid]) => P[pid]?.category));
@@ -238,7 +249,17 @@ export const api = {
   },
   parseGoal: async (text) => { await wait(450); return parse(text); },
   startBatchA: async (goal, inject) => { await wait(150); return schedule(await buildA(goal, inject)); },
-  startBatchB: async (prevId) => { await wait(150); return schedule(await buildB(prevId)); },
+  startBatchB: async (prevId, picks) => { await wait(150); return schedule(await buildB(prevId, picks || [])); },
+  places: async ({ batch_id, region, interest, q, sort = "score", offset = 0, limit = 40 } = {}) => {
+    await wait(120);
+    const P = Object.values(await load("places"));
+    const cats = interest ? INTEREST_CATS[interest] || [] : null;
+    const t = (q || "").replace(/ /g, "");
+    let rows = P.filter((p) => (!region || p.region_id === region) && (!cats || cats.includes(p.category)) && (!t || p.name.replace(/ /g, "").includes(t)));
+    const key = { score: (a, b) => b.score - a.score, quiet: (a, b) => (b.spread + b.quiet) - (a.spread + a.quiet), name: (a, b) => a.name.localeCompare(b.name, "ko") }[sort];
+    rows = rows.sort(key);
+    return { total: rows.length, offset: +offset, limit: +limit, sort, items: rows.slice(+offset, +offset + +limit) };
+  },
   events: async (id, after) => {
     const b = batches[id];
     if (!b) throw new Error("없는 배치입니다");

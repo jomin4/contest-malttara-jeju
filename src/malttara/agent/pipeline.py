@@ -34,6 +34,15 @@ def violation_text(v: dict, places: dict) -> str:
     }.get(t, t)
 
 
+def _pinned_regions(v, itinerary, places, pinned) -> bool:
+    """권역 위반이 사용자가 고정한(꼭 갈래요·직접 고름) 장소 때문이면 자동 수정 대상이 아니다(원칙 7)."""
+    if v["type"] != "regions" or not pinned:
+        return False
+    d = next((x for x in itinerary["days"] if x["day"] == v["day"]), None)
+    off = [i for i in (d or {}).get("place_ids", []) if (places.get(i) or {}).get("region_id") != d["region_id"]]
+    return bool(off) and all(i in pinned for i in off)
+
+
 def revise_loop(conn, state, itinerary, places, candidates_by_region, goal, settings, llm, pinned=frozenset(),
                 origin_xy=None):
     """검증 → (위반 시) 행동 선택 → 적용, 최대 max_revisions회. 반환 (일정, 남은 위반)."""
@@ -44,7 +53,7 @@ def revise_loop(conn, state, itinerary, places, candidates_by_region, goal, sett
             return itinerary, []
         for v in violations:
             state.emit("validate_itinerary", "code", "fail", violation_text(v, places))
-        fixable = [v for v in violations if v["type"] != "count"]
+        fixable = [v for v in violations if v["type"] != "count" and not _pinned_regions(v, itinerary, places, pinned)]
         if attempt == settings["max_revisions"] or not fixable:
             if not fixable:
                 state.emit("revise_itinerary", "code", "skip", "자동으로 고칠 수 있는 위반 없음 → 화면에 표시")

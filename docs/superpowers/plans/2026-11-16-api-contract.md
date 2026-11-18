@@ -102,11 +102,12 @@ A 트랙(데이터·에이전트)과 B 트랙(프론트)이 함께 지키는 계
 |---|---|---|
 | `GET /api/health` | — | `{"ok": true, "llm_available": bool, "data_version": "2026-11-17"}` |
 | `POST /api/goal/parse` | `{"text": str}` | `{"goal": Goal, "missing": ["days"], "actor": "llm"\|"rule"}` |
-| `GET /api/config` | — | `{"interests": [{"key": "바다", "slot": false}], "regions": [{"region_id": str, "name": str}], "max_days": int}` (`config/interests.json`·`regions.json`·settings 값 그대로) |
+| `GET /api/config` | — | `{"interests": [{"key": "바다", "slot": false}], "regions": [{"region_id": str, "name": str}], "max_days": int, "supports": ["places", "picks"]}` (`config/interests.json`·`regions.json`·settings 값 그대로. `supports`는 선택 기능 목록 — 프론트는 있는 것만 켠다) |
 | `GET /api/map` | — | `{"view_box": "0 0 W H", "emds": [{"emd": str, "region_id": str, "d": str}], "regions": [{"region_id": str, "name": str, "d": str}], "project": {"min_lon": f, "max_lat": f, "scale": f}}` |
 | `GET /api/stats/emd?month=N` | month 생략 = 연평균 | `{"period": str, "source_id": "563", "items": [{"emd": str, "region_id": str, "visit_ratio": f\|null, "pct": f\|null}]}` |
 | `POST /api/batch/a` | `{"goal": Goal, "inject_error": bool}` | `{"batch_id": str}` (실행은 백그라운드) |
-| `POST /api/batch/b` | `{"prev_batch_id": str}` | `{"batch_id": str}` |
+| `POST /api/batch/b` | `{"prev_batch_id": str, "picks"?: [{"place_id": str, "day": int\|null}]}` (picks 최대 20) | `{"batch_id": str}`. picks = 직접 고른 장소: 꼭 갈래요처럼 고정. `day` 없으면 같은 권역의 날. 그날 고정 안 된 장소 중 같은 slot(음식·카페·일반)·최저 점수와 교체해 하루 장소 수를 지킨다. 고정 장소 때문에 생긴 권역 위반은 자동 수정하지 않고 `violations_remaining`으로 넘긴다 |
+| `GET /api/places?batch_id=&region=&interest=&q=&sort=score\|quiet\|name&offset=0&limit=40` | 모두 선택. `batch_id`를 주면 그 실행의 Goal로 점수 계산. `limit` ≤ 200 | `{"total": int, "offset": int, "limit": int, "sort": str, "items": [Place]}` — 매 요청마다 DB를 읽으므로 데이터 갱신이 바로 반영 |
 | `GET /api/batch/{id}/events?after=N` | `seq > N`인 이벤트만, 처음은 `after=0` | `{"events": [LogEvent], "done": bool, "result": BatchResult\|null, "error": str\|null}` |
 | `POST /api/events` | `{"batch_id": str, "place_id": str, "type": "virtual_arrival"\|"feedback", "value": "interest"\|"must"\|"dislike"\|null}` | `{"ok": true}` |
 | `GET /api/places/{id}/trend` | — | `{"place_id": str, "period": str\|null, "source_ids": ["189","190"], "series": [{"year_month": "2024-01", "domestic": int\|null, "foreign": int\|null}]}` |
@@ -125,3 +126,4 @@ A 트랙(데이터·에이전트)과 B 트랙(프론트)이 함께 지키는 계
 
 - 2026-11-17 (B 제안, A 확인 완료 — PR #2):  emd 키 형식 통일, `GET /api/config` 추가, `places` 포함 범위, `seq`·`after` 의미, Violation value/limit, 정적 파일 범위·MIME 고정, 중산간 권역 경로, 404·오류 문구, (선택) 월별 통계 일괄 조회. 근거: `2026-11-17-frontend-requirements.md` 4장
 - 2026-11-17 (A): 중산간 권역 경로(C7) 삭제 — 912 원본 권역 4개로 확정. 지도 경계 출처 명시.
+- 2026-11-18 (B, 키오스크 피드백 "추천 말고 내가 고르고 싶다"): `GET /api/places` 목록 추가, `POST /api/batch/b`에 선택 `picks` 추가, `GET /api/config`에 `supports`. 기존 요청·응답은 그대로(하위 호환). 구현·테스트: `tests/test_picks.py`

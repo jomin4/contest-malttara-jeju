@@ -5,6 +5,7 @@ import { SvgMap, dayColor } from "../components/map.js";
 import { LogPanel, Stepper } from "../components/log.js";
 import { PlaceRow } from "../components/placecard.js";
 import { WhyButton, WhySection } from "../components/why.js";
+import { ViewSwitch, PickerView, PickTray, pickMarks } from "../components/picker.js";
 
 // 이동수단·동행은 표시만 한다는 것을 분명히 알린다 (원칙 2·6)
 export function TransportNote(goal) {
@@ -48,7 +49,7 @@ export function MapCard(st, ctx, r, title) {
   return h("div", { class: "card map-card" },
     h("div", { class: "card-head" }, h("div", { class: "card-title" }, icon("map", 15), title), r ? DayTabs(st, r.itinerary, r.places) : null),
     h("div", { class: "card-body map-fit" },
-      SvgMap({ map: ctx.map, itinerary: r?.itinerary, places: r?.places, activeDay: st.activeDay,
+      SvgMap({ map: ctx.map, itinerary: r?.itinerary, places: r?.places, activeDay: st.activeDay, marks: r ? pickMarks(st) : null,
         highlightRegion: r && st.activeDay ? r.itinerary.days.find((d) => d.day === st.activeDay)?.region_id : null,
         onPlaceClick: (id, day) => { set({ open: { ...st.open, [id]: true }, activeDay: day }); setTimeout(() => document.querySelector(`[data-place="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 30); } }),
       h("div", { class: "legend", style: { marginTop: "8px" } }, h("span", {}, "선은 방문 순서를 잇는 직선입니다 (도로·이동시간 아님)"), h("span", {}, ctx.map.attribution || "경계: 통계청 SGIS 행정동 (가공: vuski/admdongkor)"))));
@@ -77,10 +78,13 @@ export function Step2(st, ctx, A) {
       h("div", { class: "s2-left" },
         r?.violations_remaining?.length ? h("div", { class: "viol" },
           h("h4", {}, "고치지 못한 부분이 있어요"), h("ul", {}, r.violations_remaining.map((v) => h("li", {}, violationText(v, r.places))))) : null,
-        r ? h("p", { class: "summary" }, r.summary) : null,
-        r ? DayList(st, ctx, A, r) : null,
+        r ? ViewSwitch(st, ctx) : null,
+        r && st.listView === "pick" ? PickerView({ st, ctx, A, r }) : [
+          r ? h("p", { class: "summary" }, r.summary) : null,
+          r ? DayList(st, ctx, A, r) : null],
         LogPanel({ title: "AI가 한 일", batch: b, onRetry: () => A.runBatch("A"), open: logOpen, onToggle: r ? () => set({ logOpen: !logOpen }) : null,
           sub: r ? `분류 없음 ${r.quality.no_category}곳 · 읍면동 지표 없음 ${r.quality.no_region_indicator}곳 · 반경 지표 없음 ${r.quality.no_nearby_indicator}곳` : null })),
       h("div", { class: "s2-right" }, MapCard(st, ctx, r, "경로 지도"))),
-    r ? WhySection({ st, ctx, r, events: b.events, kind: "A" }) : null);
+    r ? WhySection({ st, ctx, r, events: b.events, kind: "A" }) : null,
+    r ? PickTray({ st, A, r }) : null);
 }

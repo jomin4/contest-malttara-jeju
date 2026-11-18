@@ -29,7 +29,7 @@ const fillFor = (v) => (v == null ? "url(#hatch)" : RAMP[Math.min(4, Math.floor(
 
 export function SvgMap(opts) {
   const z = opts.zoom || 1;
-  const { map, emdValues, itinerary, places, activeDay, horseAt, highlightRegion, onPlaceClick, markerState, showLabels = true, onlyDay, onEmdClick, selectedEmd, pin } = opts;
+  const { map, emdValues, itinerary, places, activeDay, horseAt, highlightRegion, onPlaceClick, markerState, showLabels = true, onlyDay, onEmdClick, selectedEmd, pin, marks } = opts;
   const [, , W, H] = map.view_box.split(" ").map(Number);
   const svg = s("svg", { class: "map-svg", viewBox: opts.viewBox || map.view_box, role: "img", "aria-label": "제주 지도" });
   svg.appendChild(s("defs", {},
@@ -87,6 +87,17 @@ export function SvgMap(opts) {
     svg.appendChild(s("g", { class: "stay-pin", transform: `translate(${pin[0]},${pin[1]})` },
       s("path", { d: "M0 0 C-9 -12 -12 -18 -12 -24 A12 12 0 1 1 12 -24 C12 -18 9 -12 0 0 Z", fill: "#ea580c", stroke: "#fff", "stroke-width": 2.5 }),
       s("path", { d: "M-6 -22 L0 -28 L6 -22 V-16 H-6 Z", fill: "#fff" })));
+  }
+  if (marks?.length) {   // 직접 고른 장소 (별 표시) · hot = 목록에서 가리킨 장소
+    const g = s("g", { class: "pick-marks" });
+    for (const m of marks) {
+      const [x, y] = project(m.lat, m.lon, map.project);
+      g.appendChild(s("g", { class: "pick-mark" + (m.hot ? " hot" : ""), transform: `translate(${x},${y})` },
+        s("circle", { r: m.hot ? 15 : 11, fill: m.color || "#0a0a0a", stroke: "#fff", "stroke-width": 2.5 }),
+        s("path", { d: "M0 -6 L1.8 -1.9 L6.2 -1.9 L2.6 0.8 L3.9 5.2 L0 2.6 L-3.9 5.2 L-2.6 0.8 L-6.2 -1.9 L-1.8 -1.9 Z", fill: "#fff" }),
+        m.label ? s("text", { class: "pick-lbl", x: 16, y: 5 }, m.label) : null));
+    }
+    svg.appendChild(g);
   }
   if (horseAt) {
     const g = s("g", { class: "horse", style: `transform: translate(${horseAt[0]}px, ${horseAt[1] - 26 * z}px) scale(${z})` }, horseGlyph());

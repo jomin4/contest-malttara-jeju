@@ -67,9 +67,9 @@ export const actions = {
     const sid = state.session_id;
     const key = kind === "A" ? "batchA" : "batchB";
     const ac = new AbortController(); aborts.push(ac);
-    set({ [key]: { id: null, events: [], result: null, error: null, slow: false }, activeDay: null, selPlace: null, open: {}, logOpen: null, ...(kind === "A" ? { batchB: null, game: { day: 1, idx: 0, awaiting: null }, arrived: {}, feedback: {} } : {}) });
+    set({ [key]: { id: null, events: [], result: null, error: null, slow: false }, activeDay: null, selPlace: null, open: {}, logOpen: null, ...(kind === "A" ? { batchB: null, game: { day: 1, idx: 0, awaiting: null }, arrived: {}, feedback: {}, picks: [], pickRes: null, listView: "rec" } : {}) });
     try {
-      const id = kind === "A" ? await api.startBatchA(state.goal, state.injectError) : await api.startBatchB(state.batchA.id);
+      const id = kind === "A" ? await api.startBatchA(state.goal, state.injectError) : await api.startBatchB(state.batchA.id, state.picks.map(({ place_id, day }) => ({ place_id, day })));
       if (sid !== state.session_id) return;
       set({ [key]: { ...state[key], id } });
       const result = await pollBatch(id, (evs) => {
@@ -91,6 +91,42 @@ export const actions = {
     if (state.arrived[placeId]) return;
     set({ arrived: { ...state.arrived, [placeId]: true } }, { silent: true });
     api.postEvent({ batch_id: state.batchA.id, place_id: placeId, type: "virtual_arrival", value: null }).catch((e) => toast(e.message));
+  },
+  // ── 직접 고르기 ──
+  pickKey() { const q = state.pickQ; return JSON.stringify([state.batchA?.id, q.q.trim(), q.region, q.interest, q.sort]); },
+  async loadPicks(more = false) {
+    const key = actions.pickKey();
+    const prev = state.pickRes;
+    if (!more && prev?.key === key && (prev.loading || prev.items)) return;
+    if (more && prev?.loading) return;
+    const items = more && prev?.key === key ? prev.items : [];
+    set({ pickRes: { key, items, total: more ? prev.total : 0, loading: true, error: null } });
+    try {
+      const q = state.pickQ;
+      const d = await api.places({ batch_id: state.batchA?.id, q: q.q.trim(), region: q.region, interest: q.interest, sort: q.sort, offset: items.length, limit: 30 });
+      if (actions.pickKey() !== key) return;
+      set({ pickRes: { key, items: [...items, ...d.items], total: d.total, loading: false, error: null } });
+    } catch (e) {
+      if (actions.pickKey() !== key) return;
+      set({ pickRes: { key, items, total: prev?.total || 0, loading: false, error: e.message } });
+    }
+  },
+  setPickQ(patch, debounce = 0) {
+    clearTimeout(actions._pqT);
+    const apply = () => set({ pickQ: { ...state.pickQ, ...patch } });
+    if (debounce) { state.pickQ = { ...state.pickQ, ...patch }; actions._pqT = setTimeout(() => set({}), debounce); }
+    else apply();
+  },
+  pick(place, day) {
+    if (state.picks.some((x) => x.place_id === place.place_id) || state.picks.length >= 20) return;
+    set({ picks: [...state.picks, { place_id: place.place_id, day, place }] });
+  },
+  unpick(id) { set({ picks: state.picks.filter((x) => x.place_id !== id) }); },
+  setPickDay(id, day) { set({ picks: state.picks.map((x) => (x.place_id === id ? { ...x, day } : x)) }); },
+  applyPicks() {
+    if (!state.batchA?.result || !state.picks.length) return;
+    set({ batchB: null, listView: "rec" });
+    actions.go(4);
   },
   toggleOpen(id) { set({ open: { ...state.open, [id]: !state.open[id] } }); },
   restart() {

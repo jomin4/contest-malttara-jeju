@@ -1,12 +1,13 @@
 import { h, icon } from "../dom.js";
 import { set } from "../state.js";
 import { api } from "../api.js";
-import { CHANGE } from "../format.js";
+import { CHANGE, violationText } from "../format.js";
 import { LogPanel, Stepper } from "../components/log.js";
 import { LineChart } from "../components/chart.js";
 import { DayList, MapCard, TransportNote } from "./step2.js";
 import { WhyButton, WhySection } from "../components/why.js";
 import { QrModal, planText } from "../components/qr.js";
+import { ViewSwitch, PickerView, PickTray } from "../components/picker.js";
 
 const LINE_COLORS = ["#0f766e", "#ea580c", "#2563eb", "#9333ea", "#ca8a04", "#db2777"];
 let loadingTrends = false;
@@ -93,12 +94,18 @@ export function Step4(st, ctx, A) {
     r ? null : Stepper({ kind: "B", batch: b }),
     h("div", { class: "s2" },
       h("div", { class: "s2-left" },
-        r ? DayList(st, ctx, A, r, { badgeFor, footFor }) : null,
+        r?.violations_remaining?.length ? h("div", { class: "viol" },
+          h("h4", {}, "그대로 둔 부분이 있어요"),
+          h("ul", {}, r.violations_remaining.map((v) => h("li", {}, violationText(v, r.places),
+            v.type === "regions" && st.picks.some((x) => x.day === v.day) ? " — 직접 고른 장소라 바꾸지 않았어요" : "")))) : null,
+        r ? ViewSwitch(st, ctx) : null,
+        r && st.listView === "pick" ? PickerView({ st, ctx, A, r }) : (r ? DayList(st, ctx, A, r, { badgeFor, footFor }) : null),
         LogPanel({ title: "AI가 한 일", batch: b, onRetry: () => A.runBatch("B"), open: logOpen, onToggle: r ? () => set({ logOpen: !logOpen }) : null,
           sub: b?.id ? `${b.id} ← 이전 ${a.batch_id}` : null })),
       h("div", { class: "s2-right" }, MapCard(st, ctx, r, "최종 경로"))),
     r ? WhySection({ st, ctx, r, events: b.events, kind: "B", feedback: st.feedback }) : null,
     r ? Charts(st, ctx, A, r) : null,
+    r ? PickTray({ st, A, r }) : null,
     r && st.qrOpen ? QrModal({ text: planText(st.goal, r, (rid) => ctx.map.regions.find((x) => x.region_id === rid)?.name || rid),
       onClose: () => set({ qrOpen: false }), onPrint: () => { set({ qrOpen: false }); print(); } }) : null);
 }

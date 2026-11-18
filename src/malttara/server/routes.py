@@ -17,7 +17,8 @@ from malttara.db import connect, data_sources, meta_get
 from malttara.tools.explain import export_travel_plan
 from malttara.tools.feedback import record_event
 from malttara.tools.goal import merge_goal, parse_goal_rules, validate_goal
-from malttara.tools.places import analyze_tourism, get_region_data, get_region_data_all
+from malttara.agent.pipeline import compact
+from malttara.tools.places import analyze_tourism, get_region_data, get_region_data_all, score_places
 
 
 class ApiError(Exception):
@@ -54,7 +55,7 @@ def h_health(ctx, m, q, body):
 def h_config(ctx, m, q, body):
     return 200, {"interests": [{"key": k, "slot": bool(v.get("slot"))} for k, v in ctx.interests["interests"].items()],
                  "regions": [{"region_id": r["region_id"], "name": r["name"]} for r in ctx.regions["regions"]],
-                 "max_days": ctx.settings["max_days"]}
+                 "max_days": ctx.settings["max_days"], "supports": ["places", "picks"]}
 
 
 def h_parse(ctx, m, q, body):
@@ -138,8 +139,55 @@ def h_batch_b(ctx, m, q, body):
     prev = body["prev_batch_id"]
     if _stored(ctx, prev) is None:
         raise ApiError(404, "이전 경로를 찾을 수 없습니다. 처음부터 다시 시작해 주세요")
+    picks = body.get("picks") or []
+    if not isinstance(picks, list) or len(picks) > MAX_PICKS or not all(
+            isinstance(x, dict) and isinstance(x.get("place_id"), str)
+            and (x.get("day") is None or (isinstance(x["day"], int) and not isinstance(x["day"], bool))) for x in picks):
+        raise ApiError(400, f"picks는 [{{place_id, day}}] 목록이어야 합니다 (최대 {MAX_PICKS}곳)")
     st = BatchState("B", prev_batch_id=prev)
-    return _start(ctx, st, lambda conn: run_batch_b(conn, prev, ctx.llm, ctx.settings, ctx.interests, ctx.regions, st))
+    return _start(ctx, st, lambda conn: run_batch_b(conn, prev, ctx.llm, ctx.settings, ctx.interests, ctx.regions, st,
+                                                    picks=picks))
+
+
+MAX_PICKS = 20
+PLACE_SORTS = {
+    "score": lambda p: (-p["score"], p["place_id"]),
+    "quiet": lambda p: (-(p["spread"] + p["quiet"]), -p["score"], p["place_id"]),
+    "name": lambda p: (p["name"], p["place_id"]),
+}
+
+
+def h_places(ctx, m, q, body):
+    """직접 고르기 목록. DB를 매번 읽으므로 데이터 갱신이 바로 반영된다. batch_id를 주면 그 실행의 조건으로 점수를 매긴다."""
+    goal = {}
+    if q.get("batch_id"):
+        res = _stored(ctx, q["batch_id"])
+        if res is None:
+            raise ApiError(404, "해당 실행 기록이 없습니다")
+        goal = res.get("goal") or {}
+    sort = q.get("sort") or "score"
+    if sort not in PLACE_SORTS:
+        raise ApiError(400, "sort는 score, quiet, name 중 하나입니다")
+    try:
+        limit = max(1, min(int(q.get("limit") or 40), 200))
+        offset = max(0, int(q.get("offset") or 0))
+    except ValueError:
+        raise ApiError(400, "limit, offset은 정수여야 합니다")
+    cats = None
+    if q.get("interest"):
+        spec = ctx.interests["interests"].get(q["interest"])
+        if spec is None:
+            raise ApiError(400, "알 수 없는 관심사입니다")
+        cats = set(spec["categories"])
+    text = (q.get("q") or "").replace(" ", "")
+    region = q.get("region")
+    with ctx.db() as conn:
+        rows = score_places(conn, goal, ctx.settings, ctx.interests)
+    rows = [p for p in rows if (not region or p["region_id"] == region) and (cats is None or p["category"] in cats)
+            and (not text or text in p["name"].replace(" ", ""))]
+    rows.sort(key=PLACE_SORTS[sort])
+    return 200, {"total": len(rows), "offset": offset, "limit": limit, "sort": sort,
+                 "items": [compact(p) for p in rows[offset:offset + limit]]}
 
 
 def h_events_poll(ctx, m, q, body):
@@ -193,6 +241,7 @@ ROUTES = [
     ("POST", re.compile(r"^/api/batch/b$"), h_batch_b),
     ("GET", re.compile(r"^/api/batch/([A-Za-z0-9\-]+)/events$"), h_events_poll),
     ("POST", re.compile(r"^/api/events$"), h_post_event),
+    ("GET", re.compile(r"^/api/places$"), h_places),
     ("GET", re.compile(r"^/api/places/([^/]+)/trend$"), h_trend),
     ("GET", re.compile(r"^/api/print/([A-Za-z0-9\-]+)$"), h_print),
 ]

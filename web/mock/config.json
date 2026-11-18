@@ -47,5 +47,9 @@
    "name": "중문·서귀포권"
   }
  ],
- "max_days": 7
+ "max_days": 7,
+ "supports": [
+  "places",
+  "picks"
+ ]
 }
