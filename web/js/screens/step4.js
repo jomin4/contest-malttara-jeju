@@ -19,7 +19,7 @@ function Charts(st, ctx, A, B) {
   const c1 = !M ? h("div", { class: "log-status" }, h("span", { class: "spinner" }), "월별 통계 불러오는 중…")
     : M.error ? h("div", { class: "side-empty" }, M.error)
     : LineChart({
-        labels: months.map((m) => `${m}월`), fmt: (v) => v.toFixed(1),
+        labels: months.map((m) => `${m}월`),
         series: emds.map((e, i) => ({ name: e, color: LINE_COLORS[i % LINE_COLORS.length],
           values: months.map((m) => (M.months[m] || M.months[String(m)] || []).find((x) => x.emd === e)?.visit_ratio ?? null) })),
       });
@@ -41,7 +41,7 @@ function Charts(st, ctx, A, B) {
       series.push({ name: `${P[t.place_id].name} 내국인`, color: LINE_COLORS[(i * 2) % LINE_COLORS.length], values: t.series.map((x) => x.domestic) });
       series.push({ name: `${P[t.place_id].name} 외국인`, color: LINE_COLORS[(i * 2 + 1) % LINE_COLORS.length], values: t.series.map((x) => x.foreign) });
     });
-    c2 = ts.length ? LineChart({ labels, series, fmt: (v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : v) }) : h("div", { class: "side-empty" }, "해당 장소의 입장객 통계 없음");
+    c2 = ts.length ? LineChart({ labels, series }) : h("div", { class: "side-empty" }, "해당 장소의 입장객 통계 없음");
   }
   const period2 = trendIds.map((id) => ctx.trends[id]?.period).find(Boolean) || "—";
   return h("section", { class: "evidence" },

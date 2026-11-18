@@ -61,9 +61,9 @@ UI 프로토타입에는 이 원칙과 어긋나는 요소(하드코딩된 km·�
 | A 데이터·에이전트 | `docs/superpowers/plans/2026-11-16-track-a-data-agent.md` | `src/` `config/` `data/` `tests/` `run.py` `run.bat` `requirements*.txt` |
 | B 프론트·UI | `docs/superpowers/plans/2026-11-16-track-b-frontend.md` | `web/` |
 
-- 두 트랙의 접점은 **`docs/superpowers/plans/2026-11-16-api-contract.md` 하나**다. 계약을 바꿔야 하면 계약 문서를 고치는 PR을 먼저 열고 상대 트랙의 확인을 받는다. 계약과 다른 응답·요청을 코드에서 먼저 만들지 않는다.
-- 공용 문서 중 `docs/05_submission/README.md`(명시 사항 표)와 `docs/01_planning/decisions.md`(변경 이력)는 **줄 추가만** 한다. `CLAUDE.md`는 PR로만 바꾼다.
-- 브랜치: `main`은 항상 실행되는 상태. 작업은 계획서 태스크 단위 브랜치(`a/task-07-scoring`, `b/task-03-step1`)에서 하고 PR → squash merge. 계약 변경 PR만 상대 리뷰 필수, 나머지는 본인이 merge 가능. 작업 시작 전 `git pull origin main`.
+- 두 트랙의 접점은 **`docs/superpowers/plans/2026-11-16-api-contract.md` 하나**다. 계약을 바꿔야 하면 이슈로 먼저 제안하고 상대 트랙의 확인을 받은 뒤 계약 문서를 고친다. 계약과 다른 응답·요청을 코드에서 먼저 만들지 않는다.
+- 공용 문서 중 `docs/05_submission/README.md`(명시 사항 표)와 `docs/01_planning/decisions.md`(변경 이력)는 **줄 추가만** 한다. `CLAUDE.md`는 이슈로 상대에게 알린 뒤 바꾼다.
+- 진행 방식(11/18 변경): **PR 없이 이슈로 진행**한다. 할 일·요청·확인은 GitHub 이슈로 올리고, 작업은 `main`에 직접 커밋·push한다(`main`은 항상 실행되는 상태). 작업 시작 전과 push 전에 `git pull origin main`. 커밋 메시지에 관련 이슈 번호(`#12`)를 적는다.
 - 커밋 메시지 접두: `feat(a):` `feat(b):` `fix(a):` `docs:` `test(a):` (계획서 형식).
 - 저장소에 올리지 않는 것: `.env`(키), `data/raw/`, `data/db/`, `submission/`, `node_modules/`, `dist/`. 키는 비공개 메신저로 주고받는다. 빌드된 DB(`malttara.sqlite`, `map.json`)는 GitHub Release 첨부 파일로 공유한다.
 - B 트랙(프론트)은 바닐라 JS(ES 모듈)+SVG, 번들러·Node 없음. `python web/build.py`가 실행 파일만 `web/dist`로 복사하고 서버가 그것을 서빙한다. 개발 순서: 프론트 목업(`web/`에서 `python -m http.server` + `?mock=1`) → `python run.py --mock`(모의 서버) → Release의 실제 DB. 상세 `web/README.md`.

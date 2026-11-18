@@ -16,7 +16,9 @@ def explain_place(place: dict, goal: dict, interests_cfg: dict) -> list:
     cat = place.get("category")
     slot = place.get("slot")
     if slot:
-        lines.append(f"TourAPI 등록 {'카페' if slot == '카페' else '음식점'} (관심사 '{slot}')")
+        kind = "카페" if slot == "카페" else "음식점"
+        src = "TourAPI 등록" if place.get("category_source") == "tourapi" else "이름으로 분류한"
+        lines.append(f"{src} {kind} (관심사 '{slot}')")
     elif not cat:
         lines.append("분류 없음")
     elif not goal.get("interests"):

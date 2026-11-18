@@ -50,15 +50,15 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 
 ```bash
 git pull origin main
-git switch -c b/task-03-step1          # 계획서 태스크 단위 브랜치 (a/… 또는 b/…)
-# … 작업·커밋 …
-git push -u origin b/task-03-step1
-gh pr create --fill                     # squash merge. 계약 문서 변경 PR만 상대 리뷰 필수
+# 할 일은 이슈로: gh issue list / gh issue create
+git commit -m "feat(b): … (#12)"   # 커밋 메시지에 이슈 번호
+git pull origin main
+git push origin main               # PR 없이 main에 직접 push (11/18 팀 결정)
 ```
 
 ### Claude Code 첫 요청 예시
 
-> CLAUDE.md와 B 트랙 계획서(docs/superpowers/plans/2026-11-16-track-b-frontend.md), API 계약 문서를 읽고 executing-plans로 Task 1부터 진행하자. 태스크마다 브랜치를 만들고 PR로 올려줘.
+> CLAUDE.md와 B 트랙 계획서(docs/superpowers/plans/2026-11-16-track-b-frontend.md), API 계약 문서를 읽고 executing-plans로 Task 1부터 진행하자. 태스크마다 관련 이슈 번호를 커밋에 적고 main에 올려줘.
 
 > CLAUDE.md와 A 트랙 계획서를 읽고 executing-plans로 Task 1부터 진행하자.
 

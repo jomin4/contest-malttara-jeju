@@ -76,6 +76,9 @@ def is_island(address: str, lat: float, lon: float, cfg: dict) -> bool:
     addr = address or ""
     if any(tok in addr for tok in cfg.get("island_address_tokens", [])):
         return True
+    name = cfg.get("_current_name") or ""
+    if any(name.replace(" ", "").startswith(p) for p in cfg.get("island_name_prefixes", [])):
+        return True
     for c in cfg.get("island_circles", []):
         if haversine_km(lat, lon, c["lat"], c["lon"]) <= c["r_km"]:
             return True
@@ -84,7 +87,14 @@ def is_island(address: str, lat: float, lon: float, cfg: dict) -> bool:
 
 def is_non_place(name: str, cfg: dict) -> bool:
     """렌터카·공항·주차장처럼 여행 장소가 아닌 이름이면 True."""
-    return any(k in (name or "") for k in cfg.get("non_place_keywords", []))
+    n = name or ""
+    if any(k in n for k in cfg.get("non_place_keywords", [])):
+        return True
+    if n.strip().lower() in [j.lower() for j in cfg.get("junk_names", [])]:
+        return True
+    if cfg.get("area_name_pattern") and re.match(cfg["area_name_pattern"], n.replace(" ", "")):
+        return True                              # "대정읍"처럼 행정구역 이름만 적은 기록
+    return len(re.findall(r"[가-힣]", n)) < cfg.get("min_hangul", 0)   # "dd", "123", "TERER" 같은 이름
 
 
 def _in_bbox(lat: float, lon: float, bbox: dict) -> bool:
@@ -118,7 +128,7 @@ def clean_1349(rows: list, cfg: dict, regions_cfg: dict, alias: dict, polygons=N
         address = jibun + " " + (row.get("도로명주소") or "").strip()
         if not _in_bbox(lat, lon, cfg["bbox"]):
             continue
-        if is_island(address, lat, lon, cfg) or is_non_place(name, cfg):
+        if is_island(address, lat, lon, dict(cfg, _current_name=name)) or is_non_place(name, cfg):
             continue
         key = normalize_name(name, prefixes)
         if any(haversine_km(lat, lon, a, b) <= dedup_km for a, b in seen.get(key, [])):

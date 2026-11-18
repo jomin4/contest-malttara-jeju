@@ -1,4 +1,6 @@
 """장소 분류 매칭: 참조 데이터(TourAPI·허브 API·파일)와 이름·좌표로 맞춘다(설계 5.4-2)."""
+import re
+
 from malttara.geo import haversine_km
 from malttara.etl.names import name_similarity, normalize_name
 
@@ -60,10 +62,18 @@ def match_reference(place: dict, refs: list, match_cfg: dict, prefixes: list) ->
     return _match_prepared(place, _prepare(refs, prefixes), match_cfg, prefixes)
 
 
-def _keyword_category(name: str, keyword_categories: dict) -> "str | None":
-    """이름에 키워드가 들어 있으면 그 분류. 긴 키워드부터 본다(예: '숲길' > '숲')."""
+def _keyword_category(name: str, keyword_categories: dict, food_keywords: dict = None) -> "str | None":
+    """이름 키워드 분류.
+
+    1) 음식·카페 키워드는 이름 어디에 있어도 우선("삼화포구횟집" → 음식점, "오름카페" → 카페).
+    2) 경관 키워드는 괄호를 뗀 이름이 그 키워드로 끝날 때만("준반점(…해수욕장에 위치)"은 해수욕장 아님).
+    """
+    base = re.sub(r"\(.*?\)|\(.*$", "", name or "").strip()
+    for kw in sorted(food_keywords or {}, key=len, reverse=True):
+        if kw in base:
+            return food_keywords[kw]
     for kw in sorted(keyword_categories, key=len, reverse=True):
-        if kw in (name or ""):
+        if base.endswith(kw):
             return keyword_categories[kw]
     return None
 
@@ -94,7 +104,7 @@ def categorize_places(places: list, ref_sets: list, cfg: dict) -> dict:
                 break
         if matched:
             continue
-        cat = _keyword_category(p.get("name", ""), cfg.get("keyword_categories", {}))
+        cat = _keyword_category(p.get("name", ""), cfg.get("keyword_categories", {}), cfg.get("food_keywords", {}))
         if cat:
             p["category"], p["category_source"] = cat, "keyword"
             counts["keyword"] += 1

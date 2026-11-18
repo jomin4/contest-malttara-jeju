@@ -41,7 +41,7 @@ def _row(emd: str, month: int, visit: float, resident: float, period: str) -> di
     }
 
 
-def aggregate_563(csv_path: str, alias: dict) -> list:
+def aggregate_563(csv_path: str, alias: dict, stats: "dict | None" = None) -> list:
     """읍면동 × 월 집계 행 목록.
 
     1) 같은 (emd, 연월)의 visit_population_count·residence_population_count를 모두 더한다.
@@ -49,10 +49,13 @@ def aggregate_563(csv_path: str, alias: dict) -> list:
     3) (emd)별로 전체 연월 합의 평균 → month 0 행.
     visit_ratio = visit_pop / resident_pop (resident 0이면 None).
     period는 파일 전체의 실제 최소~최대 연월("YYYY-MM~YYYY-MM").
+    stats(dict)를 주면 읽은 데이터 행 수를 stats["rows"]에 적는다(data_sources 기록용).
     """
     sums = {}  # (emd, (y, m)) → [visit, resident]
+    n_rows = 0
     with open_csv(csv_path) as f:
         for row in csv.DictReader(f):
+            n_rows += 1
             ym = _year_month(row.get("base_year_month", ""))
             raw = (row.get("emd_name") or "").strip()
             if ym is None or not raw:
@@ -63,6 +66,8 @@ def aggregate_563(csv_path: str, alias: dict) -> list:
                 acc = sums[(emd, ym)] = [0.0, 0.0]
             acc[0] += _num(row.get("visit_population_count"))
             acc[1] += _num(row.get("residence_population_count"))
+    if stats is not None:
+        stats["rows"] = n_rows
     if not sums:
         return []
     yms = sorted({ym for _, ym in sums})
