@@ -64,7 +64,7 @@ function Game(st, ctx, A, r) {
   if (can3d && !ctx.terrainState) queueMicrotask(() => A.loadTerrain());
   const use3d = can3d && st.map3d && ctx.terrainState === "ready";
   const arrivedPlace = st.selPlace && P[st.selPlace] ? P[st.selPlace] : null;
-  return h("div", { class: "card stage" },
+  return h("div", { class: "card stage" + (use3d ? " game3d" : "") },
       h("div", { class: "card-head" },
         h("div", { class: "card-title" }, h("span", { class: "pnum", style: { background: dayColor(q.day), width: "24px", height: "24px", fontSize: "12px" } }, q.day), `${q.day}일차 경로 따라가기`),
         h("div", { style: { display: "flex", gap: "10px", alignItems: "center" } },
@@ -107,8 +107,9 @@ export function Step3(st, ctx, A) {
   const r = st.batchA?.result;
   if (!r) return h("div", { class: "page" }, "경로가 아직 없습니다.");
   const c = (v) => Object.values(st.feedback).filter((x) => x === v).length;
-  return h("div", { class: "page" },
-    h("div", { class: "pagehead" },
+  const gameMode = st.previewMode === "game";
+  return h("div", { class: "page" + (gameMode ? " page-game" : "") },
+    h("div", { class: "pagehead" + (gameMode ? " compact" : "") },
       h("div", {}, h("div", { class: "eyebrow" }, "03 미리 둘러보기"),
         h("h1", {}, st.previewMode === "game" ? "지명을 입력하면 말이 달려가요" : "장소를 보고 반응을 남겨 주세요"),
         h("div", { class: "muted lead" }, "좋아요는 비슷한 곳을 더, 꼭 갈래요는 고정, 별로예요는 다른 곳으로 바꿔요. 게임은 선택이에요.")),

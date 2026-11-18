@@ -286,7 +286,11 @@ function resize() {
   const w = parent.clientWidth, hgt = parent.clientHeight;
   if (w === view.size[0] && hgt === view.size[1]) return;
   view.size = [w, hgt]; view.renderer.setSize(w, hgt, false);
-  view.camera.aspect = w / Math.max(1, hgt); view.camera.updateProjectionMatrix();
+  view.camera.aspect = w / Math.max(1, hgt);
+  // 아래쪽 입력 패널에 가리지 않게 화면 중심을 위로 올린다
+  const off = Math.round(Math.min(160, hgt * 0.16));
+  view.camera.setViewOffset(w, hgt, 0, off, w, hgt);
+  view.camera.updateProjectionMatrix();
 }
 
 function frame(t) {
