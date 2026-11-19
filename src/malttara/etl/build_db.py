@@ -237,7 +237,7 @@ def build_db(raw_dir: str, out_db: str, out_map: str, log=print, mapping_dir: st
     stats["places_1349"] = len(places)
     log(f"[1349] 원본 {len(rows)}행 → 정제 후 {len(places)}곳")
     src("1349", rows=len(rows), fetched_at=_mtime_date(_csvs(raw_dir, "1349")[0]) if rows else None,
-        notes=f"정제 후 {len(places)}곳(본섬 범위·부속섬·비장소 제외, 50m 내 같은 이름 중복 제거)")
+        notes=f"정제 후 {len(places)}곳(본섬 범위·부속섬·비장소 제외, 같은 이름 2km 안 병합·좌표 오류 보정)")
 
     # 2) 분류 참조 세트
     ref_sets = []
