@@ -47,3 +47,4 @@
 | AI 활용 범위 (개발 도구 포함) | Claude (Anthropic) — Claude Code·Cowork | B 화면 구현·리팩터링, 자동 테스트 스크립트, 원칙 점검, 매뉴얼·기획서 초안 작성 보조. 실행 중 화면은 Claude를 호출하지 않음 | 개발 도구 |
 | 오픈소스·외부 코드 | (개발용) Playwright | 화면 자동 점검 `web/tools/e2e_scenarios.js`·`tour_walkthrough.js`·`check_responsive.js`, 매뉴얼 스크린샷. 실행·제출 동작에 불필요 | Apache-2.0 |
 | 외부 데이터 | (확인) 화면에 표시하는 출처 | 지도 아래 "SGIS 행정동 경계(가공: vuski/admdongkor)", 3D 지도 아래 Copernicus DEM 출처, 근거 패널에 제주데이터허브 데이터 ID(563·1208·189·190·1349)와 기간 표시 | 출처 표기 의무 이행 |
+| (A 2026-11-19) 보안 설계 | LLM 보안 가드(인젝션 탐지·입력 경계 표시·출력 검사·개인정보 마스킹·호출 상한) | 위협·방어·코드·테스트 표: `docs/05_submission/security.md` | 자체 작성 |
