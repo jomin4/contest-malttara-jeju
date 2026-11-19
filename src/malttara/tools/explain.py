@@ -27,6 +27,8 @@ def explain_place(place: dict, goal: dict, interests_cfg: dict) -> list:
         hits = [k for k in goal["interests"] if cat in interests_cfg["interests"].get(k, {}).get("categories", [])]
         lines.append(f"관심사 '{hits[0]}' ↔ 분류 '{cat}' 일치" if hits else f"분류 '{cat}' · 입력한 관심사와 일치하지 않음")
 
+    if place.get("records"):
+        lines.append(f"여행자 기록 {place['records']}회 (1349 · 같은 이름으로 남긴 여행 장소 기록)")
     r = place["indicators"]["region"]
     if r["missing"]:
         lines.append(f"{r['emd'] or '읍면동 미상'} 지표 없음 (563)")

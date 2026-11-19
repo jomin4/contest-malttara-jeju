@@ -105,3 +105,31 @@ class UncategorizedTest(unittest.TestCase):
         nothing = {p["place_id"]: p for p in score_places(conn, goal(), S, I)}
         self.assertEqual(nothing["p-mock-west-00"]["interest"], 0.5)
         conn.close()
+
+
+class PopularityTest(unittest.TestCase):
+    """이슈 #16: '덜 붐비는 대안'이 '아무도 안 가는 곳'이 되지 않게 인지도 항, 렌터카 0건은 지표 없음."""
+
+    def setUp(self):
+        self.conn, _ = mock_conn()
+
+    def tearDown(self):
+        self.conn.close()
+
+    def test_popularity_raises_rank_among_equal_interest(self):
+        g = goal(interests=["바다"])
+        before = {p["place_id"]: p for p in score_places(self.conn, g, S, I)}
+        self.conn.execute("UPDATE places SET popularity = 999 WHERE place_id = 'p-mock-east-06'")
+        self.conn.commit()
+        after = {p["place_id"]: p for p in score_places(self.conn, g, S, I)}
+        self.assertGreater(after["p-mock-east-06"]["score"], before["p-mock-east-06"]["score"])
+        self.assertEqual(after["p-mock-east-06"]["records"], 999)
+        self.assertEqual(after["p-mock-east-06"]["popularity"], 1.0)
+
+    def test_zero_rental_stays_is_missing_not_quiet(self):
+        self.conn.execute("UPDATE places SET quiet_count = 0 WHERE place_id = 'p-mock-west-01'")
+        self.conn.commit()
+        p = {x["place_id"]: x for x in score_places(self.conn, goal(), S, I)}["p-mock-west-01"]
+        self.assertTrue(p["indicators"]["nearby"]["missing"])
+        self.assertEqual(p["quiet"], 0.5)
+

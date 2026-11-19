@@ -7,8 +7,9 @@ from malttara.geo import centroid, haversine_km, pct_rank
 class ConfigGeoTest(unittest.TestCase):
     def test_settings_values_from_spec(self):
         s = load_config("settings")
-        self.assertEqual(s["weights"]["default"], [0.6, 0.2, 0.2])
-        self.assertEqual(s["weights"]["quiet"], [0.4, 0.3, 0.3])
+        self.assertEqual(s["weights"]["default"], [0.5, 0.15, 0.15, 0.2])   # 관심·분산·한적·인지도 (이슈 #16)
+        self.assertEqual(s["weights"]["quiet"], [0.4, 0.25, 0.25, 0.1])
+        self.assertAlmostEqual(sum(s["weights"]["default"]), 1.0)
         self.assertEqual(s["pace_k"], {"여유롭게": 3, "보통": 4, "빡빡하게": 5})
         self.assertEqual(s["max_daily_km"], 60)
         self.assertEqual(s["max_days"], 7)
