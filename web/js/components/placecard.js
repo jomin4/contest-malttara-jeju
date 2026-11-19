@@ -1,5 +1,5 @@
 import { h, icon } from "../dom.js";
-import { pct100, REACT, REACT_HINT } from "../format.js";
+import { pct100, REACT, REACT_HINT, shortName } from "../format.js";
 import { dayColor } from "./map.js";
 
 function Indicator(kind, d) {
@@ -25,7 +25,7 @@ export function PlaceRow({ place, num, day, explanations, alternatives, places, 
     h("div", { class: "prow-main" },
       h("div", { class: "pnum", style: { background: dayColor(day) } }, num),
       h("div", { class: "prow-txt" },
-        h("div", { class: "prow-name" }, p.name, badge || null),
+        h("div", { class: "prow-name", title: p.name }, shortName(p.name), badge || null),
         h("div", { class: "prow-meta" }, p.category ?? "분류 없음", legKm != null ? h("span", { class: "leg" }, ` · 앞 장소에서 직선 ${legKm}km`) : null)),
       onReact ? h("div", { class: "react mini" },
         ["interest", "must", "dislike"].map((v) => h("button", { class: `${v} ${reaction === v ? "on" : ""}`, title: `${REACT[v]} — ${REACT_HINT[v]}`,
@@ -35,6 +35,6 @@ export function PlaceRow({ place, num, day, explanations, alternatives, places, 
       p.overview ? h("p", { class: "pov" }, p.overview) : null,
       h("div", { class: "ind-grid" }, Indicator("region", p.indicators.region), Indicator("nearby", p.indicators.nearby)),
       explanations?.length ? h("ul", { class: "why" }, explanations.map((t) => h("li", {}, t))) : null,
-      alternatives?.length ? h("div", { class: "alts" }, "같은 권역 대안 ", alternatives.map((id, i) => [i ? " · " : "", h("b", {}, places?.[id]?.name ?? id)])) : null,
+      alternatives?.length ? h("div", { class: "alts" }, "같은 권역 대안 ", alternatives.map((id, i) => [i ? " · " : "", h("b", { title: places?.[id]?.name }, shortName(places?.[id]?.name) ?? id)])) : null,
       h("div", { class: "src-line" }, `분류 출처 ${SRC[p.category_source] || "없음"} · 장소 출처 ${p.source === "1349" ? "제주데이터허브 1349" : "TourAPI"}`)) : null);
 }

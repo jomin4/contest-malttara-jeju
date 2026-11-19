@@ -3,6 +3,7 @@
 import { h, icon } from "../dom.js";
 import { set } from "../state.js";
 import { dayColor } from "./map.js";
+import { shortName } from "../format.js";
 
 export const MAX_PICKS = 20;
 const SORTS = [["score", "추천순"], ["quiet", "덜 붐비는 순"], ["name", "이름순"]];
@@ -38,7 +39,7 @@ function Row({ p, st, r, A, regionName, inItin }) {
       onmouseenter: () => { if (st.pickHot !== p.place_id) set({ pickHot: p.place_id }); },
       onmouseleave: (e) => { if (e.currentTarget.isConnected && st.pickHot === p.place_id) set({ pickHot: null }); } },
     h("div", { class: "pick-main" },
-      h("div", { class: "pick-name" }, p.name,
+      h("div", { class: "pick-name", title: p.name }, shortName(p.name),
         inItin ? h("span", { class: "badge" }, `${inItin}일차 일정에 있음`) : null),
       h("div", { class: "pick-meta" }, [p.category || "분류 없음", regionName(p.region_id), p.emd?.split(" ")[1]].filter(Boolean).join(" · ")),
       h("div", { class: "pick-meters" }, pctLabel(p.indicators?.region, "동네 한산"), pctLabel(p.indicators?.nearby, "주변 한산")),
@@ -104,7 +105,7 @@ export function PickTray({ st, A, r }) {
       h("b", {}, `담은 장소 ${st.picks.length}곳`),
       h("div", { class: "tray-chips" }, st.picks.map((x) => h("span", { class: "tray-chip" },
         h("span", { class: "sw", style: { background: x.day ? dayColor(x.day) : "#a3a3a3" } }),
-        x.place.name, h("small", {}, x.day ? `${x.day}일차` : "알아서"),
+        shortName(x.place.name), h("small", {}, x.day ? `${x.day}일차` : "알아서"),
         h("button", { "aria-label": `${x.place.name} 빼기`, onclick: () => A.unpick(x.place_id) }, "×"))))),
     h("div", { class: "tray-r" },
       h("button", { class: "btn btn-ghost", onclick: () => set({ picks: [] }) }, "모두 비우기"),
@@ -113,8 +114,8 @@ export function PickTray({ st, A, r }) {
 
 // 지도에 담은 장소(별) + 목록에서 가리킨 장소
 export function pickMarks(st) {
-  const marks = st.picks.map((x) => ({ lat: x.place.lat, lon: x.place.lon, color: x.day ? dayColor(x.day) : "#525252", label: x.place.name, hot: st.pickHot === x.place_id }));
+  const marks = st.picks.map((x) => ({ lat: x.place.lat, lon: x.place.lon, color: x.day ? dayColor(x.day) : "#525252", label: shortName(x.place.name), hot: st.pickHot === x.place_id }));
   const hot = st.pickHot && !st.picks.some((x) => x.place_id === st.pickHot) && st.pickRes?.items?.find((p) => p.place_id === st.pickHot);
-  if (hot) marks.push({ lat: hot.lat, lon: hot.lon, color: "#a3a3a3", label: hot.name, hot: true });
+  if (hot) marks.push({ lat: hot.lat, lon: hot.lon, color: "#a3a3a3", label: shortName(hot.name), hot: true });
   return marks.filter((m) => m.lat != null && m.lon != null);
 }

@@ -3,7 +3,7 @@
 import qrcode from "../../vendor/qrcode/qrcode.mjs";
 import { stringToBytes } from "../../vendor/qrcode/qrcode_UTF8.mjs";
 import { h, s, icon } from "../dom.js";
-import { periodLabel } from "../format.js";
+import { periodLabel, shortName } from "../format.js";
 
 qrcode.stringToBytes = stringToBytes;
 
@@ -15,7 +15,7 @@ export function planText(goal, r, regionName) {
     lines.push(`[${d.day}일차 · ${regionName(d.region_id)}]${route ? ` 직선 ${route.total_km}km` : ""}`);
     d.place_ids.forEach((id, i) => {
       const p = r.places[id];
-      if (p) lines.push(`${i + 1}. ${p.name}${p.category ? ` (${p.category})` : ""}`);
+      if (p) lines.push(`${i + 1}. ${shortName(p.name)}${p.category ? ` (${p.category})` : ""}`);
     });
   }
   lines.push("");

@@ -2,6 +2,7 @@
 // 문장과 수치는 모두 서버 응답(goal, events, explanations, diff, indicators)에서 가져온다. 프론트는 고르고 배치만 한다.
 import { h, icon } from "../dom.js";
 import { periodLabel, TOOL_KO, ACTOR, CHANGE, REACT, distanceLabel, DIST_NOTE } from "../format.js";
+import { shortName as sn } from "../format.js";
 import { dayColor } from "./map.js";
 
 const WHY_TOOLS = new Set(["plan_tasks", "get_region_data", "analyze_tourism", "check_data_quality", "create_itinerary",
@@ -49,7 +50,7 @@ export function WhySection({ st, ctx, r, events, kind, feedback }) {
     kind === "B" && r.diff?.some((x) => x.change !== "keep") ? Step({ n: ++n, title: "이렇게 바꿨어요", children:
       h("ul", { class: "why-list" }, r.diff.filter((x) => x.change !== "keep").map((x) => h("li", {},
         h("span", { class: `chg ${x.change}` }, CHANGE[x.change]), " ",
-        x.change === "replace" ? [h("s", {}, r.places[x.place_id]?.name), " → ", h("b", {}, r.places[x.replaced_by]?.name)] : h("b", {}, r.places[x.place_id]?.name),
+        x.change === "replace" ? [h("s", {}, sn(r.places[x.place_id]?.name)), " → ", h("b", {}, sn(r.places[x.replaced_by]?.name))] : h("b", {}, sn(r.places[x.place_id]?.name)),
         h("span", { class: "muted" }, ` — ${x.reason}`)))) }) : null,
     Step({ n: ++n, title: "날짜별로 이 장소들을 고른 이유", children:
       r.itinerary.days.map((d) => {
@@ -61,7 +62,7 @@ export function WhySection({ st, ctx, r, events, kind, feedback }) {
             const p = r.places[id]; if (!p) return null;
             const why = (r.explanations?.[id] || []).slice(0, 3);
             return h("div", { class: "why-place" },
-              h("b", {}, `${i + 1}. ${p.name}`), feedback?.[id] ? h("span", { class: "badge" }, `내 반응: ${REACT[feedback[id]]}`) : null,
+              h("b", {}, `${i + 1}. ${sn(p.name)}`), feedback?.[id] ? h("span", { class: "badge" }, `내 반응: ${REACT[feedback[id]]}`) : null,
               h("ul", {}, why.map((t) => h("li", {}, t))));
           }));
       }) }),

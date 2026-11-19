@@ -557,7 +557,7 @@ section.why { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--b
 /* ── 6차: 적응형(어떤 화면이든) ─────────────────────────────
    원칙: ① 제목은 절대 눌리지 않는다(버튼이 먼저 줄바꿈) ② 가로 스크롤 금지
    ③ 1100px 미만 1단 ④ 760px 미만 모바일(헤더 축약, 버튼 꽉 채움) */
-html, body { overflow-x: hidden; }
+html, body { overflow-x: clip; }   /* hidden이면 body가 스크롤 상자가 돼 화면 이동 시 맨 위로 안 감 */
 img, svg, canvas { max-width: 100%; }
 .pagehead { flex-wrap: wrap; align-items: flex-end; }
 .pagehead > :first-child { flex: 1 1 380px; min-width: min(380px, 100%); }
@@ -742,3 +742,9 @@ html.touring .toast { z-index: 210; }
 .tour-keys { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--fg-3); }
 .tour-keys .kbd { font-size: 11px; }
 @media (hover: none), (max-width: 640px) { .tour-keys, .tour-enter { display: none; } }
+
+/* ── 9차: 실데이터 긴 이름 ── */
+.prow-name, .pick-name, .arr-name, .target .name, .tray-chip, .why-place b, .changes b { overflow-wrap: anywhere; word-break: keep-all; }
+.tray-chip { max-width: 260px; }
+.tray-chip > :not(button):not(.sw):not(small) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.target .name { line-height: 1.2; }

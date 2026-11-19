@@ -1,0 +1,19 @@
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"Noto Sans CJK KR, Noto Sans KR, sans-serif","fontSize":"15px","primaryColor":"#ffffff","primaryBorderColor":"#0a0a0a","lineColor":"#525252"}}}%%
+flowchart TB
+  U(["여행자<br/>한 줄 입력"]) --> G["조건 읽기<br/>parse_travel_goal<br/><small>LLM · 규칙 폴백</small>"]
+  G -->|기간 필수 확인| P["작업 계획<br/>plan_tasks<br/><small>Tool 추가·생략 + 이유</small>"]
+  subgraph A["Batch A — 경로 생성 (코드가 순서 고정)"]
+    direction LR
+    S["장소 찾기·점수<br/>1349 · 563 · 1208"] --> C["일정 만들기<br/>권역 배정·최근접 순서"]
+    C --> R["거리 계산<br/>직선 km"]
+    R --> V{"검증<br/>60km·권역·중복·개수"}
+    V -->|위반| X["수정 행동 선택<br/><small>LLM: 교체·순서·제외<br/>규칙 폴백</small>"]
+    X -->|최대 2회| V
+  end
+  P --> S
+  V -->|통과/남은 위반 표시| E["설명·기록<br/>배치 ID·판단 기록"]
+  E --> M["03 미리보기<br/>게임 / 목록<br/>좋아요·꼭 갈래요·별로예요<br/>직접 고르기"]
+  M --> B["Batch B — 다시 짜기<br/>반응 분석 → 유지·교체 판단<br/>→ 재검증 → 전후 비교"]
+  B --> F(["04 최종 계획<br/>근거 · QR · 인쇄"])
+  classDef llm fill:#e6f4f1,stroke:#0f766e,color:#0a0a0a;
+  class G,X,P llm;

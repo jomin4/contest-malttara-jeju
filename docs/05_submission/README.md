@@ -42,3 +42,8 @@
 | 오픈소스·외부 코드 | three.js r187 (mrdoob/three.js) | 03 미리보기 3D 지형 지도 `web/vendor/three/` (로컬 동봉) | MIT |
 | 오픈소스·외부 코드 | qrcode-generator 2.0.4 (Kazuhiko Arase) | 04 일정 QR(휴대폰으로 가져가기) `web/vendor/qrcode/` (로컬 동봉) | MIT |
 | 외부 데이터 | Copernicus DEM GLO-30 (타일 N33 E126) | 03 미리보기 3D 지형 높이 `web/assets/terrain.bin` (약 250m 격자로 가공·동봉) | © DLR e.V. 2010-2014, © Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the European Union and ESA. 화면에 출처 표기 |
+| (정정·B 2026-11-19) 오픈소스·외부 코드 | 화면 구현 방식 | 위의 "(UI) Tailwind CSS·Material Symbols" 줄은 초기 계획. **최종 화면은 바닐라 JavaScript(ES 모듈)·직접 쓴 CSS로 구현, Tailwind·Material Symbols·외부 아이콘 미사용**. 아이콘은 직접 그린 SVG 선 아이콘(`web/js/dom.js`), 말 3D 모델은 three.js 기본 도형으로 직접 구성 | 자체 작성 |
+| (정정·B 2026-11-19) 디자인 시안 | design/ui-prototype | 초기 화면 구성 참고로만 사용. 제출 화면(`web/`)에는 시안의 코드·이미지를 포함하지 않음 | — |
+| AI 활용 범위 (개발 도구 포함) | Claude (Anthropic) — Claude Code·Cowork | B 화면 구현·리팩터링, 자동 테스트 스크립트, 원칙 점검, 매뉴얼·기획서 초안 작성 보조. 실행 중 화면은 Claude를 호출하지 않음 | 개발 도구 |
+| 오픈소스·외부 코드 | (개발용) Playwright | 화면 자동 점검 `web/tools/e2e_scenarios.js`·`tour_walkthrough.js`·`check_responsive.js`, 매뉴얼 스크린샷. 실행·제출 동작에 불필요 | Apache-2.0 |
+| 외부 데이터 | (확인) 화면에 표시하는 출처 | 지도 아래 "SGIS 행정동 경계(가공: vuski/admdongkor)", 3D 지도 아래 Copernicus DEM 출처, 근거 패널에 제주데이터허브 데이터 ID(563·1208·189·190·1349)와 기간 표시 | 출처 표기 의무 이행 |

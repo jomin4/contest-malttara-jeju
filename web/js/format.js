@@ -56,3 +56,12 @@ export function stageOf(kind, events, done) {
   if (kind === "B" && t === "validate_itinerary") return 3;
   return Math.min(3, STAGE_OF[t] ?? 0);
 }
+
+// 화면용 짧은 이름: 메모처럼 붙은 설명을 뗀다. 예) "우굼/몰망국수,성게전복장비빔밥" → "우굼",
+// "산이물식당(고등어조림 회 장어구이 등)" → "산이물식당". 원래 이름은 근거·툴팁에 그대로 둔다.
+export function shortName(n) {
+  if (!n) return n;
+  let s = String(n).replace(/\s*[(\[][^)\]]*[)\]]\s*/g, " ").split(/[\/,|]/)[0].replace(/\s+/g, " ").trim();
+  s = s.replace(/^제주도\s+(?=\S)/, "");
+  return s.length >= 2 ? s : String(n).trim();
+}

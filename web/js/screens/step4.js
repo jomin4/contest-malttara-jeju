@@ -2,6 +2,7 @@ import { h, icon } from "../dom.js";
 import { set } from "../state.js";
 import { api } from "../api.js";
 import { CHANGE, violationText } from "../format.js";
+import { shortName as sn } from "../format.js";
 import { LogPanel, Stepper } from "../components/log.js";
 import { LineChart } from "../components/chart.js";
 import { DayList, MapCard, TransportNote } from "./step2.js";
@@ -41,8 +42,8 @@ function Charts(st, ctx, A, B) {
     const labels = ts[0]?.series.map((x) => x.year_month.slice(2).replace("-", ".")) || [];
     const series = [];
     ts.forEach((t, i) => {
-      series.push({ name: `${P[t.place_id].name} 내국인`, color: LINE_COLORS[(i * 2) % LINE_COLORS.length], values: t.series.map((x) => x.domestic) });
-      series.push({ name: `${P[t.place_id].name} 외국인`, color: LINE_COLORS[(i * 2 + 1) % LINE_COLORS.length], values: t.series.map((x) => x.foreign) });
+      series.push({ name: `${sn(P[t.place_id].name)} 내국인`, color: LINE_COLORS[(i * 2) % LINE_COLORS.length], values: t.series.map((x) => x.domestic) });
+      series.push({ name: `${sn(P[t.place_id].name)} 외국인`, color: LINE_COLORS[(i * 2 + 1) % LINE_COLORS.length], values: t.series.map((x) => x.foreign) });
     });
     c2 = ts.length ? LineChart({ labels, series }) : h("div", { class: "side-empty" }, "해당 장소의 입장객 통계 없음");
   }
@@ -76,7 +77,7 @@ export function Step4(st, ctx, A) {
     if (!lines.length) return null;
     return h("ul", { class: "changes" }, lines.map((x) => h("li", {},
       h("span", { class: `chg ${x.change}` }, CHANGE[x.change]),
-      x.change === "replace" ? [h("s", {}, r.places[x.place_id]?.name), " → ", h("b", {}, r.places[x.replaced_by]?.name)] : h("b", {}, r.places[x.place_id]?.name),
+      x.change === "replace" ? [h("s", {}, sn(r.places[x.place_id]?.name)), " → ", h("b", {}, sn(r.places[x.replaced_by]?.name))] : h("b", {}, sn(r.places[x.place_id]?.name)),
       h("span", { class: "muted" }, ` · ${x.reason}`))));
   };
   const changed = diff.filter((x) => x.change !== "keep").length;
