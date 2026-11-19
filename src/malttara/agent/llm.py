@@ -5,9 +5,13 @@
 키는 로그에 남기지 않는다.
 """
 import json
+import threading
+import time
 import urllib.error
 import urllib.request
+from collections import deque
 
+from malttara.agent.guard import SECURITY, SYSTEM_GUARD, clean_text, detect_injection, wrap_user
 from malttara.agent.schema_lite import check_schema
 
 
@@ -44,7 +48,7 @@ def _extract_json(text: str):
 
 class LLMClient:
     def __init__(self, api_key, base_url, model, timeout_s: float, transport=None,
-                 json_mode: str = "schema", extra_body=None):
+                 json_mode: str = "schema", extra_body=None, max_calls_per_min=None):
         self.api_key = api_key
         self.base_url = (base_url or "").rstrip("/")
         self.model = model
@@ -52,10 +56,34 @@ class LLMClient:
         self.transport = transport or _default_transport
         self.json_mode = json_mode if json_mode in ("schema", "prompt") else "schema"
         self.extra_body = dict(extra_body or {})
+        self.max_calls_per_min = max_calls_per_min
+        self._calls = deque()                # 최근 60초 안의 실제 HTTP 호출 시각
+        self._lock = threading.Lock()
+        self._local = threading.local()      # 배치마다 스레드가 달라 상태를 섞지 않는다
 
     @property
     def available(self) -> bool:
         return bool(self.api_key and self.base_url and self.model)
+
+    @property
+    def last_status(self) -> str:
+        """ok · invalid · error · unavailable · injection_suspected · rate_limited"""
+        return getattr(self._local, "status", "ok")
+
+    def _set(self, status: str):
+        self._local.status = status
+
+    def _take_slot(self) -> bool:
+        if not self.max_calls_per_min:
+            return True
+        now = time.monotonic()
+        with self._lock:
+            while self._calls and now - self._calls[0] >= 60:
+                self._calls.popleft()
+            if len(self._calls) >= self.max_calls_per_min:
+                return False
+            self._calls.append(now)
+            return True
 
     def _post(self, messages: list, schema: dict, mode: str):
         body = {"model": self.model, "messages": messages, "temperature": 0}
@@ -71,9 +99,19 @@ class LLMClient:
 
     def chat_json(self, system: str, user: str, schema: dict):
         if not self.available:
+            self._set("unavailable")
             return None
+        user = clean_text(user)
+        if detect_injection(user):           # 의심 입력은 외부로 보내지 않고 규칙으로 넘긴다
+            self._set("injection_suspected")
+            return None
+        system = system + SYSTEM_GUARD
+        user = wrap_user(user)
         modes = [self.json_mode] if self.json_mode == "prompt" else ["schema", "prompt"]
         for mode in modes:
+            if not self._take_slot():
+                self._set("rate_limited")
+                return None
             sys_msg = system
             if mode == "prompt":
                 sys_msg = (system + "\n\n출력 규칙: 아래 '모양'과 같은 키를 가진 JSON 객체 하나만 출력하라. "
@@ -86,11 +124,16 @@ class LLMClient:
             except urllib.error.HTTPError as e:
                 if mode == "schema" and e.code == 400:
                     continue                    # response_format 미지원 → 프롬프트 방식으로 한 번 더
+                self._set("error")
                 return None
             except Exception:
+                self._set("error")
                 return None
             out = _extract_json(content)
-            return out if out is not None and check_schema(out, schema) else None
+            ok = out is not None and check_schema(out, schema)
+            self._set("ok" if ok else "invalid")
+            return out if ok else None
+        self._set("error")
         return None
 
 
@@ -106,4 +149,5 @@ def client_from_env(env: dict, settings: dict) -> LLMClient:
     return LLMClient(env.get("LLM_API_KEY") or None, env.get("LLM_BASE_URL") or None,
                      env.get("LLM_MODEL") or None, timeout,
                      json_mode=env.get("LLM_JSON_MODE") or "schema",
-                     extra_body=extra if isinstance(extra, dict) else {})
+                     extra_body=extra if isinstance(extra, dict) else {},
+                     max_calls_per_min=SECURITY.get("llm_max_calls_per_min"))

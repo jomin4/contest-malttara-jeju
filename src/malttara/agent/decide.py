@@ -31,7 +31,8 @@ def decide(conn, batch_id, point, llm, system, user, schema, accept, fallback, o
         if ok:
             _record(conn, batch_id, point, "llm", options, out, "accepted")
             return out, "llm"
-        reason = "llm_invalid"
+        status = getattr(llm, "last_status", None)
+        reason = status if status in ("injection_suspected", "rate_limited") else "llm_invalid"
     choice = fallback()
     _record(conn, batch_id, point, "rule", options, choice, reason)
     return choice, "rule"
