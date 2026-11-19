@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 680" width="1000" height="680">
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M20 0H0V20" fill="none" stroke="#edf2f0" stroke-width="1"/>
+    </pattern>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#374151"/>
+    </marker>
+    <marker id="art" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0f766e"/>
+    </marker>
+    <marker id="arg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8a9a96"/>
+    </marker>
+    <filter id="glow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#0f766e" flood-opacity="0.22"/>
+    </filter>
+    <filter id="sh" x="-5%" y="-5%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#0b1f1c" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+  <style>
+    text { font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; fill: #111; }
+    .h { font-size: 24px; font-weight: 700; }
+    .s { font-size: 14px; fill: #5b6b67; }
+    .n { font-size: 16px; font-weight: 700; }
+    .k { font-size: 12.5px; fill: #4b5563; }
+    .m { font-family: Consolas, 'Noto Sans KR', monospace; font-size: 12.5px; fill: #5b6b67; }
+    .g { font-size: 13px; fill: #6b7c78; font-weight: 600; }
+    .lt { font-size: 12px; fill: #0f766e; font-weight: 600; }
+    .card { fill: #fff; stroke: #c9d4d1; stroke-width: 1.5; }
+    .grp { fill: none; stroke: #9fb3ae; stroke-width: 1.4; stroke-dasharray: 6 5; }
+    .acc { fill: #eef6f4; stroke: #0f766e; stroke-width: 2.2; }
+    .item { fill: #fff; stroke: #a7d0c9; stroke-width: 1.2; }
+    .line { fill: none; stroke: #374151; stroke-width: 1.6; }
+    .badge { fill: #0f766e; }
+    .bt { font-size: 11px; font-weight: 700; fill: #fff; }
+  </style>
+
+  <rect x="0.5" y="0.5" width="999" height="679" rx="12" fill="#fbfcfc" stroke="#e3e9e7"/>
+  <rect x="1" y="1" width="998" height="678" rx="12" fill="url(#grid)"/>
+
+  <text class="h" x="28" y="44">말따라 제주 — AI Agent 아키텍처</text>
+  <text class="s" x="28" y="70">코드가 순서를 쥐고, AI는 판단 5곳에서 선택지 안만 고른다 · AI가 실패하면 같은 자리를 규칙이 맡는다</text>
+
+  <!-- 여행자 -->
+  <g stroke="#374151" stroke-width="2" fill="none">
+    <circle cx="66" cy="124" r="10"/>
+    <path d="M47,156 a19,17 0 0 1 38,0"/>
+  </g>
+  <text class="n" x="66" y="178" text-anchor="middle" style="font-size:14px">여행자</text>
+  <text class="k" x="66" y="195" text-anchor="middle">키오스크 한 줄</text>
+  <path class="line" d="M92,145 H118" marker-end="url(#ar)"/>
+
+  <!-- 조건 읽기 -->
+  <g filter="url(#sh)"><rect class="card" x="120" y="108" width="180" height="74" rx="10"/></g>
+  <rect class="badge" x="262" y="116" width="28" height="18" rx="9"/><text class="bt" x="276" y="129" text-anchor="middle">AI</text>
+  <text class="n" x="134" y="133">조건 읽기</text>
+  <text class="m" x="134" y="153">parse_travel_goal</text>
+  <text class="k" x="134" y="171">미입력 조건은 미반영</text>
+  <path class="line" d="M300,145 H338" marker-end="url(#ar)"/>
+
+  <!-- 작업 계획 -->
+  <g filter="url(#sh)"><rect class="card" x="340" y="108" width="200" height="74" rx="10"/></g>
+  <rect class="badge" x="502" y="116" width="28" height="18" rx="9"/><text class="bt" x="516" y="129" text-anchor="middle">AI</text>
+  <text class="n" x="354" y="133">작업 계획</text>
+  <text class="m" x="354" y="153">plan_tasks</text>
+  <text class="k" x="354" y="171">도구 추가·생략 + 이유</text>
+
+  <!-- AI 연결 -->
+  <path d="M542,132 H638" fill="none" stroke="#0f766e" stroke-width="1.6" stroke-dasharray="5 4" marker-start="url(#art)" marker-end="url(#art)"/>
+  <text class="lt" x="590" y="124" text-anchor="middle">판단만 돌려받음</text>
+
+  <!-- Claude 강조 -->
+  <g filter="url(#glow)"><rect class="acc" x="640" y="100" width="334" height="218" rx="14"/></g>
+  <text x="658" y="130" style="font-size:18px;font-weight:700;fill:#0b5d56">Claude Haiku 5.5</text>
+  <text class="m" x="658" y="150">Anthropic Messages API · urllib</text>
+  <rect class="item" x="658" y="164" width="298" height="30" rx="7"/>
+  <text class="k" x="672" y="184"><tspan style="font-weight:700;fill:#0b5d56">판단 5곳</tspan> — 선택지 안에서만 (ID·정해진 값)</text>
+  <rect class="item" x="658" y="200" width="298" height="30" rx="7"/>
+  <text class="k" x="672" y="220"><tspan style="font-weight:700;fill:#0b5d56">보안 가드</tspan> — 인젝션·출력 검사·개인정보</text>
+  <rect class="item" x="658" y="236" width="298" height="30" rx="7"/>
+  <text class="k" x="672" y="256"><tspan style="font-weight:700;fill:#0b5d56">비용</tspan> — 생각 끔·짧은 출력·분당 상한</text>
+  <rect class="item" x="658" y="272" width="298" height="30" rx="7"/>
+  <text class="k" x="672" y="292"><tspan style="font-weight:700;fill:#0b5d56">실패하면</tspan> — 같은 자리를 규칙이 대신 (0원)</text>
+
+  <path class="line" d="M440,182 V226" marker-end="url(#ar)"/>
+
+  <!-- Batch A 묶음 -->
+  <rect class="grp" x="28" y="228" width="582" height="242" rx="14"/>
+  <text class="g" x="44" y="252">Batch A · 경로 생성 — 코드가 순서를 고정</text>
+
+  <g filter="url(#sh)"><rect class="card" x="44" y="266" width="180" height="70" rx="10"/></g>
+  <text class="n" x="58" y="290">장소 찾기·점수</text>
+  <text class="m" x="58" y="309">1349·563·1208</text>
+  <text class="k" x="58" y="326">관심사·분산·한적·인지도</text>
+
+  <g filter="url(#sh)"><rect class="card" x="240" y="266" width="180" height="70" rx="10"/></g>
+  <text class="n" x="254" y="290">일정 만들기</text>
+  <text class="k" x="254" y="309">하루 1권역·대표지 1곳</text>
+  <text class="k" x="254" y="326">최근접 순서·음식 삽입</text>
+
+  <g filter="url(#sh)"><rect class="card" x="436" y="266" width="160" height="70" rx="10"/></g>
+  <text class="n" x="450" y="290">거리 계산</text>
+  <text class="m" x="450" y="309">calculate_route</text>
+  <text class="k" x="450" y="326">직선 km (시간 아님)</text>
+
+  <path class="line" d="M224,301 H238" marker-end="url(#ar)"/>
+  <path class="line" d="M420,301 H434" marker-end="url(#ar)"/>
+  <path class="line" d="M516,336 V356 H316 V374" marker-end="url(#ar)"/>
+
+  <g filter="url(#sh)"><rect class="card" x="44" y="376" width="160" height="70" rx="10"/></g>
+  <rect class="badge" x="166" y="384" width="28" height="18" rx="9"/><text class="bt" x="180" y="397" text-anchor="middle">AI</text>
+  <text class="n" x="58" y="400">설명·기록</text>
+  <text class="k" x="58" y="419">근거 문장 다듬기</text>
+  <text class="k" x="58" y="436">배치 ID·판단 기록</text>
+
+  <g filter="url(#sh)"><rect class="card" x="236" y="376" width="160" height="70" rx="10"/></g>
+  <text class="n" x="250" y="400">검증</text>
+  <text class="m" x="250" y="419">validate_itinerary</text>
+  <text class="k" x="250" y="436">60km·권역·중복·개수</text>
+
+  <g filter="url(#sh)"><rect class="card" x="450" y="376" width="146" height="70" rx="10"/></g>
+  <rect class="badge" x="558" y="384" width="28" height="18" rx="9"/><text class="bt" x="572" y="397" text-anchor="middle">AI</text>
+  <text class="n" x="464" y="400">수정 행동</text>
+  <text class="k" x="464" y="419">교체·순서·제외</text>
+  <text class="k" x="464" y="436">최대 2회·재검증</text>
+
+  <path class="line" d="M396,398 H448" marker-end="url(#ar)"/>
+  <text class="k" x="423" y="392" text-anchor="middle" style="font-size:11px">위반</text>
+  <path class="line" d="M450,424 H398" marker-end="url(#ar)"/>
+  <text class="k" x="423" y="440" text-anchor="middle" style="font-size:11px">재검증</text>
+  <path class="line" d="M236,411 H206" marker-end="url(#ar)"/>
+  <text class="k" x="221" y="405" text-anchor="middle" style="font-size:11px">통과</text>
+
+  <!-- DB -->
+  <g stroke="#374151" stroke-width="1.8" fill="#fff">
+    <path d="M761,384 V430 a46,12 0 0 0 92,0 V384"/>
+    <ellipse cx="807" cy="384" rx="46" ry="12"/>
+  </g>
+  <path d="M761,404 H612" fill="none" stroke="#8a9a96" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arg)"/>
+  <text class="k" x="686" y="396" text-anchor="middle" style="font-size:11px">조회</text>
+  <text class="n" x="807" y="468" text-anchor="middle" style="font-size:14px">가공 DB</text>
+  <text class="m" x="807" y="486" text-anchor="middle">SQLite · 1349·563·1208</text>
+  <text class="k" x="807" y="503" text-anchor="middle">실행 중 데이터 API 0회</text>
+
+  <path class="line" d="M124,446 V508" marker-end="url(#ar)"/>
+
+  <!-- 미리보기 → Batch B → 04 -->
+  <g filter="url(#sh)"><rect class="card" x="44" y="510" width="220" height="70" rx="10"/></g>
+  <text class="n" x="58" y="534">03 미리보기</text>
+  <text class="k" x="58" y="553">게임 · 목록 (선택)</text>
+  <text class="k" x="58" y="570">좋아요·꼭 갈래요·별로예요</text>
+  <path class="line" d="M264,545 H298" marker-end="url(#ar)"/>
+
+  <g filter="url(#sh)"><rect class="card" x="300" y="510" width="220" height="70" rx="10"/></g>
+  <rect class="badge" x="482" y="518" width="28" height="18" rx="9"/><text class="bt" x="496" y="531" text-anchor="middle">AI</text>
+  <text class="n" x="314" y="534">Batch B 다시 짜기</text>
+  <text class="k" x="314" y="553">반응 분석·유지/교체 판단</text>
+  <text class="k" x="314" y="570">고정·교체는 코드가 강제</text>
+  <path class="line" d="M520,545 H554" marker-end="url(#ar)"/>
+
+  <g filter="url(#sh)"><rect class="card" x="556" y="510" width="180" height="70" rx="10"/></g>
+  <text class="n" x="570" y="534">04 최종 계획</text>
+  <text class="k" x="570" y="553">변경 전후·근거</text>
+  <text class="k" x="570" y="570">QR로 휴대폰 · 인쇄</text>
+
+  <!-- 범례 -->
+  <line x1="28" y1="608" x2="972" y2="608" stroke="#e3e9e7"/>
+  <rect class="card" x="28" y="626" width="34" height="20" rx="5"/>
+  <text class="k" x="70" y="641">코드 도구</text>
+  <rect class="badge" x="150" y="627" width="28" height="18" rx="9"/><text class="bt" x="164" y="640" text-anchor="middle">AI</text>
+  <text class="k" x="186" y="641">LLM 판단 지점 (실패 시 규칙)</text>
+  <rect class="grp" x="384" y="626" width="34" height="20" rx="5"/>
+  <text class="k" x="426" y="641">코드가 순서를 고정하는 묶음</text>
+  <rect class="acc" x="620" y="626" width="34" height="20" rx="5"/>
+  <text class="k" x="662" y="641">외부 LLM — 판단만 하고 적용은 코드</text>
+</svg>

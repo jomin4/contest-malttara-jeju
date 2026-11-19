@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="1000" height="560">
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M20 0H0V20" fill="none" stroke="#edf2f0" stroke-width="1"/>
+    </pattern>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#374151"/>
+    </marker>
+    <marker id="arg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7b8794"/>
+    </marker>
+    <filter id="glow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#0f766e" flood-opacity="0.22"/>
+    </filter>
+    <filter id="sh" x="-5%" y="-5%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#0b1f1c" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+  <style>
+    text { font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; fill: #111; }
+    .h { font-size: 24px; font-weight: 700; }
+    .s { font-size: 14px; fill: #5b6b67; }
+    .n { font-size: 15.5px; font-weight: 700; }
+    .k { font-size: 12.5px; fill: #4b5563; }
+    .m { font-family: Consolas, 'Noto Sans KR', monospace; font-size: 12.5px; fill: #5b6b67; }
+    .r { font-family: Consolas, 'Noto Sans KR', monospace; font-size: 12px; fill: #4b5563; font-weight: 700; }
+    .g { font-size: 13px; fill: #6b7c78; font-weight: 600; }
+    .card { fill: #fff; stroke: #c9d4d1; stroke-width: 1.5; }
+    .grp { fill: none; stroke: #9fb3ae; stroke-width: 1.4; stroke-dasharray: 6 5; }
+    .acc { fill: #eef6f4; stroke: #0f766e; stroke-width: 2.2; }
+    .item { fill: #fff; stroke: #a7d0c9; stroke-width: 1.2; }
+    .line { fill: none; stroke: #374151; stroke-width: 1.6; }
+    .fail { fill: none; stroke: #7b8794; stroke-width: 1.5; stroke-dasharray: 5 4; }
+  </style>
+
+  <rect x="0.5" y="0.5" width="999" height="559" rx="12" fill="#fbfcfc" stroke="#e3e9e7"/>
+  <rect x="1" y="1" width="998" height="558" rx="12" fill="url(#grid)"/>
+
+  <text class="h" x="28" y="44">LLM 호출 보안 관문</text>
+  <text class="s" x="28" y="70">관문에서 막히면 그 자리에서 규칙 모드로 넘어간다 — 서비스는 멈추지 않고, 막힌 사유는 판단 기록에 남는다</text>
+
+  <!-- 입력 -->
+  <g filter="url(#sh)"><rect class="card" x="28" y="118" width="112" height="80" rx="10"/></g>
+  <text class="n" x="42" y="143">키오스크</text>
+  <text class="k" x="42" y="163">한 줄 입력</text>
+  <text class="k" x="42" y="181">누구나 입력</text>
+  <path class="line" d="M140,158 H170" marker-end="url(#ar)"/>
+
+  <!-- 입력 쪽 묶음 -->
+  <rect class="grp" x="158" y="88" width="634" height="124" rx="14"/>
+  <text class="g" x="172" y="108">입력 쪽 — LLM에 보내기 전</text>
+
+  <g filter="url(#sh)"><rect class="card" x="172" y="118" width="138" height="80" rx="10"/></g>
+  <text class="n" x="186" y="143">① 정리</text>
+  <text class="k" x="186" y="163">보이지 않는 문자</text>
+  <text class="k" x="186" y="181">태그 위장 제거</text>
+
+  <g filter="url(#sh)"><rect class="card" x="326" y="118" width="138" height="80" rx="10"/></g>
+  <text class="n" x="340" y="143">② 개인정보</text>
+  <text class="k" x="340" y="163">전화·이메일 등</text>
+  <text class="m" x="340" y="181">→ [개인정보]</text>
+
+  <g filter="url(#sh)"><rect class="card" x="480" y="118" width="138" height="80" rx="10"/></g>
+  <text class="n" x="494" y="143">③ 인젝션 탐지</text>
+  <text class="k" x="494" y="163">규칙 패턴</text>
+  <text class="m" x="494" y="181">security.json</text>
+
+  <g filter="url(#sh)"><rect class="card" x="634" y="118" width="138" height="80" rx="10"/></g>
+  <text class="n" x="648" y="143">④ 호출 상한</text>
+  <text class="k" x="648" y="163">분당 30회</text>
+  <text class="k" x="648" y="181">평가용 키 한도</text>
+
+  <path class="line" d="M310,158 H324" marker-end="url(#ar)"/>
+  <path class="line" d="M464,158 H478" marker-end="url(#ar)"/>
+  <path class="line" d="M618,158 H632" marker-end="url(#ar)"/>
+  <path class="line" d="M772,158 H810" marker-end="url(#ar)"/>
+
+  <!-- Claude -->
+  <g filter="url(#glow)"><rect class="acc" x="812" y="88" width="168" height="124" rx="14"/></g>
+  <text x="826" y="112" style="font-size:15.5px;font-weight:700;fill:#0b5d56">Claude Haiku 5.5</text>
+  <rect class="item" x="824" y="122" width="144" height="24" rx="6"/>
+  <text class="k" x="834" y="139" style="font-size:12px">⑤ 경계 태그로 감쌈</text>
+  <rect class="item" x="824" y="151" width="144" height="24" rx="6"/>
+  <text class="k" x="834" y="168" style="font-size:12px">보안 규칙(시스템)</text>
+  <rect class="item" x="824" y="180" width="144" height="24" rx="6"/>
+  <text class="k" x="834" y="197" style="font-size:12px">JSON 스키마 강제</text>
+
+  <!-- 규칙 폴백 레인 -->
+  <rect x="158" y="252" width="634" height="48" rx="10" fill="#f3f4f6" stroke="#a3acb0" stroke-width="1.2"/>
+  <text x="475" y="282" text-anchor="middle" style="font-size:14.5px;font-weight:700;fill:#374151">규칙 폴백 — 0원 · 같은 기능 · 판단 기록에 사유</text>
+
+  <path class="fail" d="M549,198 V250" marker-end="url(#arg)"/>
+  <text class="r" x="556" y="232">injection_suspected</text>
+  <path class="fail" d="M703,198 V250" marker-end="url(#arg)"/>
+  <text class="r" x="710" y="232">rate_limited</text>
+  <path class="fail" d="M840,212 V272 H794" marker-end="url(#arg)"/>
+  <text class="r" x="848" y="246">llm_error</text>
+  <text class="k" x="848" y="262" style="font-size:11px">장애·시간 초과</text>
+
+  <!-- 통과 경로: Claude → 출력 쪽 -->
+  <path class="line" d="M920,212 V350" marker-end="url(#ar)"/>
+
+  <!-- 출력 쪽 묶음 -->
+  <rect class="grp" x="618" y="322" width="362" height="124" rx="14"/>
+  <text class="g" x="632" y="342">출력 쪽 — 받은 뒤</text>
+
+  <g filter="url(#sh)"><rect class="card" x="820" y="352" width="146" height="80" rx="10"/></g>
+  <text class="n" x="834" y="377">⑥ 스키마 검사</text>
+  <text class="k" x="834" y="397">키·enum·범위</text>
+  <text class="k" x="834" y="415">틀리면 폐기</text>
+
+  <g filter="url(#sh)"><rect class="card" x="632" y="352" width="164" height="80" rx="10"/></g>
+  <text class="n" x="646" y="377">⑦ 자유 문장 검사</text>
+  <text class="k" x="646" y="397">URL·연락처·HTML</text>
+  <text class="k" x="646" y="415">길이·권역명 보존</text>
+
+  <path class="line" d="M820,392 H798" marker-end="url(#ar)"/>
+  <path class="fail" d="M714,352 V302" marker-end="url(#arg)"/>
+  <text class="r" x="704" y="316" text-anchor="end">llm_invalid</text>
+  <path class="fail" d="M862,352 V316 H758 V302" marker-end="url(#arg)"/>
+
+  <!-- 적용·결과 -->
+  <path class="line" d="M632,392 H602" marker-end="url(#ar)"/>
+  <g filter="url(#sh)"><rect class="card" x="400" y="352" width="200" height="80" rx="10"/></g>
+  <text class="n" x="414" y="377">코드가 검증·적용</text>
+  <text class="k" x="414" y="397">ID·범위 다시 검사</text>
+  <text class="k" x="414" y="415">수치는 언제나 코드</text>
+
+  <path class="line" d="M400,392 H370" marker-end="url(#ar)"/>
+  <g filter="url(#sh)"><rect class="card" x="158" y="352" width="210" height="80" rx="10"/></g>
+  <text class="n" x="172" y="377">화면 · DB</text>
+  <text class="k" x="172" y="397">원문 개인정보 없음</text>
+  <text class="k" x="172" y="415">판단·토큰 사용량 기록</text>
+
+  <!-- 범례·주석 -->
+  <line x1="28" y1="474" x2="972" y2="474" stroke="#e3e9e7"/>
+  <path class="line" d="M28,500 H70" marker-end="url(#ar)"/>
+  <text class="k" x="80" y="504">통과</text>
+  <path class="fail" d="M130,500 H172" marker-end="url(#arg)"/>
+  <text class="k" x="182" y="504">막힘 → 규칙 폴백 (사유 기록)</text>
+  <text class="k" x="420" y="504">③은 첫 번째 그물이라 새 표현에는 우회될 수 있다.</text>
+  <text class="k" x="420" y="524">본 방어선은 선택지 구조와 출력 검사다(그림 B).</text>
+</svg>
