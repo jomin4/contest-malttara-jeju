@@ -95,3 +95,17 @@ class NearDuplicateNameTest(unittest.TestCase):
         b = {"place_id": "b", "name": "한라산 트레킹", "lat": 33.40, "lon": 126.60}
         self.assertTrue(is_duplicate(b, [a]))
 
+
+class AnchorTest(unittest.TestCase):
+    def test_each_day_includes_most_recorded_interest_match(self):
+        conn, _ = mock_conn()
+        conn.execute("UPDATE places SET popularity = 500 WHERE place_id = 'p-mock-west-06'")   # 서부 해수욕장
+        conn.commit()
+        g = goal(days=1, pace="여유롭게", interests=["바다"])
+        scored = score_places(conn, g, S, I)
+        general = search_places(conn, g, S, I, limit=500, scored=scored)
+        west = [p for p in general if p["region_id"] == "west"]
+        it = create_itinerary(west, {}, g, S, region_order=region_order(R))
+        self.assertIn("p-mock-west-06", it["days"][0]["place_ids"])
+        conn.close()
+

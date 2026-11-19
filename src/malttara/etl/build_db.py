@@ -21,7 +21,7 @@ from malttara.db import connect, meta_set
 from malttara.geo import haversine_km
 from malttara.etl.boundaries import ATTRIBUTION, build_map, find_boundary_file, load_polygons, nearest_emd
 from malttara.etl.categorize import _keyword_category, _match_prepared, _prepare, categorize_places
-from malttara.etl.clean_places import assign_region, clean_1349, emd_of_point
+from malttara.etl.clean_places import assign_region, clean_1349, clean_display_name, emd_of_point
 from malttara.etl.emd_stats import aggregate_563
 from malttara.etl.names import load_mapping, normalize_name, open_csv, read_csv_rows
 from malttara.etl.quiet import quiet_counts, read_1208_points
@@ -404,6 +404,17 @@ def build_db(raw_dir: str, out_db: str, out_map: str, log=print, mapping_dir: st
     stats["sights_matched"] = len(mapping)
     stats["sight_visit_rows"] = len(visits)
 
+    # 6.4) 인지도: 1349 원본에서 같은 이름으로 남긴 여행자 기록 수(정제 전, 좌표 무관)
+    pre = etl_cfg.get("name_prefixes", [])
+    name_counts = {}
+    for r in rows:
+        k = normalize_name(clean_display_name(r.get("장소명") or ""), pre)
+        if k:
+            name_counts[k] = name_counts.get(k, 0) + 1
+    for p in places:
+        p["popularity"] = name_counts.get(normalize_name(p["name"], pre), 0)
+    stats["places_with_records"] = sum(1 for p in places if p["popularity"])
+
     # 6.5) 화면용 분류 이름, 추천·목록 대상 범위
     disp = etl_cfg.get("category_display", {})
     for p in places:
@@ -424,7 +435,7 @@ def build_db(raw_dir: str, out_db: str, out_map: str, log=print, mapping_dir: st
         conn.executemany("INSERT INTO regions(region_id, name) VALUES (?, ?)",
                          [(r["region_id"], r["name"]) for r in regions_cfg["regions"]])
         cols = ("place_id", "name", "lat", "lon", "emd", "region_id", "category", "category_source",
-                "overview", "source", "quiet_count", "in_scope")
+                "overview", "source", "quiet_count", "popularity", "in_scope")
         conn.executemany(f"INSERT INTO places({', '.join(cols)}) VALUES ({', '.join('?' for _ in cols)})",
                          [tuple(p.get(c) for c in cols) for p in places])
         conn.executemany(

@@ -141,7 +141,16 @@ def create_itinerary(candidates: list, slot_candidates: dict, goal: dict, settin
             if pick:
                 slot_ids.append(pick["place_id"])
         general = []
-        for p in by_region[region]:
+        # 대표지 1곳: 그 권역에서 관심사가 가장 잘 맞는 장소 중 여행자 기록(인지도)이 가장 많은 곳 → 나머지는 점수 순
+        # (덜 붐비는 곳'만'이 아니라 대표지와 함께 추천 — 이슈 #16)
+        pool = by_region[region]
+        if pool and max(p.get("records") or 0 for p in pool) > 0 and k - len(slot_ids) > 0:
+            top_interest = max(p.get("interest", 0) for p in pool)
+            anchor = max((p for p in pool if p.get("interest", 0) == top_interest),
+                         key=lambda p: (p.get("records") or 0, p["score"]), default=None)
+            if anchor is not None and take(anchor):
+                general.append(anchor["place_id"])
+        for p in pool:
             if len(general) >= max(0, k - len(slot_ids)):
                 break
             if take(p):

@@ -44,6 +44,7 @@ def _places():
                 "overview": None if i % 4 == 3 else f"모의 개요 {rid}-{i:02d}",
                 "source": "tourapi" if cat in ("음식점", "카페") else "1349",
                 "quiet_count": quiet,
+                "popularity": (i * 7 + r_idx * 3) % 20,
                 "in_scope": 1,
             })
     return out

@@ -12,7 +12,7 @@ from malttara.tools.route import calculate_route
 from malttara.tools.validate import validate_itinerary
 
 PLACE_FIELDS = ("place_id", "name", "lat", "lon", "emd", "region_id", "region_name", "category", "category_source",
-                "overview", "source", "score", "interest", "spread", "quiet", "indicators", "has_trend", "slot")
+                "overview", "source", "score", "interest", "spread", "quiet", "indicators", "has_trend", "slot", "records", "popularity")
 
 REVISE_SCHEMA = {
     "type": "object", "required": ["type", "day", "place_id"], "additionalProperties": False,

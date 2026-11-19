@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS places (
     overview TEXT,
     source TEXT,
     quiet_count INTEGER,
+    popularity INTEGER,              -- 1349 이용자 기록 수(같은 이름) — 인지도
     in_scope INTEGER NOT NULL DEFAULT 1
 );
 CREATE TABLE IF NOT EXISTS sight_visits (
@@ -83,13 +84,16 @@ CREATE INDEX IF NOT EXISTS idx_inter_batch ON user_interactions(batch_id);
 """
 
 PLACE_COLUMNS = ("place_id", "name", "lat", "lon", "emd", "region_id", "category",
-                 "category_source", "overview", "source", "quiet_count", "in_scope")
+                 "category_source", "overview", "source", "quiet_count", "popularity", "in_scope")
 
 
 def connect(path: str) -> sqlite3.Connection:
     conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(places)")}
+    if "popularity" not in cols:                 # 11/19 이전 DB(Release data-2026-11-19 이하)와 호환
+        conn.execute("ALTER TABLE places ADD COLUMN popularity INTEGER")
     return conn
 
 

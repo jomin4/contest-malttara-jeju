@@ -38,7 +38,8 @@ def score_places(conn, goal: dict, settings: dict, interests_cfg: dict, boosts=N
     stats = emd_stats(conn, month)
     ratios = [s["visit_ratio"] for s in stats.values() if s["visit_ratio"] is not None]
     places = all_places(conn)
-    quiets = [p["quiet_count"] for p in places if p["quiet_count"] is not None]
+    quiets = [p["quiet_count"] for p in places if p["quiet_count"]]          # 0건은 '한적'이 아니라 데이터 공백
+    pops = [p.get("popularity") or 0 for p in places]
     names = region_names(conn)
     trend_ids = {r["place_id"] for r in conn.execute("SELECT DISTINCT place_id FROM sight_visits")}
     nearby_period = _period(conn, "1208")
@@ -63,7 +64,7 @@ def score_places(conn, goal: dict, settings: dict, interests_cfg: dict, boosts=N
             region_ind = {"emd": p["emd"], "visit_ratio": None, "pct": None, "period": None,
                           "month": month, "source_id": "563", "missing": True}
 
-        if p["quiet_count"] is not None:
+        if p["quiet_count"]:
             qpct = pct_rank(p["quiet_count"], quiets)
             quiet = 1 - qpct
             nearby_ind = {"quiet_count": p["quiet_count"], "pct": round(qpct, 4), "radius_km": radius,
@@ -73,11 +74,14 @@ def score_places(conn, goal: dict, settings: dict, interests_cfg: dict, boosts=N
             nearby_ind = {"quiet_count": None, "pct": None, "radius_km": radius,
                           "period": nearby_period, "source_id": "1208", "missing": True}
 
+        pop = pct_rank(p.get("popularity") or 0, pops) if any(pops) else 0.0
         q = dict(p)
         q.update({
             "region_name": names.get(p["region_id"]),
             "interest": round(interest, 4), "spread": round(spread, 4), "quiet": round(quiet, 4),
-            "score": round(w[0] * interest + w[1] * spread + w[2] * quiet, 6),
+            "records": p.get("popularity") or 0,
+            "popularity": round(pop, 4),
+            "score": round(w[0] * interest + w[1] * spread + w[2] * quiet + (w[3] * pop if len(w) > 3 else 0), 6),
             "indicators": {"region": region_ind, "nearby": nearby_ind},
             "has_trend": p["place_id"] in trend_ids,
             "slot": next((k for k, cats in slots.items() if p["category"] in cats), None),
