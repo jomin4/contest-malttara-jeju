@@ -49,14 +49,14 @@ def _one_edit(a: str, b: str) -> bool:
 
 
 def is_duplicate(p: dict, chosen: list) -> bool:
-    """이미 고른 장소와 같은 곳의 다른 기록인지. 이름이 같거나 한쪽이 다른 쪽을 포함(4자 이상),
+    """이미 고른 장소와 같은 곳의 다른 기록인지. 이름이 같거나 한쪽이 다른 쪽을 포함(핵심 이름 3자 이상),
     3km 안에서 이름이 한 글자만 다름(오타), 또는 둘 다 일반 장소(slot 없음)이고 DUP_KM 안."""
     n = _core(p.get("name", ""))
     for q in chosen:
         if q["place_id"] == p["place_id"]:
             return True
         m = _core(q.get("name", ""))
-        if n and m and (n == m or (min(len(n), len(m)) >= 4 and (n in m or m in n))):
+        if n and m and (n == m or (min(len(n), len(m)) >= 3 and (n in m or m in n))):   # "한라산" ⊂ "한라산 하산"
             return True
         a, b = _norm(p.get("name", "")), _norm(q.get("name", ""))
         if min(len(a), len(b)) >= 4 and (a in b or b in a):

@@ -27,15 +27,17 @@ def match_sights(sight_names: list, places: list, manual: dict, prefixes: list) 
     """
     by_key = {}
     for p in places:
-        by_key.setdefault(_sight_key(p.get("name", ""), prefixes), []).append(p["place_id"])
+        by_key.setdefault(_sight_key(p.get("name", ""), prefixes), []).append(p)
     out = {}
     for name in sight_names:
         if name in manual:
             out[name] = manual[name]
             continue
-        ids = by_key.get(_sight_key(name, prefixes), [])
-        if len(ids) == 1:
-            out[name] = ids[0]
+        cands = by_key.get(_sight_key(name, prefixes), [])
+        if len(cands) > 1:                      # 여럿이면 분류가 있는 기록이 하나일 때만 그것으로
+            cands = [p for p in cands if p.get("category")]
+        if len(cands) == 1:
+            out[name] = cands[0]["place_id"]
     return out
 
 

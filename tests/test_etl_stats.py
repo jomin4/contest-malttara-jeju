@@ -77,3 +77,10 @@ class EtlStatsTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SightsAmbiguityTest(unittest.TestCase):
+    def test_ambiguous_name_resolved_by_category(self):
+        from malttara.etl.sights import match_sights
+        places = [{"place_id": "a", "name": "비자림", "category": None}, {"place_id": "b", "name": "비자림", "category": "숲"}]
+        self.assertEqual(match_sights(["비자림"], places, {}, ["제주"]), {"비자림": "b"})
