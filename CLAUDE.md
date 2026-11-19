@@ -49,7 +49,7 @@ UI 프로토타입에는 이 원칙과 어긋나는 요소(하드코딩된 km·�
 
 ## 결정 현황
 
-- 확정: D1 키오스크 · D2 2인/11월 19일 밤 작동 · D5 Solar Pro 4 + 규칙 폴백 · D6 바닐라 JS+SVG(Phaser·React 미사용, 11/17 변경) · D7 API 모드 + 규칙 기반 폴백 · D8 11/18 기능 동결
+- 확정: D1 키오스크 · D2 2인/11월 19일 밤 작동 · D5 Claude Haiku 5.5 + 규칙 폴백(11/19 변경, Solar Pro 4 대신) · D6 바닐라 JS+SVG(Phaser·React 미사용, 11/17 변경) · D7 API 모드 + 규칙 기반 폴백 · D8 11/18 기능 동결
 - 확정(11/16): D3 필수 데이터 · D4 본섬 전역·5권역 · D9~D16 · **D17 실행 중 서버는 Python 표준 라이브러리만** · D18 가공 DB 동봉 → `docs/01_planning/decisions.md`
 
 ## 팀 협업 (2인, 공개 GitHub 저장소 jomin4/malttara-jeju)

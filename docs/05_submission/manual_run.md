@@ -16,7 +16,7 @@
 | Node.js·빌드 도구 | 필요 없음. 화면(`web/dist`)은 이미 만들어진 파일로 동봉한다 |
 | GPU·VRAM | 사용하지 않음. 로컬 AI 모델을 돌리지 않는다 |
 | 브라우저 | Chrome 또는 Edge 최신판 (Windows 기본 브라우저가 자동으로 열린다) |
-| 인터넷 | 없어도 전 기능이 돈다(규칙 기반 모드). 있고 AI 키가 있으면 외부 AI(Upstage Solar Pro 4)를 쓴다 |
+| 인터넷 | 없어도 전 기능이 돈다(규칙 기반 모드). 있고 AI 키가 있으면 외부 AI(Claude Haiku 5.5)를 쓴다 |
 | 디스크 | 압축 해제 후 수십 MB 수준. 압축을 푼 폴더에 **쓰기 권한**이 있어야 한다(실행 기록을 DB에 저장) |
 | 서명 없는 확장 모듈(.pyd/.dll) | 쓰지 않음. 외부 패키지를 설치하지 않으므로 센터 보안 정책의 확장 모듈 실행 제한에 걸리지 않는다 |
 
@@ -91,14 +91,16 @@ malttara-jeju/
 
 | 이름 | 뜻 | 평가용 값(예시 형식, 실제 키는 제출본 `.env`에만) |
 |---|---|---|
-| `LLM_API_KEY` | 외부 AI API 키 | Upstage 콘솔에서 발급한 키 (이 문서에는 적지 않는다) |
-| `LLM_BASE_URL` | API 주소 | `https://api.upstage.ai/v1` |
-| `LLM_MODEL` | 모델 이름 | `solar-pro4` |
-| `LLM_JSON_MODE` | JSON 응답 방식 | `schema` |
-| `LLM_EXTRA_BODY` | 추가 요청 값(JSON) | 비워 둔다 |
+| `LLM_API_KEY` | 외부 AI API 키 | Anthropic Console(platform.claude.com)에서 발급한 키 (이 문서에는 적지 않는다) |
+| `LLM_PROVIDER` | API 종류 | `anthropic` |
+| `LLM_BASE_URL` | API 주소 | `https://api.anthropic.com` |
+| `LLM_MODEL` | 모델 이름 | `claude-haiku-5-5` (Claude Haiku 5.5) |
 
-- 세 값(`LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`)이 모두 있어야 AI를 쓴다. 하나라도 비면 규칙 기반이다.
-- AI 호출 1회 제한 시간은 20초(`config/settings.json`의 `llm.timeout_s`). 실패·시간 초과·형식 오류면 그 판단만 규칙으로 바꿔 계속 진행한다.
+- `LLM_API_KEY`와 `LLM_MODEL`이 있어야 AI를 쓴다(`LLM_PROVIDER=anthropic`이면 주소는 비워도 기본값). 하나라도 비면 규칙 기반이다.
+- 추가 패키지 없이 Python 표준 라이브러리(`urllib`)로 Anthropic Messages API(`/v1/messages`)를 호출한다.
+- AI 호출 1회 제한 시간은 20초, 응답 길이 상한은 1,024토큰(`config/settings.json`의 `llm`). 실패·시간 초과·형식 오류면 그 판단만 규칙으로 바꿔 계속 진행한다.
+- 분당 AI 호출은 30회까지(`config/security.json`). 넘으면 규칙으로 처리한다.
+- 실제로 쓴 토큰은 DB의 `llm_usage` 표에 남는다. 집계: `py -3 -m malttara.agent.usage` (`src` 폴더를 `PYTHONPATH`에 두고 실행, 비용 설명은 `cost.md`).
 - 평가용 키는 **사용 한도를 설정**했고 **평가 종료 후 폐기**한다(대회 규칙의 AI API 키 예외 조항).
 - 평가용 키를 직접 넣어야 하는 경우: `.env.example`을 복사해 이름을 `.env`로 바꾸고, 위 표의 값을 채운 뒤 저장한다(메모장 사용 가능, 인코딩 UTF-8).
 
@@ -240,7 +242,7 @@ Python 공식 설치본만 있는 Windows(가능하면 다른 PC 또는 새 사�
 | 날짜 | 확인자 | PC·OS | Python 버전 | AI 키 | 결과(01→04 완주) | 걸린 시간 | 문제·조치 |
 |---|---|---|---|---|---|---|---|
 | | | | | 없음(규칙 기반) | | | |
-| | | | | 있음(Solar Pro 4) | | | |
+| | | | | 있음(Claude Haiku 5.5) | | | |
 | | | | | 있음 + 인터넷 차단 | | | |
 
 자동 테스트 결과:

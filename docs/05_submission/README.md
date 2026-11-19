@@ -48,3 +48,6 @@
 | 오픈소스·외부 코드 | (개발용) Playwright | 화면 자동 점검 `web/tools/e2e_scenarios.js`·`tour_walkthrough.js`·`check_responsive.js`, 매뉴얼 스크린샷. 실행·제출 동작에 불필요 | Apache-2.0 |
 | 외부 데이터 | (확인) 화면에 표시하는 출처 | 지도 아래 "SGIS 행정동 경계(가공: vuski/admdongkor)", 3D 지도 아래 Copernicus DEM 출처, 근거 패널에 제주데이터허브 데이터 ID(563·1208·189·190·1349)와 기간 표시 | 출처 표기 의무 이행 |
 | (A 2026-11-19) 보안 설계 | LLM 보안 가드(인젝션 탐지·입력 경계 표시·출력 검사·개인정보 마스킹·호출 상한) | 위협·방어·코드·테스트 표: `docs/05_submission/security.md` | 자체 작성 |
+| (정정·A 2026-11-19) 사용 AI 모델 | Claude Haiku 5.5 (`claude-haiku-5-5`, Anthropic) — 위의 "Upstage Solar Pro 4" 줄을 대체 | 목표 해석·작업 계획·수정 행동·유지교체 판단·설명 문장 다듬기 (D5 변경, decisions.md) | 유료 API, 평가용 키 사용 한도 설정·평가 후 폐기 |
+| (정정·A 2026-11-19) 외부 API·서비스 | Anthropic Messages API (`api.anthropic.com/v1/messages`) — 위의 "Upstage API" 줄을 대체. SDK 없이 Python 표준 라이브러리로 호출 | LLM 호출 (실패·장애·인젝션 의심·호출 상한 초과 시 규칙 기반 폴백) | Anthropic 이용약관 |
+| (A 2026-11-19) 비용 설계 | LLM 토큰 사용량 기록·비용 집계 | 원칙과 실측: `docs/05_submission/cost.md` | 자체 작성 |
