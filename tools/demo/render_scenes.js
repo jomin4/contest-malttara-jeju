@@ -7,8 +7,8 @@ const {record, sleep, W, H} = require('./lib/recorder');
 const OUT = path.resolve(__dirname, '../../submission/demo/segments');
 const PAGE = pathToFileURL(path.join(__dirname, 'scenes', 'scenes.html')).href;
 // 파일 이름 순서 = 영상 순서 (앱 녹화는 10~14)
-const SCENES = [['00_title', 'title'], ['01_problem', 'problem'], ['02_arch', 'arch'],
-  ['20_gate', 'gate'], ['21_layers', 'layers'], ['22_cost', 'cost'], ['23_outro', 'outro']];
+// 시연 영상 위주: 타이틀·아웃트로만 넣는다. (problem·arch·gate·layers·cost 장면은 scenes.html에 남겨 둠)
+const SCENES = [['00_title', 'title'], ['90_outro', 'outro']];
 
 (async () => {
   const only = process.argv.slice(2);

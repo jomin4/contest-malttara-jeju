@@ -176,7 +176,7 @@ const spot = (id, fig, [x, y, w, h]) => {
   Object.assign(el.style, {left: fig[0] + x * k + 'px', top: fig[1] + y * k + 'px', width: w * k + 'px', height: h * k + 'px'});
   el.classList.add('show');
 };
-window.DURATION = {title: 6500, problem: 13000, arch: 15000, gate: 13000, layers: 8000, cost: 9500, outro: 7500}[S];
+window.DURATION = {title: 5000, problem: 13000, arch: 15000, gate: 13000, layers: 8000, cost: 9500, outro: 6000}[S];
 
 if (S === 'problem') {
   at(900, () => document.querySelectorAll('.fill').forEach(f => f.style.width = f.dataset.w + '%'));
