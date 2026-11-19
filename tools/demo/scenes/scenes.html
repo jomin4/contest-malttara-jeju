@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>말따라 제주 데모 장면</title>
+<style>
+  :root { --teal:#0f766e; --teal-d:#0b5d56; --teal-l:#eef6f4; --ink:#111; --sub:#5b6b67; --line:#e3e9e7; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { width:1920px; height:1080px; overflow:hidden; background:#fbfcfc; }
+  body { font-family:'Noto Sans KR','Malgun Gothic',sans-serif; color:var(--ink); letter-spacing:-.3px; }
+  .grid { position:absolute; inset:0; background-image:linear-gradient(#edf2f0 1px,transparent 1px),linear-gradient(90deg,#edf2f0 1px,transparent 1px); background-size:40px 40px; }
+  .scene { position:absolute; inset:0; display:none; }
+  .scene.on { display:block; }
+  .in { opacity:0; transform:translateY(18px); animation:in .7s cubic-bezier(.2,.7,.2,1) forwards; }
+  @keyframes in { to { opacity:1; transform:none; } }
+  .cap { position:absolute; left:50%; bottom:34px; transform:translateX(-50%); background:rgba(15,23,42,.88); color:#fff;
+         font:600 27px/1.45 'Noto Sans KR',sans-serif; padding:14px 34px; border-radius:16px; white-space:nowrap;
+         opacity:0; transition:opacity .35s; }
+  .cap.show { opacity:1; }
+  .eyebrow { font-size:22px; font-weight:700; color:var(--teal); letter-spacing:0; }
+  .src { font-family:Consolas,'Noto Sans KR',monospace; font-size:17px; color:var(--sub); }
+
+  /* 타이틀 */
+  #title .box { position:absolute; left:160px; top:300px; }
+  #title h1 { font-size:76px; font-weight:800; line-height:1.15; margin:18px 0 26px; }
+  #title h1 em { font-style:normal; color:var(--teal); }
+  #title p { font-size:30px; color:#374151; }
+  #title .meta { margin-top:60px; font-size:21px; color:var(--sub); }
+  #title .bar { position:absolute; left:160px; top:270px; width:0; height:6px; background:var(--teal); border-radius:3px; animation:bar 1s .2s ease forwards; }
+  @keyframes bar { to { width:120px; } }
+
+  /* 문제 */
+  #problem h2 { position:absolute; left:120px; top:90px; font-size:52px; font-weight:800; }
+  #problem .panel { position:absolute; top:220px; width:800px; height:600px; background:#fff; border:2px solid #d6dfdc; border-radius:24px; padding:44px 48px; }
+  #problem .p1 { left:120px; } #problem .p2 { left:1000px; }
+  #problem h3 { font-size:32px; font-weight:800; margin:10px 0 40px; }
+  .row { margin:0 0 34px; }
+  .row .lbl { display:flex; justify-content:space-between; font-size:25px; font-weight:600; margin-bottom:12px; }
+  .row .lbl b { font-family:Consolas,'Noto Sans KR',monospace; font-size:28px; }
+  .track { height:34px; background:#f1f5f4; border-radius:10px; overflow:hidden; }
+  .fill { height:100%; width:0; border-radius:10px; transition:width 1.6s cubic-bezier(.2,.7,.2,1); }
+  .fill.hi { background:#94a3b8; } .fill.lo { background:var(--teal); }
+  .ratio { font-size:46px; font-weight:800; color:var(--teal); margin-top:26px; }
+  #problem .panel .src { position:absolute; left:48px; bottom:36px; }
+
+  /* 도식 장면 공통 */
+  .fig { position:absolute; transform-origin:0 0; }
+  .fig img { display:block; width:1000px; }
+  .spot { position:absolute; border:4px solid var(--teal); border-radius:16px; box-shadow:0 0 0 4000px rgba(251,252,252,.62);
+          transition:all .7s cubic-bezier(.2,.7,.2,1); opacity:0; pointer-events:none; }
+  .spot.show { opacity:1; }
+  .tok { position:absolute; left:0; top:0; width:22px; height:22px; margin:-11px 0 0 -11px; border-radius:50%;
+         offset-rotate:0deg; opacity:0; box-shadow:0 0 0 6px rgba(255,255,255,.8); }
+  .tok.bad { background:#b42318; } .tok.good { background:var(--teal); }
+  .tag { position:absolute; font:700 15px 'Noto Sans KR',sans-serif; color:#fff; padding:4px 10px; border-radius:8px; opacity:0; transition:opacity .3s; white-space:nowrap; }
+  .tag.bad { background:#b42318; } .tag.good { background:var(--teal); }
+
+  /* 비용·신뢰성 */
+  #cost h2 { position:absolute; left:120px; top:100px; font-size:52px; font-weight:800; }
+  #cost .cards { position:absolute; left:120px; top:250px; display:grid; grid-template-columns:repeat(2,820px); gap:40px; }
+  #cost .card { background:#fff; border:2px solid #d6dfdc; border-radius:24px; padding:40px 44px; height:300px; }
+  #cost .card.acc { border-color:var(--teal); background:var(--teal-l); box-shadow:0 0 28px rgba(15,118,110,.18); }
+  #cost .num { font-size:88px; font-weight:800; color:var(--teal-d); font-family:'Noto Sans KR',sans-serif; letter-spacing:-2px; }
+  #cost .num small { font-size:40px; font-weight:700; margin-left:6px; }
+  #cost .k { font-size:30px; font-weight:700; margin-top:6px; }
+  #cost .d { font-size:22px; color:var(--sub); margin-top:10px; }
+
+  /* 아웃트로 */
+  #outro .box { position:absolute; left:160px; top:230px; right:160px; }
+  #outro h1 { font-size:64px; font-weight:800; margin:16px 0 50px; }
+  #outro dl { display:grid; grid-template-columns:260px 1fr; row-gap:26px; font-size:27px; }
+  #outro dt { color:var(--sub); font-weight:600; }
+  #outro dd { font-weight:600; }
+  #outro .ids { font-family:Consolas,'Noto Sans KR',monospace; color:var(--teal-d); }
+</style>
+</head>
+<body>
+<div class="grid"></div>
+
+<!-- 00 타이틀 -->
+<section class="scene" id="title">
+  <div class="bar"></div>
+  <div class="box">
+    <div class="eyebrow in" style="animation-delay:.2s">제주 AI·빅데이터 활용 AI Agent 개발 챌린지 · 데모</div>
+    <h1 class="in" style="animation-delay:.5s">말따라 제주<br><em>데이터로 덜 붐비는 제주</em>를 찾아 주는<br>여행 경로 AI Agent</h1>
+    <p class="in" style="animation-delay:1s">한 줄로 말하면 → 경로를 짜고 → 스스로 검증해 고치고 → 미리 둘러본 반응으로 다시 짭니다</p>
+    <div class="meta in" style="animation-delay:1.4s">제주데이터허브 데이터 · Claude Haiku 5.5(판단 보조) + 규칙 폴백 · Python 표준 라이브러리 서버</div>
+  </div>
+</section>
+
+<!-- 01 문제 -->
+<section class="scene" id="problem">
+  <h2 class="in">같은 바다라도, 사람이 덜 몰리는 곳이 있습니다</h2>
+  <div class="panel p1 in" style="animation-delay:.4s">
+    <div class="eyebrow">동네마다</div>
+    <h3>찾아오는 사람의 비율이 크게 다릅니다</h3>
+    <div class="row"><div class="lbl"><span>제주시 도두동</span><b>2.660</b></div><div class="track"><div class="fill hi" data-w="100"></div></div></div>
+    <div class="row"><div class="lbl"><span>제주시 삼양동</span><b>0.225</b></div><div class="track"><div class="fill lo" data-w="8.5"></div></div></div>
+    <div class="ratio">방문/거주 비율 약 12배 차이</div>
+    <div class="src">563 내국인 유동인구 구성비율 · 2018-01~2022-09</div>
+  </div>
+  <div class="panel p2 in" style="animation-delay:.8s">
+    <div class="eyebrow">같은 조천읍 해수욕장도</div>
+    <h3>장소마다 머무는 렌터카 수가 다릅니다</h3>
+    <div class="row"><div class="lbl"><span>함덕해수욕장</span><b>4,403건</b></div><div class="track"><div class="fill hi" data-w="100"></div></div></div>
+    <div class="row"><div class="lbl"><span>신흥해수욕장</span><b>314건</b></div><div class="track"><div class="fill lo" data-w="7.1"></div></div></div>
+    <div class="ratio">반경 1km 렌터카 체류 14배 차이</div>
+    <div class="src">1208 렌터카 체류 거점 · 2021-07~12 토요일</div>
+  </div>
+  <div class="cap" id="cap-problem"></div>
+</section>
+
+<!-- 02 아키텍처 -->
+<section class="scene" id="arch">
+  <div class="fig" style="left:260px; top:18px; transform:scale(1.4)">
+    <img src="../../../docs/02_proposal/img/fig_architecture.svg" alt="">
+  </div>
+  <div class="spot" id="spot-arch"></div>
+  <div class="cap" id="cap-arch"></div>
+</section>
+
+<!-- 03 보안 관문 -->
+<section class="scene" id="gate">
+  <div class="fig" style="left:260px; top:60px; transform:scale(1.4)">
+    <img src="../../../docs/02_proposal/img/fig_security_gate.svg" alt="">
+    <div class="tok bad" id="tok-bad" style="offset-path:path('M84,158 H549 V276')"></div>
+    <div class="tag bad" id="tag-bad" style="left:168px; top:220px">✕ 인젝션 의심 → LLM 호출 없이 규칙 모드</div>
+    <div class="tok good" id="tok-good" style="offset-path:path('M84,158 H896 V150 M920,150 V392 H263')"></div>
+    <div class="tag good" id="tag-good" style="left:200px; top:322px">✓ 정상 문장 → 관문을 모두 통과</div>
+  </div>
+  <div class="cap" id="cap-gate"></div>
+</section>
+
+<!-- 04 방어의 세 겹 -->
+<section class="scene" id="layers">
+  <div class="fig" style="left:260px; top:90px; transform:scale(1.4)">
+    <img src="../../../docs/02_proposal/img/fig_security_layers.svg" alt="">
+  </div>
+  <div class="spot" id="spot-layers"></div>
+  <div class="cap" id="cap-layers"></div>
+</section>
+
+<!-- 05 비용·신뢰성 -->
+<section class="scene" id="cost">
+  <h2 class="in">비용과 신뢰성 — 실측으로</h2>
+  <div class="cards">
+    <div class="card acc in" style="animation-delay:.3s"><div class="num">$0.0012</div><div class="k">방문객 1명 전체 체험</div><div class="d">Claude Haiku 5.5 · LLM 약 7회 · 토큰 실측(llm_usage)</div></div>
+    <div class="card in" style="animation-delay:.6s"><div class="num">0<small>원</small></div><div class="k">규칙 모드</div><div class="d">키·인터넷이 없어도, 장애·인젝션 의심이어도 전 기능 동작</div></div>
+    <div class="card in" style="animation-delay:.9s"><div class="num">204<small>개</small></div><div class="k">자동 테스트 통과</div><div class="d">데이터·도구·Batch A/B·서버·LLM 보안·Claude API 형식</div></div>
+    <div class="card in" style="animation-delay:1.2s"><div class="num">0<small>회</small></div><div class="k">실행 중 외부 데이터 API</div><div class="d">허브 데이터는 빌드 때 SQLite로 가공·동봉 · 설치 패키지 없음</div></div>
+  </div>
+</section>
+
+<!-- 06 아웃트로 -->
+<section class="scene" id="outro">
+  <div class="box">
+    <div class="eyebrow in">말따라 제주</div>
+    <h1 class="in" style="animation-delay:.3s">유명한 곳 말고, 나에게 맞으면서 덜 붐비는 곳</h1>
+    <dl class="in" style="animation-delay:.7s">
+      <dt>제주데이터허브</dt><dd class="ids">1349 · 563 · 1208 · 189 · 190 · 811 · 812 · 784 · 858 · 912</dd>
+      <dt>외부 데이터</dt><dd>한국관광공사 TourAPI · SGIS 행정동 경계(vuski/admdongkor) · Copernicus DEM</dd>
+      <dt>AI 모델</dt><dd>Claude Haiku 5.5 — 판단 보조, 실패 시 규칙 폴백</dd>
+      <dt>실행 환경</dt><dd>Windows · Python 표준 라이브러리 · run.bat 더블클릭</dd>
+    </dl>
+  </div>
+</section>
+
+<script>
+const S = (location.hash || '#title').slice(1);
+document.getElementById(S).classList.add('on');
+const at = (ms, fn) => setTimeout(fn, ms);
+const cap = (id, t) => { const c = document.getElementById(id); if (!t) { c.classList.remove('show'); return; } c.innerHTML = t; c.classList.add('show'); };
+// 도식 좌표(viewBox) → 화면 px
+const spot = (id, fig, [x, y, w, h]) => {
+  const el = document.getElementById(id), k = 1.4;
+  Object.assign(el.style, {left: fig[0] + x * k + 'px', top: fig[1] + y * k + 'px', width: w * k + 'px', height: h * k + 'px'});
+  el.classList.add('show');
+};
+window.DURATION = {title: 6500, problem: 13000, arch: 15000, gate: 13000, layers: 8000, cost: 9500, outro: 7500}[S];
+
+if (S === 'problem') {
+  at(900, () => document.querySelectorAll('.fill').forEach(f => f.style.width = f.dataset.w + '%'));
+  at(6500, () => cap('cap-problem', '말따라 제주는 이 차이로 <b>관심사에 맞으면서 덜 붐비는 곳</b>을 골라 하루 동선으로 묶습니다'));
+}
+if (S === 'arch') {
+  const F = [260, 18];
+  at(700, () => { spot('spot-arch', F, [20, 100, 286, 98]); cap('cap-arch', '한 줄 요청을 AI가 조건으로 읽습니다 — 말하지 않은 조건은 미반영'); });
+  at(3500, () => { spot('spot-arch', F, [334, 96, 646, 228]); cap('cap-arch', '작업 계획 — 조건에 따라 도구를 더하고 빼며 이유를 남깁니다'); });
+  at(6300, () => { spot('spot-arch', F, [22, 222, 594, 254]); cap('cap-arch', 'Batch A는 코드가 순서를 고정 — 점수·일정·거리·검증, 위반이면 수정(최대 2회)'); });
+  at(9100, () => { spot('spot-arch', F, [634, 94, 346, 230]); cap('cap-arch', 'AI는 판단 5곳에서 선택지 안만 고르고, 실패하면 같은 자리를 규칙이 대신'); });
+  at(11900, () => { spot('spot-arch', F, [38, 502, 704, 84]); cap('cap-arch', '미리보기 반응으로 다시 짜고, 최종 계획은 근거와 함께 휴대폰·인쇄로'); });
+}
+if (S === 'gate') {
+  const run = (tok, ms) => { const t = document.getElementById(tok); t.style.opacity = 1;
+    t.animate([{offsetDistance: '0%'}, {offsetDistance: '100%'}], {duration: ms, easing: 'cubic-bezier(.4,.1,.3,1)', fill: 'forwards'}); };
+  at(600, () => cap('cap-gate', '공격 문장은 ③ 인젝션 탐지에서 막혀, LLM을 부르지 않고 규칙 모드로 넘어갑니다'));
+  at(1200, () => run('tok-bad', 3200));
+  at(4500, () => document.getElementById('tag-bad').style.opacity = 1);
+  at(6600, () => { cap('cap-gate', '정상 문장은 경계 태그로 감싸 LLM에 보내고, 받은 답도 스키마·문장 검사를 거칩니다');
+                   document.getElementById('tok-bad').style.opacity = .35; });
+  at(7000, () => run('tok-good', 4600));
+  at(11700, () => document.getElementById('tag-good').style.opacity = 1);
+}
+if (S === 'layers') {
+  const F = [260, 90];
+  at(600, () => cap('cap-layers', '탐지와 출력 검사를 통과해도 — 구조가 막습니다'));
+  at(1800, () => spot('spot-layers', F, [284, 220, 392, 202]));
+  at(4300, () => { spot('spot-layers', F, [770, 90, 208, 384]); cap('cap-layers', '수치·장소를 지어내거나, 고정한 장소·최종 선택을 바꿀 수 없습니다'); });
+}
+</script>
+</body>
+</html>
