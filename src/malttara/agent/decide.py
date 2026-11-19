@@ -3,6 +3,8 @@ import json
 import re
 from datetime import datetime
 
+from malttara.agent.guard import safe_text
+
 POLISH_SCHEMA = {"type": "object", "properties": {"text": {"type": "string"}},
                  "required": ["text"], "additionalProperties": False}
 _NUM = re.compile(r"\d+(?:\.\d+)?")
@@ -38,8 +40,9 @@ def decide(conn, batch_id, point, llm, system, user, schema, accept, fallback, o
     return choice, "rule"
 
 
-def polish_text(llm, template: str):
-    """문장만 다듬는다. 템플릿에 없는 숫자가 생기면 템플릿을 그대로 쓴다."""
+def polish_text(llm, template: str, keep_terms=()):
+    """문장만 다듬는다. 템플릿에 없는 숫자가 생기거나, URL·연락처·HTML이 섞이거나,
+    지켜야 할 낱말(권역명)이 빠지거나, 지나치게 길어지면 템플릿을 그대로 쓴다."""
     if llm is None or not llm.available:
         return template, "rule"
     out = llm.chat_json(
@@ -49,5 +52,7 @@ def polish_text(llm, template: str):
         return template, "rule"
     allowed = set(_NUM.findall(template))
     if any(n not in allowed for n in _NUM.findall(out["text"])):
+        return template, "rule"
+    if not safe_text(out["text"], int(len(template) * 1.5) + 40, keep_terms):
         return template, "rule"
     return out["text"], "llm"

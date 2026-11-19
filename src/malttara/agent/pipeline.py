@@ -122,7 +122,12 @@ def assemble_result(conn, state, goal, itinerary, scored, violations, settings, 
         "summary": None, "quests": generate_quests(itinerary, places), "alternatives": alts,
         "quality": check_data_quality([places[i] for i in ids if i in places]), "diff": diff,
     }
-    text, actor = polish_text(llm, summary_template(result))
+    regions = []                                   # 요약 템플릿이 쓰는 권역명은 다듬어도 남아 있어야 한다
+    for d in itinerary["days"]:
+        name = places[d["place_ids"][0]]["region_name"] if d["place_ids"] and d["place_ids"][0] in places else None
+        if name and name not in regions:
+            regions.append(name)
+    text, actor = polish_text(llm, summary_template(result), keep_terms=tuple(regions))
     result["summary"] = text
     state.emit("explain_decisions", actor, "ok", "설명 문장 생성" + (" (AI 다듬기)" if actor == "llm" else " (템플릿)"))
     state.goal = goal

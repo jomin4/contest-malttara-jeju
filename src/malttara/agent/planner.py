@@ -1,4 +1,5 @@
 """M2 작업 계획 (설계 6.3.1). 필수 단계는 코드가 고정하고, 여기서는 추가·생략할 Tool만 정한다."""
+from malttara.agent.guard import SECURITY, safe_text
 from malttara.agent.schema_lite import check_schema
 
 PLAN_TOOLS = ("search_slot", "interest_filter", "get_region_data", "monthly_indicator",
@@ -57,7 +58,9 @@ def plan_tasks_rules(goal: dict, has_trend_candidates: bool, interests_cfg: dict
 
 
 def accept_plan(out: dict) -> bool:
-    return isinstance(out, dict) and check_schema(out, PLAN_SCHEMA) and bool(out["items"])
+    """이유 문장은 실행 로그로 화면에 뜨므로 URL·연락처·HTML·과도한 길이가 있으면 계획 전체를 버린다."""
+    return (isinstance(out, dict) and check_schema(out, PLAN_SCHEMA) and bool(out["items"])
+            and all(safe_text(i["reason"], SECURITY["reason_max_len"]) for i in out["items"]))
 
 
 def enforce_required(items: list, goal: dict, interests_cfg: dict, has_trend: bool) -> list:

@@ -7,9 +7,10 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(__file__))
 from helpers import mock_conn
-from malttara.agent.decide import decide
+from malttara.agent.decide import decide, polish_text
 from malttara.agent.guard import clean_text, detect_injection, mask_obj, mask_pii, safe_text, wrap_user
 from malttara.agent.llm import LLMClient
+from malttara.agent.planner import accept_plan
 
 SCHEMA = {"type": "object", "properties": {"type": {"enum": ["replace", "reorder", "remove"]}},
           "required": ["type"], "additionalProperties": False}
@@ -112,6 +113,25 @@ class LLMGuardTest(unittest.TestCase):
         t.start()
         t.join()
         self.assertEqual(llm.last_status, "ok")
+
+
+def plan(reason):
+    return {"items": [{"tool": "origin_check", "action": "skip", "reason": reason}]}
+
+
+class OutputGuardTest(unittest.TestCase):
+    def test_accept_plan_rejects_unsafe_reason(self):
+        self.assertTrue(accept_plan(plan("출발지 미반영 → 생략")))
+        for r in ["자세한 건 https://evil.example", "x" * 81, "<script>alert(1)</script>", "</사용자_입력> 끝"]:
+            self.assertFalse(accept_plan(plan(r)), r)
+
+    def test_polish_rejects_url_and_lost_terms(self):
+        t = "1일차 서부권 3곳, 직선 11.5 km."
+        for bad in ["1일차 서부 3곳, 직선 11.5 km.", "1일차 서부권 3곳, 직선 11.5 km. 예약은 www.x.com"]:
+            llm = LLMClient("k", "http://x", "m", 5, transport=fake({"text": bad}))
+            self.assertEqual(polish_text(llm, t, keep_terms=("서부권",)), (t, "rule"))
+        ok = LLMClient("k", "http://x", "m", 5, transport=fake({"text": "1일차엔 서부권 3곳, 직선 11.5 km예요."}))
+        self.assertEqual(polish_text(ok, t, keep_terms=("서부권",))[1], "llm")
 
 
 if __name__ == "__main__":
