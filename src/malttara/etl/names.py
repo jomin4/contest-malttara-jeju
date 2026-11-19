@@ -11,12 +11,16 @@ def normalize_name(name: str, prefixes: list) -> str:
     """괄호와 그 안, 공백, 특수문자를 지우고 접두어(예: '제주')를 뗀 뒤 소문자로."""
     s = _PAREN.sub("", name or "")
     s = _NON_WORD.sub("", s).lower()
-    for p in prefixes:
-        p = _NON_WORD.sub("", p).lower()
-        # 접두어만 남는 이름('제주')은 지우지 않는다
-        if p and s.startswith(p) and len(s) > len(p):
-            s = s[len(p):]
-            break
+    pres = sorted({_NON_WORD.sub("", p).lower() for p in prefixes if p}, key=len, reverse=True)
+    changed = True
+    while changed:                       # "제주 서귀포 산방산" → "산방산"
+        changed = False
+        for p in pres:
+            # 접두어만 남는 이름('제주')은 지우지 않는다
+            if s.startswith(p) and len(s) > len(p):
+                s = s[len(p):]
+                changed = True
+                break
     return s
 
 

@@ -124,3 +124,24 @@ class RealDataQualityTest(unittest.TestCase):
                                     ("관음사코스~성판악코스", 33.42, 126.55), ("윗세오름", 33.36, 126.53)]),
                          load_config("etl"), load_config("regions"), {}, polygons=None)
         self.assertEqual([p["name"] for p in out], ["윗세오름"])
+
+
+class DataGapsTest(unittest.TestCase):
+    """11/19 DB 빈칸 보완: 접두어 여러 개, '제주도' 같은 지역명, 메모형 괄호 이름."""
+
+    def test_normalize_strips_city_prefixes_repeatedly(self):
+        from malttara.etl.names import normalize_name
+        pre = load_config("etl")["name_prefixes"]
+        self.assertEqual(normalize_name("제주 서귀포 산방산", pre), normalize_name("산방산", pre))
+
+    def test_region_name_only_records_dropped(self):
+        rows = [{"장소명": n, "지번주소": "제주특별자치도 제주시 조천읍 함덕리 1", "위도": "33.5", "경도": str(126.6 + i / 100)}
+                for i, n in enumerate(["제주도", "서귀포", "함덕서우봉"])]
+        out = clean_1349(rows, load_config("etl"), load_config("regions"), {}, polygons=None)
+        self.assertEqual([p["name"] for p in out], ["함덕서우봉"])
+
+    def test_memo_parentheses_removed_from_name(self):
+        from malttara.etl.clean_places import clean_display_name
+        self.assertEqual(clean_display_name("제주에 가면 (해물 칼국수 13.000)"), "제주에 가면")
+        self.assertEqual(clean_display_name("준반점(아점/ 함덕해수욕장에 위치)"), "준반점")
+        self.assertEqual(clean_display_name("새별오름 (나홀로나무)"), "새별오름 (나홀로나무)")

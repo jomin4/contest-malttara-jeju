@@ -97,6 +97,15 @@ def is_non_place(name: str, cfg: dict) -> bool:
     return len(re.findall(r"[가-힣]", n)) < cfg.get("min_hangul", 0)   # "dd", "123", "TERER" 같은 이름
 
 
+_MEMO_PAREN = re.compile(r"\s*\([^)]*(?:\d|위치|근처|/)[^)]*\)?\s*$|\s*\([^)]*(?:\d|위치|근처|/)[^)]*\)")
+
+
+def clean_display_name(name: str) -> str:
+    """이용자 메모가 붙은 괄호(숫자·가격·'위치'·'근처'·'/' 포함)를 뗀다. "새별오름 (나홀로나무)"는 그대로."""
+    s = _MEMO_PAREN.sub("", name or "").strip()
+    return s or (name or "").strip()
+
+
 def _in_bbox(lat: float, lon: float, bbox: dict) -> bool:
     return bbox["min_lat"] <= lat <= bbox["max_lat"] and bbox["min_lon"] <= lon <= bbox["max_lon"]
 
@@ -120,7 +129,7 @@ def clean_1349(rows: list, cfg: dict, regions_cfg: dict, alias: dict, polygons=N
     out = []
     seen = {}  # 정규화 이름 → [(lat, lon), ...]
     for idx, row in enumerate(rows, start=1):
-        name = (row.get("장소명") or "").strip()
+        name = clean_display_name(row.get("장소명") or "")
         lat, lon = _to_float(row.get("위도")), _to_float(row.get("경도"))
         if not name or lat is None or lon is None:
             continue

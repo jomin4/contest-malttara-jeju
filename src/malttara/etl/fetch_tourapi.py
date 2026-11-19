@@ -175,6 +175,42 @@ def fetch_tourapi(api_key: str, out_path: str, with_overview: bool = True, max_o
     return len(records)
 
 
+OVERVIEW_PRIORITY = ("관광지", "문화시설", "레포츠", "음식점")   # 쇼핑(대부분 사후면세점)은 받지 않는다
+
+
+def fill_overviews(api_key: str, out_path: str, max_calls=None, save_every: int = 50) -> tuple:
+    """기존 스냅샷의 개요만 채운다(목록 재조회 없음). 끊겨도 다시 실행하면 이어 받는다. 반환 (호출 수, 채운 수)."""
+    with open(out_path, encoding="utf-8") as f:
+        records = json.load(f)
+    order = sorted((r for r in records if not r.get("overview") and r.get("content_id")
+                    and r.get("content_type") in OVERVIEW_PRIORITY),
+                   key=lambda r: OVERVIEW_PRIORITY.index(r["content_type"]))
+    calls = filled = 0
+
+    def save():
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(records, f, ensure_ascii=False, indent=1)
+
+    for rec in order:
+        if max_calls is not None and calls >= max_calls:
+            print(f"호출 상한 {max_calls}회 도달 — 다시 실행하면 이어 받는다")
+            break
+        calls += 1
+        try:
+            its = _items(_call(api_key, "detailCommon2", {"contentId": rec["content_id"]}))
+        except ApiError as e:
+            print(f"개요 받기 중단: {e} — 받은 데까지 저장")
+            break
+        if its and its[0].get("overview"):
+            rec["overview"] = its[0]["overview"]
+            filled += 1
+        if calls % save_every == 0:
+            save()
+            print(f"  {calls}/{len(order)}회, 채움 {filled}", flush=True)
+    save()
+    return calls, filled
+
+
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     key = load_env().get("DATA_GO_KR_KEY", "")
@@ -192,6 +228,11 @@ def main(argv=None) -> int:
         with open(DEFAULT_OUT, "w", encoding="utf-8") as f:
             json.dump(items, f, ensure_ascii=False)
         print(f"분류 이름 갱신: {sum(1 for it in items if it['category'])}/{len(items)}건 (코드표 {len(names)}개)")
+        return 0
+    if "--fill-overview" in argv:
+        cap = int(argv[argv.index("--max-overview") + 1]) if "--max-overview" in argv else None
+        calls, filled = fill_overviews(key, DEFAULT_OUT, cap)
+        print(f"개요 채움: 호출 {calls}회, 채움 {filled}건")
         return 0
     max_calls = None
     if "--max-overview" in argv:
