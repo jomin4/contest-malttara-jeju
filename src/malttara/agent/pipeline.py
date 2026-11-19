@@ -133,9 +133,10 @@ def assemble_result(conn, state, goal, itinerary, scored, violations, settings, 
     result["summary"] = text
     state.emit("explain_decisions", actor, "ok", "설명 문장 생성" + (" (AI 다듬기)" if actor == "llm" else " (템플릿)"))
     state.goal = goal
-    state.finish(result)
+    state.result = result                           # 저장·마지막 로그를 남긴 뒤에 done을 세운다(폴링이 마지막 이벤트를 놓치지 않게)
     state.save(conn)
     state.emit("save_agent_state", "code", "ok", f"배치 {state.batch_id} 저장")
+    state.finish(result)
     return result
 
 

@@ -22,6 +22,13 @@ def _record(conn, batch_id, point, actor, options, choice, reason):
     conn.commit()
 
 
+def failure_reason(status) -> str:
+    """LLM 결과를 쓰지 못한 사유: 인젝션 의심·호출 상한·장애(시간 초과·네트워크·5xx)·형식 불일치를 구분해 남긴다."""
+    if status in ("injection_suspected", "rate_limited"):
+        return status
+    return "llm_error" if status == "error" else "llm_invalid"
+
+
 def decide(conn, batch_id, point, llm, system, user, schema, accept, fallback, options=None):
     """반환 (선택, 'llm'|'rule')."""
     reason = "llm_unavailable"
@@ -35,8 +42,7 @@ def decide(conn, batch_id, point, llm, system, user, schema, accept, fallback, o
         if ok:
             _record(conn, batch_id, point, "llm", options, out, "accepted")
             return out, "llm"
-        status = getattr(llm, "last_status", None)
-        reason = status if status in ("injection_suspected", "rate_limited") else "llm_invalid"
+        reason = failure_reason(getattr(llm, "last_status", None))
     choice = fallback()
     _record(conn, batch_id, point, "rule", options, choice, reason)
     return choice, "rule"

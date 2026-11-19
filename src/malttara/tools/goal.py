@@ -4,6 +4,8 @@
 """
 import re
 
+from malttara.agent.guard import safe_text
+
 PACES = ("여유롭게", "보통", "빡빡하게")
 TRANSPORTS = ("렌터카", "버스", "도보")
 MAX_DAYS = 7
@@ -111,8 +113,8 @@ def merge_goal(llm_goal, rule_goal: dict, text: str, interests_cfg: dict):
     allowed = {
         "pace": lambda v: v in PACES,
         "transport": lambda v: v in TRANSPORTS,
-        "companion": lambda v: isinstance(v, str) and 0 < len(v) <= 20,
-        "origin": lambda v: isinstance(v, str) and 0 < len(v) <= 30,
+        "companion": lambda v: isinstance(v, str) and 0 < len(v) <= 20 and safe_text(v, 20),   # 화면에 그대로 뜬다
+        "origin": lambda v: isinstance(v, str) and 0 < len(v) <= 30 and safe_text(v, 30),
         "month": lambda v: isinstance(v, int) and 1 <= v <= 12,
         "days": lambda v: isinstance(v, int) and 1 <= v <= 30,
         "quiet_pref": lambda v: isinstance(v, bool),

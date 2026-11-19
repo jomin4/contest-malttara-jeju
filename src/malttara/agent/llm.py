@@ -98,6 +98,7 @@ class LLMClient:
                  json_mode: str = "schema", extra_body=None, max_calls_per_min=None,
                  provider: str = "openai", max_tokens: int = 1024,
                  anthropic_version: str = "2026-10-21"):
+        provider = (provider or "").strip().lower()
         self.provider = provider if provider in ("openai", "anthropic") else "openai"
         if self.provider == "anthropic" and not base_url:
             base_url = ANTHROPIC_BASE_URL

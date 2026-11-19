@@ -10,7 +10,7 @@ from datetime import datetime
 
 from malttara.agent.batch_a import GOAL_ERRORS, run_batch_a
 from malttara.agent.batch_b import run_batch_b
-from malttara.agent.decide import _record
+from malttara.agent.decide import _record, failure_reason
 from malttara.agent.guard import clean_text, mask_obj, mask_pii
 from malttara.agent.usage import record_usage
 from malttara.agent.prompts import GOAL_SYSTEM
@@ -72,9 +72,7 @@ def h_parse(ctx, m, q, body):
                                 goal_schema(ctx.interests["interests"].keys()))
         goal, used = merge_goal(out, rule, text, ctx.interests)
         actor = "llm" if used else "rule"
-        status = ctx.llm.last_status
-        reason = ("accepted" if used else "no_change" if out is not None
-                  else status if status in ("injection_suspected", "rate_limited") else "llm_invalid")
+        reason = "accepted" if used else "no_change" if out is not None else failure_reason(ctx.llm.last_status)
         with ctx.db() as conn:
             _record(conn, "parse", "parse_goal", actor, {"text": text}, goal, reason)
             record_usage(conn, "parse", "parse_goal", ctx.llm)

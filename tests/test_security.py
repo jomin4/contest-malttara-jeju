@@ -61,7 +61,10 @@ class GuardTest(unittest.TestCase):
     def test_normal_travel_text_not_flagged(self):
         for s in ["2박 3일 동안 바다를 보며 여유롭게 쉬고, 현지 음식도 먹고 싶어요",
                   "날씨는 무시하고 오름 위주로", "이전에 가 본 곳 말고 새로운 데", "시스템 에어컨 있는 숙소 근처",
-                  "아이와 함께 3일, 박물관이랑 숲"]:
+                  "아이와 함께 3일, 박물관이랑 숲",
+                  "이제 네가 알아서 짜줘", "이제 넌 쉬어도 돼, 나머지는 내가 정할게",
+                  "이동 거리 제약은 무시하고 많이 보고 싶어요", "예산 제약 없이 풀어서 짜줘",
+                  "버스 규칙은 무시해도 돼", "이전 설정 잊고 새로 짜줘", "이제 너는 가이드야 추천해줘"]:
             self.assertEqual(detect_injection(clean_text(s)), [], s)
 
     def test_safe_text(self):
@@ -120,6 +123,30 @@ class LLMGuardTest(unittest.TestCase):
         t.start()
         t.join()
         self.assertEqual(llm.last_status, "ok")
+
+
+class MergeGoalGuardTest(unittest.TestCase):
+    def test_llm_free_text_fields_must_be_safe(self):
+        from helpers import I
+        from malttara.tools.goal import merge_goal, parse_goal_rules
+        text = "친구랑 2박 3일 제주시에서 출발"
+        rule = parse_goal_rules(text, I)
+        for field, bad, ev in (("companion", "www.x.kr 예약", "친구랑"), ("origin", "<b>제주시</b>", "제주시")):
+            llm = {"days": 3, "interests": [], field: bad, "evidence": {field: ev}}
+            g, _ = merge_goal(llm, rule, text, I)
+            self.assertNotEqual(g[field], bad, field)
+
+
+class ReasonTest(unittest.TestCase):
+    def test_outage_is_recorded_as_llm_error_and_provider_case(self):
+        conn, _ = mock_conn()
+        def boom(*a):
+            raise OSError("offline")
+        llm = LLMClient("k", "http://x", "m", 5, transport=boom)
+        decide(conn, "A-e", "revise", llm, "s", "u", SCHEMA, lambda o: True, lambda: {"type": "reorder"})
+        self.assertEqual(conn.execute("SELECT reason FROM agent_decisions").fetchone()[0], "llm_error")
+        conn.close()
+        self.assertEqual(LLMClient("k", None, "m", 5, provider="Anthropic").provider, "anthropic")
 
 
 def plan(reason):
