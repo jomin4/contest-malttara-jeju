@@ -11,6 +11,7 @@ from datetime import datetime
 from malttara.agent.batch_a import GOAL_ERRORS, run_batch_a
 from malttara.agent.batch_b import run_batch_b
 from malttara.agent.decide import _record
+from malttara.agent.guard import clean_text, mask_obj, mask_pii
 from malttara.agent.prompts import GOAL_SYSTEM
 from malttara.agent.state import BatchState
 from malttara.db import connect, data_sources, meta_get
@@ -62,7 +63,7 @@ def h_config(ctx, m, q, body):
 
 def h_parse(ctx, m, q, body):
     require(body, {"text": str})
-    text = body["text"].strip()[:500]
+    text = mask_pii(clean_text(body["text"]))[0][:500]     # 개인정보는 해석·LLM 전송·기록 전에 지운다
     rule = parse_goal_rules(text, ctx.interests)
     goal, actor = rule, "rule"
     if ctx.llm.available and text:
@@ -70,9 +71,11 @@ def h_parse(ctx, m, q, body):
                                 goal_schema(ctx.interests["interests"].keys()))
         goal, used = merge_goal(out, rule, text, ctx.interests)
         actor = "llm" if used else "rule"
+        status = ctx.llm.last_status
+        reason = ("accepted" if used else "no_change" if out is not None
+                  else status if status in ("injection_suspected", "rate_limited") else "llm_invalid")
         with ctx.db() as conn:
-            _record(conn, "parse", "parse_goal", actor, {"text": text}, goal,
-                    "accepted" if used else ("llm_invalid" if out is None else "no_change"))
+            _record(conn, "parse", "parse_goal", actor, {"text": text}, goal, reason)
     goal = copy.deepcopy(goal)
     missing = validate_goal(goal)
     return 200, {"goal": goal, "missing": missing, "actor": actor}
@@ -116,7 +119,7 @@ def _start(ctx, state, fn):
 
 def h_batch_a(ctx, m, q, body):
     require(body, {"goal": dict})
-    goal = copy.deepcopy(body["goal"])
+    goal = mask_obj(copy.deepcopy(body["goal"]))     # 화면을 거치지 않은 직접 요청도 같은 처리
     errs = validate_goal(goal)
     if errs:
         raise ApiError(400, GOAL_ERRORS.get(errs[0], "조건을 확인해 주세요"))
