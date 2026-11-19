@@ -129,3 +129,14 @@ class LLMTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PromptModeTest(unittest.TestCase):
+    def test_skeleton_and_timeout_override(self):
+        from malttara.agent.llm import _skeleton
+        sch = {"type": "object", "properties": {"days": {"type": ["integer", "null"]}, "pace": {"enum": ["여유롭게", "보통"]},
+                                                 "interests": {"type": "array", "items": {"enum": ["바다"]}}}}
+        self.assertEqual(_skeleton(sch), {"days": 0, "pace": "여유롭게", "interests": ["바다"]})
+        c = client_from_env({"LLM_API_KEY": "k", "LLM_BASE_URL": "u", "LLM_MODEL": "m", "LLM_TIMEOUT_S": "60"}, S)
+        self.assertEqual(c.timeout_s, 60.0)
+
