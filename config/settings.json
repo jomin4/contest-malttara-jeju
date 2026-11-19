@@ -32,7 +32,10 @@
   "max_revisions": 2,
   "alternatives_per_place": 2,
   "llm": {
-    "timeout_s": 20
+    "timeout_s": 20,
+    "max_tokens": 1024,
+    "anthropic_version": "2026-10-21",
+    "price_usd_per_mtok": {"claude-haiku-5-5": {"input": 0.10, "output": 0.50}}
   },
   "server": {
     "host": "127.0.0.1",

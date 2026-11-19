@@ -12,6 +12,7 @@ from malttara.agent.batch_a import GOAL_ERRORS, run_batch_a
 from malttara.agent.batch_b import run_batch_b
 from malttara.agent.decide import _record
 from malttara.agent.guard import clean_text, mask_obj, mask_pii
+from malttara.agent.usage import record_usage
 from malttara.agent.prompts import GOAL_SYSTEM
 from malttara.agent.state import BatchState
 from malttara.db import connect, data_sources, meta_get
@@ -76,6 +77,7 @@ def h_parse(ctx, m, q, body):
                   else status if status in ("injection_suspected", "rate_limited") else "llm_invalid")
         with ctx.db() as conn:
             _record(conn, "parse", "parse_goal", actor, {"text": text}, goal, reason)
+            record_usage(conn, "parse", "parse_goal", ctx.llm)
     goal = copy.deepcopy(goal)
     missing = validate_goal(goal)
     return 200, {"goal": goal, "missing": missing, "actor": actor}

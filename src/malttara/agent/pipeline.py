@@ -2,6 +2,7 @@
 import json
 
 from malttara.agent.decide import decide, polish_text
+from malttara.agent.usage import record_usage
 from malttara.agent.prompts import REVISE_SYSTEM
 from malttara.db import data_sources
 from malttara.tools.explain import explain_place, summary_template
@@ -128,6 +129,7 @@ def assemble_result(conn, state, goal, itinerary, scored, violations, settings, 
         if name and name not in regions:
             regions.append(name)
     text, actor = polish_text(llm, summary_template(result), keep_terms=tuple(regions))
+    record_usage(conn, state.batch_id, "polish_summary", llm)
     result["summary"] = text
     state.emit("explain_decisions", actor, "ok", "설명 문장 생성" + (" (AI 다듬기)" if actor == "llm" else " (템플릿)"))
     state.goal = goal

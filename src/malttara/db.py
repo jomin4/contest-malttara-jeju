@@ -74,6 +74,15 @@ CREATE TABLE IF NOT EXISTS user_interactions (
     value TEXT,
     created_at TEXT
 );
+CREATE TABLE IF NOT EXISTS llm_usage (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    batch_id TEXT,
+    point TEXT,
+    model TEXT,
+    input_tokens INTEGER,
+    output_tokens INTEGER,
+    created_at TEXT
+);
 CREATE TABLE IF NOT EXISTS meta (
     key TEXT PRIMARY KEY,
     value TEXT

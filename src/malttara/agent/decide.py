@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 
 from malttara.agent.guard import safe_text
+from malttara.agent.usage import record_usage
 
 POLISH_SCHEMA = {"type": "object", "properties": {"text": {"type": "string"}},
                  "required": ["text"], "additionalProperties": False}
@@ -26,6 +27,7 @@ def decide(conn, batch_id, point, llm, system, user, schema, accept, fallback, o
     reason = "llm_unavailable"
     if llm is not None and llm.available:
         out = llm.chat_json(system, user, schema)
+        record_usage(conn, batch_id, point, llm)
         try:
             ok = out is not None and accept(out)
         except Exception:
