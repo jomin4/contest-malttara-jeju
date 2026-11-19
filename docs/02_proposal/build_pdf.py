@@ -1,6 +1,6 @@
 """기획서 PDF 만들기 (개발용 도구, 실행·제출 동작과 무관).
 
-proposal.md → HTML(초안 v0.9 PDF와 같은 스타일) → Chrome 헤드리스 인쇄(A4) → submission/proposal/
+proposal.md(또는 지정한 md) → HTML(초안 v0.9 PDF와 같은 스타일) → Chrome 헤드리스 인쇄(A4) → submission/proposal/
 
     python docs/02_proposal/build_pdf.py            # 필요: pip install markdown, Chrome 설치
 
@@ -58,7 +58,7 @@ def find_chrome() -> str:
 
 def build(src=HERE / "proposal.md", name="말따라제주_기획서") -> pathlib.Path:
     body = markdown.markdown(src.read_text(encoding="utf-8"), extensions=["tables", "fenced_code", "sane_lists"])
-    html = (f"<!doctype html><html lang='ko'><head><meta charset='utf-8'><base href='{HERE.as_uri()}/'>"
+    html = (f"<!doctype html><html lang='ko'><head><meta charset='utf-8'><base href='{src.resolve().parent.as_uri()}/'>"
             f"<title>{name}</title><style>{CSS}</style></head><body>{body}</body></html>")
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     html_path, pdf_path = OUT_DIR / f"{name}.html", OUT_DIR / f"{name}.pdf"
@@ -72,4 +72,8 @@ def build(src=HERE / "proposal.md", name="말따라제주_기획서") -> pathlib
 
 
 if __name__ == "__main__":
-    print(build())
+    # 인자 없이: 기획서. 인자 있으면: build_pdf.py <md 경로> <출력 이름>
+    if len(sys.argv) >= 3:
+        print(build(pathlib.Path(sys.argv[1]), sys.argv[2]))
+    else:
+        print(build())
