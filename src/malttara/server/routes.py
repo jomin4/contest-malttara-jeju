@@ -41,8 +41,10 @@ def goal_schema(interest_keys):
     s = lambda: {"type": ["string", "null"]}
     return {"type": "object", "required": ["days", "interests", "evidence"], "properties": {
         "nights": {"type": ["integer", "null"]}, "days": {"type": ["integer", "null"]},
-        "pace": {"type": ["string", "null"]}, "interests": {"type": "array", "items": {"enum": list(interest_keys)}},
-        "quiet_pref": {"type": "boolean"}, "transport": s(), "companion": s(), "origin": s(),
+        "pace": {"enum": ["여유롭게", "보통", "빡빡하게", None]},          # 모델이 허용 값 중에서 고르게
+        "interests": {"type": "array", "items": {"enum": list(interest_keys)}},
+        "quiet_pref": {"type": "boolean"}, "transport": {"enum": ["렌터카", "버스", "도보", None]},
+        "companion": s(), "origin": s(),
         "month": {"type": ["integer", "null"]},
         "evidence": {"type": "object", "additionalProperties": {"type": "string"}}}}
 

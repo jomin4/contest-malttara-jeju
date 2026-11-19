@@ -17,6 +17,19 @@ def _default_transport(url: str, headers: dict, body: bytes, timeout: float) -> 
         return r.read()
 
 
+def _skeleton(schema: dict):
+    """스키마에서 '채워 넣을 모양' 예시를 만든다(모델이 스키마 자체를 다시 출력하는 것을 막는다)."""
+    t = schema.get("type")
+    t = t[0] if isinstance(t, list) else t
+    if "enum" in schema:
+        return schema["enum"][0]
+    if t == "object":
+        return {k: _skeleton(v) for k, v in schema.get("properties", {}).items()}
+    if t == "array":
+        return [_skeleton(schema["items"])] if schema.get("items") else []
+    return {"string": "…", "integer": 0, "number": 0, "boolean": False, "null": None}.get(t, "…")
+
+
 def _extract_json(text: str):
     if not isinstance(text, str):
         return None
@@ -63,8 +76,10 @@ class LLMClient:
         for mode in modes:
             sys_msg = system
             if mode == "prompt":
-                sys_msg = (system + "\n\n반드시 아래 JSON 스키마에 맞는 JSON 객체 하나만 출력하라. 설명·코드블록 금지.\n"
-                           + json.dumps(schema, ensure_ascii=False))
+                sys_msg = (system + "\n\n출력 규칙: 아래 '모양'과 같은 키를 가진 JSON 객체 하나만 출력하라. "
+                           "값을 실제 내용으로 채우고, 스키마나 설명·코드블록은 출력하지 않는다.\n모양: "
+                           + json.dumps(_skeleton(schema), ensure_ascii=False)
+                           + "\n허용 값 규칙: " + json.dumps(schema, ensure_ascii=False))
             try:
                 content = self._post([{"role": "system", "content": sys_msg},
                                       {"role": "user", "content": user}], schema, mode)
@@ -84,7 +99,11 @@ def client_from_env(env: dict, settings: dict) -> LLMClient:
         extra = json.loads(env.get("LLM_EXTRA_BODY") or "{}")
     except ValueError:
         extra = {}
+    try:                                         # 개발용 느린 모델 확인 때만 .env에서 늘린다
+        timeout = float(env.get("LLM_TIMEOUT_S") or settings["llm"]["timeout_s"])
+    except ValueError:
+        timeout = settings["llm"]["timeout_s"]
     return LLMClient(env.get("LLM_API_KEY") or None, env.get("LLM_BASE_URL") or None,
-                     env.get("LLM_MODEL") or None, settings["llm"]["timeout_s"],
+                     env.get("LLM_MODEL") or None, timeout,
                      json_mode=env.get("LLM_JSON_MODE") or "schema",
                      extra_body=extra if isinstance(extra, dict) else {})
