@@ -79,3 +79,12 @@ class KeywordRuleTest(unittest.TestCase):
                   {"place_id": "e", "name": "새별오름 (나홀로나무)", "lat": 33.5, "lon": 126.6}]
         categorize_places(places, [], load_config("etl"))
         self.assertEqual([p["category"] for p in places], ["음식점", "음식점", "해수욕장", "카페", "오름"])
+
+
+class MoreKeywordsTest(unittest.TestCase):
+    def test_extended_suffix_keywords(self):
+        names = ["동문재래시장", "만장굴", "송악산", "수월봉", "섭지코지 등대", "에코랜드", "선흘 동백동산 곶자왈", "김녕미로공원"]
+        places = [{"place_id": str(i), "name": n, "lat": 33.5, "lon": 126.6} for i, n in enumerate(names)]
+        categorize_places(places, [], load_config("etl"))
+        self.assertEqual([p["category"] for p in places],
+                         ["시장", "동굴", "오름·산", "오름·산", "등대", "테마파크", "숲", "공원"])

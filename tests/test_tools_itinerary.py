@@ -86,3 +86,12 @@ class ItineraryTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NearDuplicateNameTest(unittest.TestCase):
+    def test_three_char_name_contained_is_duplicate(self):
+        from malttara.tools.itinerary import is_duplicate
+        a = {"place_id": "a", "name": "한라산", "lat": 33.36, "lon": 126.53}
+        b = {"place_id": "b", "name": "한라산 트레킹", "lat": 33.40, "lon": 126.60}
+        self.assertTrue(is_duplicate(b, [a]))
+

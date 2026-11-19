@@ -84,7 +84,7 @@ class TestBuildDb(unittest.TestCase):
         self.assertEqual((hj["emd"], hj["region_id"]), ("제주시 한림읍", "west"))
         self.assertEqual(hj["quiet_count"], 2)
         self.assertEqual((hj["category"], hj["category_source"]), ("해수욕장", "hub_784"))
-        self.assertEqual(places["동문시장"]["category_source"], "none")
+        self.assertEqual((places["동문시장"]["category"], places["동문시장"]["category_source"]), ("시장", "hub_858"))
         # 읍면동 지표: 부속섬(우도면) 제외
         st = emd_stats(conn, None)
         self.assertEqual(set(st), {"제주시 한림읍", "제주시 일도1동"})
@@ -154,10 +154,41 @@ class DedupSameNameRegionTest(unittest.TestCase):
         kept = [p["place_id"] for p in dedup_same_name_region(ps, ["제주"])]
         self.assertEqual(kept, ["p1349-00958", "p1349-01437", "p1349-04189"])   # 권역이 다르면 둘 다 유지
 
-    def test_drop_coord_mismatch(self):
-        from malttara.etl.build_db import drop_coord_mismatch
-        refs = [{"name": "우진해장국", "lat": 33.5030, "lon": 126.4966}]
+    def test_coord_mismatch_with_two_refs_is_dropped(self):
+        from malttara.etl.build_db import fix_coord_mismatch
+        refs = [{"name": "우진해장국", "lat": 33.5030, "lon": 126.4966}, {"name": "우진해장국", "lat": 33.25, "lon": 126.56}]
         ps = [{"place_id": "a", "name": "우진해장국", "lat": 33.3871, "lon": 126.5841, "source": "1349"},
               {"place_id": "b", "name": "우진해장국", "lat": 33.5031, "lon": 126.4967, "source": "1349"},
               {"place_id": "c", "name": "다른식당", "lat": 33.3871, "lon": 126.5841, "source": "1349"}]
-        self.assertEqual([p["place_id"] for p in drop_coord_mismatch(ps, refs, ["제주"])], ["b", "c"])
+        out, moved, dropped = fix_coord_mismatch(ps, refs, ["제주"])
+        self.assertEqual([p["place_id"] for p in out], ["b", "c"])
+        self.assertEqual((moved, dropped), (0, 1))
+
+
+class DataGapsBuildTest(unittest.TestCase):
+    def test_relocate_when_single_reference(self):
+        from malttara.etl.build_db import fix_coord_mismatch
+        refs = [{"name": "제주 서귀포 산방산", "lat": 33.2424, "lon": 126.314},
+                {"name": "우진해장국", "lat": 33.50, "lon": 126.49}, {"name": "우진해장국", "lat": 33.25, "lon": 126.56}]
+        ps = [{"place_id": "a", "name": "산방산", "lat": 33.2142, "lon": 126.3310, "source": "1349"},
+              {"place_id": "b", "name": "우진해장국", "lat": 33.387, "lon": 126.584, "source": "1349"}]
+        out, moved, dropped = fix_coord_mismatch(ps, refs, ["서귀포시", "제주시", "서귀포", "제주"])
+        self.assertEqual([(p["place_id"], p["lat"], p["lon"]) for p in out], [("a", 33.2424, 126.314)])
+        self.assertEqual((moved, dropped), (1, 1))
+
+    def test_category_display_names(self):
+        from malttara.etl.build_db import display_category
+        m = load_config("etl")["category_display"]
+        self.assertEqual(display_category("해변. 해수욕장", m), "해수욕장")
+        self.assertEqual(display_category("산, 고개, 오름, 봉우리", m), "오름·산")
+        self.assertEqual(display_category("기타외국식", m), "외국식")
+        self.assertEqual(display_category("박물관", m), "박물관")
+        self.assertIsNone(display_category(None, m))
+
+    def test_uncategorized_1349_out_of_scope(self):
+        from malttara.etl.build_db import apply_scope
+        ps = [{"place_id": "a", "category": None, "source": "1349", "region_id": "west"},
+              {"place_id": "b", "category": "오름", "source": "1349", "region_id": "west"},
+              {"place_id": "c", "category": "카페", "source": "tourapi", "region_id": None}]
+        apply_scope(ps)
+        self.assertEqual([p["in_scope"] for p in ps], [0, 1, 0])

@@ -111,22 +111,46 @@ def _tourapi_places(items: list, existing: list, etl_cfg: dict, regions_cfg: dic
 _SOURCE_RANK = {"tourapi": 0, "hub_811": 0, "hub_812": 0, "hub_784": 0, "hub_858": 1, "keyword": 2, "none": 3}
 
 
-def drop_coord_mismatch(places: list, ref_items: list, prefixes: list, max_km: float = 2.0) -> list:
-    """1349 기록이 참조 데이터(TourAPI·허브)와 이름은 같은데 모든 참조 좌표에서 max_km 넘게 떨어져 있으면 좌표 오류로 본다."""
+def fix_coord_mismatch(places: list, ref_items: list, prefixes: list, max_km: float = 2.0) -> tuple:
+    """1349 기록이 참조 데이터와 이름은 같은데 모든 참조 좌표에서 max_km 넘게 떨어져 있으면 좌표 오류로 본다.
+
+    같은 이름의 참조가 한 곳뿐이면 그 좌표로 옮기고(예: 바다 위에 찍힌 산방산), 여러 곳이면 어느 쪽인지 몰라 뺀다.
+    반환 (남은 장소, 옮긴 수, 뺀 수). 옮긴 장소는 _moved=True(읍면동 다시 판정).
+    """
     ref_xy = {}
     for r in ref_items:
         try:
             lat, lon = float(r["lat"]), float(r["lon"])
         except (TypeError, ValueError, KeyError):
             continue
-        ref_xy.setdefault(normalize_name(r.get("name") or "", prefixes), []).append((lat, lon))
-    out = []
+        ref_xy.setdefault(normalize_name(r.get("name") or "", prefixes), set()).add((round(lat, 6), round(lon, 6)))
+    out, moved, dropped = [], 0, 0
     for p in places:
         refs = ref_xy.get(normalize_name(p["name"], prefixes))
         if p.get("source") == "1349" and refs and all(haversine_km(p["lat"], p["lon"], a, b) > max_km for a, b in refs):
-            continue
+            if len(refs) == 1:
+                (p["lat"], p["lon"]), p["_moved"] = next(iter(refs)), True
+                moved += 1
+            else:
+                dropped += 1
+                continue
         out.append(p)
-    return out
+    return out, moved, dropped
+
+
+def display_category(cat, mapping: dict):
+    """TourAPI 분류 원문을 화면용 짧은 이름으로("해변. 해수욕장" → "해수욕장", "기타외국식" → "외국식")."""
+    if not cat:
+        return None
+    if cat in mapping:
+        return mapping[cat]
+    return cat[2:] if cat.startswith("기타") and len(cat) > 2 else cat
+
+
+def apply_scope(places: list) -> None:
+    """추천·목록 대상: 권역이 있고, 1349 기록이면 분류가 있어야 한다(분류 없는 이용자 메모형 기록 제외)."""
+    for p in places:
+        p["in_scope"] = 0 if (p.get("region_id") is None or (p.get("source") == "1349" and not p.get("category"))) else 1
 
 
 def dedup_same_name_region(places: list, prefixes: list) -> list:
@@ -255,10 +279,13 @@ def build_db(raw_dir: str, out_db: str, out_map: str, log=print, mapping_dir: st
         all_858 = []
         skip("hub_858", "858 CSV 없음")
 
-    before = len(places)
-    places = drop_coord_mismatch(places, [r for _, refs in ref_sets for r in refs], etl_cfg.get("name_prefixes", []))
-    stats["places_coord_mismatch_dropped"] = before - len(places)
-    log(f"[정제] 참조 데이터와 이름은 같고 좌표가 2km 넘게 다른 기록 {before - len(places)}곳 제외")
+    places, moved, dropped = fix_coord_mismatch(places, [r for _, refs in ref_sets for r in refs], etl_cfg.get("name_prefixes", []))
+    for p in places:
+        if p.pop("_moved", False) and polygons:
+            p["emd"] = emd_of_point(p["lat"], p["lon"], polygons) or nearest_emd(p["lat"], p["lon"], polygons, NEAREST_EMD_MAX_KM)
+            p["region_id"] = assign_region(p["emd"], regions_cfg)
+    stats["places_coord_moved"], stats["places_coord_mismatch_dropped"] = moved, dropped
+    log(f"[정제] 참조 데이터와 이름은 같고 좌표가 2km 넘게 다른 기록: 참조 좌표로 이동 {moved}곳, 제외 {dropped}곳")
     cat_counts = categorize_places(places, ref_sets, etl_cfg)
     stats["category_counts"] = cat_counts
     log(f"[분류] {cat_counts}")
@@ -376,6 +403,17 @@ def build_db(raw_dir: str, out_db: str, out_map: str, log=print, mapping_dir: st
     stats["sight_names"] = len(sight_names)
     stats["sights_matched"] = len(mapping)
     stats["sight_visit_rows"] = len(visits)
+
+    # 6.5) 화면용 분류 이름, 추천·목록 대상 범위
+    disp = etl_cfg.get("category_display", {})
+    for p in places:
+        p["category"] = display_category(p.get("category"), disp)
+    apply_scope(places)
+    stats["places_in_scope"] = sum(p["in_scope"] for p in places)
+    stats["places_out_of_scope"] = len(places) - stats["places_in_scope"]
+    stats["in_scope_by_region"] = {r: sum(1 for p in places if p["in_scope"] and p["region_id"] == r)
+                                   for r in ("city", "west", "east", "south")}
+    log(f"[범위] 추천·목록 대상 {stats['places_in_scope']}곳, 제외(권역 없음·분류 없는 1349 기록) {stats['places_out_of_scope']}곳")
 
     # 7) 쓰기
     if os.path.exists(out_db):
